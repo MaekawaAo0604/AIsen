@@ -1,0 +1,61 @@
+{
+  "feature_name": "eisenhower-matrix-mvp",
+  "project_description": "ブラウザベースのアイゼンハワー・マトリクス（4象限タスク管理）アプリケーション。LLMによるタスク自動分類（重要度・緊急度スコアリング）、URL共有機能（編集/閲覧専用）、Firebase Auth/Firestore統合、Stripe課金システム（フリーミアム: 4件制限 → Pro無制限 ¥300/月または¥3,000買切）を実装。MVP フェーズでは単一ボード、ドラッグ&ドロップ、リアルタイム同期、ブレストモーダル（LLMタスク分解・優先度提案）を提供。",
+  "created_at": "2025-10-21T00:00:00Z",
+  "updated_at": "2025-10-21T11:00:37Z",
+  "language": "japanese",
+  "phase": "tasks-generated",
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true,
+      "approved_at": "2025-10-21T10:25:23Z"
+    },
+    "design": {
+      "generated": true,
+      "approved": true,
+      "approved_at": "2025-10-21T10:25:23Z"
+    },
+    "tasks": {
+      "generated": true,
+      "approved": false,
+      "approved_at": "2025-10-21T10:35:39Z"
+    }
+  },
+  "ready_for_implementation": false,
+  "metadata": {
+    "tech_stack": {
+      "frontend": "Next.js 15 + React (dnd-kit)",
+      "state": "Zustand / React Query",
+      "hosting": "AWS Amplify Hosting",
+      "database": "Amazon DynamoDB (Single Table)",
+      "auth": "Amazon Cognito (Email/Password + Google)",
+      "payment": "Stripe Checkout",
+      "llm": "Amazon Bedrock (Claude 3.5 Sonnet)"
+    },
+    "key_features": [
+      "4象限タスク管理（アイゼンハワー・マトリクス）",
+      "LLMタスク自動分類（重要度・緊急度0-100スコアリング）",
+      "ドラッグ&ドロップ操作",
+      "URL共有（編集/閲覧専用）",
+      "課金制限（無料4件、Pro無制限）",
+      "リアルタイム同期（Firestore）"
+    ],
+    "monetization": {
+      "free_tier": "最大4タスク",
+      "pro_monthly": "¥300/月",
+      "pro_lifetime": "¥3,000買切"
+    },
+    "aws_services": [
+      "AWS Amplify Hosting (Next.js SSR/ISR)",
+      "Amazon DynamoDB (NoSQL Database)",
+      "Amazon Cognito (認証)",
+      "Amazon Bedrock (LLM)",
+      "CloudWatch Logs (監視)"
+    ],
+    "cost_estimate": {
+      "monthly_cost": "$3-8/月 (月間1万PV想定)",
+      "free_tier": "DynamoDB 25GB, Cognito 50,000 MAU, Lambda 1M req/月"
+    }
+  }
+}
