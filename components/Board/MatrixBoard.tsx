@@ -41,21 +41,21 @@ export function MatrixBoard() {
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="relative w-full h-[800px] bg-white rounded-2xl shadow-2xl border-2 border-gray-300 overflow-hidden">
+      <div className="relative w-full h-[700px] bg-white rounded-[3px] border border-[#e9e9e7] overflow-hidden">
         {/* Y軸ラベル（左側） */}
-        <div className="absolute left-0 top-0 bottom-0 w-24 flex items-center justify-center bg-gray-50 border-r-2 border-gray-300">
-          <div className="transform -rotate-90 whitespace-nowrap text-lg font-bold text-gray-800 tracking-wide">
+        <div className="absolute left-0 top-0 bottom-0 w-16 flex items-center justify-center bg-[#fafafa] border-r border-[#e9e9e7]">
+          <div className="transform -rotate-90 whitespace-nowrap text-[12px] font-medium text-[#787774] tracking-wide">
             重要度
           </div>
         </div>
 
         {/* X軸ラベル（下部） */}
-        <div className="absolute left-24 right-0 bottom-0 h-20 flex items-center justify-center bg-gray-50 border-t-2 border-gray-300">
-          <div className="text-lg font-bold text-gray-800 tracking-wide">緊急度</div>
+        <div className="absolute left-16 right-0 bottom-0 h-12 flex items-center justify-center bg-[#fafafa] border-t border-[#e9e9e7]">
+          <div className="text-[12px] font-medium text-[#787774] tracking-wide">緊急度</div>
         </div>
 
         {/* メイングリッド */}
-        <div className="absolute left-24 right-0 top-0 bottom-20 grid grid-cols-2 grid-rows-2 gap-1 bg-gray-400">
+        <div className="absolute left-16 right-0 top-0 bottom-12 grid grid-cols-2 grid-rows-2 gap-[1px] bg-[#e9e9e7]">
           {/* Q2: 非緊急 × 重要（左上） */}
           <QuadrantZone
             quadrant="q2"
@@ -94,27 +94,17 @@ export function MatrixBoard() {
         </div>
 
 
-        {/* Y軸の矢印（上） */}
-        <div className="absolute left-24 top-8 w-1 h-16 bg-gray-700 z-10">
-          <div className="absolute -top-2 -left-2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[16px] border-b-gray-700" />
-        </div>
-
-        {/* X軸の矢印（右） */}
-        <div className="absolute right-8 bottom-20 h-1 w-16 bg-gray-700 z-10">
-          <div className="absolute -right-2 -top-2 w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[16px] border-l-gray-700" />
-        </div>
-
         {/* 軸ラベル */}
-        <div className="absolute left-4 top-16 text-base font-bold text-gray-700 bg-white px-3 py-1 rounded-lg shadow z-10">高</div>
-        <div className="absolute left-4 bottom-28 text-base font-bold text-gray-700 bg-white px-3 py-1 rounded-lg shadow z-10">低</div>
-        <div className="absolute left-32 bottom-4 text-base font-bold text-gray-700 bg-white px-3 py-1 rounded-lg shadow z-10">低</div>
-        <div className="absolute right-16 bottom-4 text-base font-bold text-gray-700 bg-white px-3 py-1 rounded-lg shadow z-10">高</div>
+        <div className="absolute left-2 top-12 text-[11px] font-medium text-[#9b9a97]">高</div>
+        <div className="absolute left-2 bottom-16 text-[11px] font-medium text-[#9b9a97]">低</div>
+        <div className="absolute left-20 bottom-2 text-[11px] font-medium text-[#9b9a97]">低</div>
+        <div className="absolute right-4 bottom-2 text-[11px] font-medium text-[#9b9a97]">高</div>
       </div>
 
       <DragOverlay>
         {activeTask ? (
-          <div className="bg-white p-4 shadow-2xl border-2 border-blue-500 rounded-lg cursor-grabbing transform rotate-2 scale-105">
-            <p className="font-semibold text-gray-900">{activeTask.title}</p>
+          <div className="bg-white p-3 shadow-lg border-2 border-[#2383e2] rounded-[3px] cursor-grabbing">
+            <p className="text-[14px] text-[#37352f]">{activeTask.title}</p>
           </div>
         ) : null}
       </DragOverlay>
@@ -137,27 +127,23 @@ function QuadrantZone({ quadrant, tasks, label, title, description }: QuadrantZo
     switch (quadrant) {
       case 'q1':
         return {
-          bg: 'bg-red-100',
-          border: 'border-red-300',
-          badge: 'bg-red-600',
+          bg: 'bg-[#fef2f2]',
+          badge: 'bg-[#dc2626] text-white',
         }
       case 'q2':
         return {
-          bg: 'bg-blue-100',
-          border: 'border-blue-300',
-          badge: 'bg-blue-600',
+          bg: 'bg-[#eff6ff]',
+          badge: 'bg-[#2563eb] text-white',
         }
       case 'q3':
         return {
-          bg: 'bg-yellow-100',
-          border: 'border-yellow-300',
-          badge: 'bg-yellow-600',
+          bg: 'bg-[#fefce8]',
+          badge: 'bg-[#ca8a04] text-white',
         }
       case 'q4':
         return {
-          bg: 'bg-gray-100',
-          border: 'border-gray-300',
-          badge: 'bg-gray-600',
+          bg: 'bg-[#fafafa]',
+          badge: 'bg-[#6b7280] text-white',
         }
     }
   }
@@ -168,18 +154,18 @@ function QuadrantZone({ quadrant, tasks, label, title, description }: QuadrantZo
     <div
       ref={setNodeRef}
       id={quadrant}
-      className={`${colors.bg} ${colors.border} border-2 p-6 overflow-y-auto relative`}
+      className={`${colors.bg} p-4 overflow-y-auto relative`}
     >
-      <div className="absolute top-4 left-4 flex items-center gap-2">
-        <div className={`${colors.badge} text-white text-sm font-bold px-3 py-1 rounded-lg shadow-md`}>
-          {label}
+      <div className="flex items-start justify-between mb-4 pb-3 border-b border-[#e9e9e7]">
+        <div className="flex items-center gap-2">
+          <div className={`${colors.badge} text-[11px] font-semibold px-2 py-0.5 rounded-[3px]`}>
+            {label}
+          </div>
+          <div className="text-[13px] font-medium text-[#37352f]">{title}</div>
         </div>
       </div>
-      <div className="absolute top-4 right-4 text-right">
-        <div className="text-base font-bold text-gray-900">{title}</div>
-        <div className="text-sm text-gray-700 mt-1">{description}</div>
-      </div>
-      <div className="mt-20 space-y-3">
+      <div className="text-[11px] text-[#9b9a97] mb-4">{description}</div>
+      <div className="space-y-2">
         {tasks.map((task) => (
           <TaskCard key={task.id} task={task} quadrant={quadrant} />
         ))}
