@@ -55,7 +55,7 @@ export function MatrixBoard() {
         </div>
 
         {/* メイングリッド */}
-        <div className="absolute left-24 right-0 top-0 bottom-20 grid grid-cols-2 grid-rows-2 gap-0">
+        <div className="absolute left-24 right-0 top-0 bottom-20 grid grid-cols-2 grid-rows-2 gap-1 bg-gray-400">
           {/* Q2: 非緊急 × 重要（左上） */}
           <QuadrantZone
             quadrant="q2"
@@ -93,9 +93,6 @@ export function MatrixBoard() {
           />
         </div>
 
-        {/* 中央の十字線 */}
-        <div className="absolute left-24 right-0 top-[calc(50%-40px)] h-1 bg-gray-400 pointer-events-none z-10" />
-        <div className="absolute left-[calc(50%+12px)] top-0 bottom-20 w-1 bg-gray-400 pointer-events-none z-10" />
 
         {/* Y軸の矢印（上） */}
         <div className="absolute left-24 top-8 w-1 h-16 bg-gray-700 z-10">
