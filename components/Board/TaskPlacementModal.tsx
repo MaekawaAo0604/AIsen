@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { Quadrant } from '@/lib/types'
+import { BrainstormChat } from './BrainstormChat'
 
 interface TaskPlacementModalProps {
   isOpen: boolean
@@ -12,7 +13,7 @@ interface TaskPlacementModalProps {
 
 export function TaskPlacementModal({ isOpen, taskTitle, onClose, onPlace }: TaskPlacementModalProps) {
   const [selectedQuadrant, setSelectedQuadrant] = useState<Quadrant | null>(null)
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [isBrainstorming, setIsBrainstorming] = useState(false)
   const [aiSuggestion, setAiSuggestion] = useState<{
     quadrant: Quadrant
     priority: number
@@ -48,29 +49,14 @@ export function TaskPlacementModal({ isOpen, taskTitle, onClose, onPlace }: Task
     },
   ]
 
-  const handleAnalyze = async () => {
-    setIsAnalyzing(true)
-    try {
-      const response = await fetch('/api/ai/analyze-priority', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: taskTitle }),
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-        setAiSuggestion({
-          quadrant: result.quadrant,
-          priority: result.priority,
-          reason: result.reason,
-        })
-        setSelectedQuadrant(result.quadrant)
-      }
-    } catch (error) {
-      console.error('AI分析エラー:', error)
-    } finally {
-      setIsAnalyzing(false)
-    }
+  const handleBrainstormComplete = (result: {
+    quadrant: Quadrant
+    priority: number
+    reason: string
+  }) => {
+    setAiSuggestion(result)
+    setSelectedQuadrant(result.quadrant)
+    setIsBrainstorming(false)
   }
 
   const handlePlace = () => {
@@ -94,87 +80,104 @@ export function TaskPlacementModal({ isOpen, taskTitle, onClose, onPlace }: Task
       <div className="relative bg-white rounded-[3px] shadow-2xl w-full max-w-2xl mx-4 border border-[#e9e9e7]">
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#e9e9e7]">
-          <h2 className="text-[16px] font-semibold text-[#37352f]">タスクの配置場所を選択</h2>
-          <p className="text-[14px] text-[#787774] mt-1">「{taskTitle}」をどの象限に配置しますか？</p>
+          <h2 className="text-[16px] font-semibold text-[#37352f]">
+            {isBrainstorming ? 'AIとブレインストーミング中' : 'タスクの配置場所を選択'}
+          </h2>
+          <p className="text-[14px] text-[#787774] mt-1">
+            {isBrainstorming
+              ? 'AIとの対話を通じて、最適な配置を見つけましょう'
+              : `「${taskTitle}」をどの象限に配置しますか？`}
+          </p>
         </div>
 
         {/* Content */}
-        <div className="p-6">
-          <div className="grid grid-cols-2 gap-3">
-            {quadrants.map((quadrant) => (
-              <button
-                key={quadrant.id}
-                onClick={() => setSelectedQuadrant(quadrant.id)}
-                className={`${quadrant.color} p-4 rounded-[3px] border-2 transition-all text-left ${
-                  selectedQuadrant === quadrant.id
-                    ? 'border-[#2383e2] ring-2 ring-[#2383e2]/20'
-                    : 'border-transparent'
-                }`}
-              >
-                <div className="text-[14px] font-semibold text-[#37352f] mb-1">{quadrant.title}</div>
-                <div className="text-[12px] text-[#787774]">{quadrant.description}</div>
-              </button>
-            ))}
-          </div>
-
-          {/* AI Suggestion Section */}
-          <div className="mt-4 p-4 bg-[#fafafa] rounded-[3px] border border-[#e9e9e7]">
-            {!aiSuggestion ? (
-              <button
-                onClick={handleAnalyze}
-                disabled={isAnalyzing}
-                className="w-full flex items-center justify-center gap-2 h-9 px-4 text-[14px] font-medium text-[#37352f] bg-white border border-[#e9e9e7] rounded-[3px] hover:bg-[#f7f6f3] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                  />
-                </svg>
-                {isAnalyzing ? 'AI分析中...' : 'AIに最適な配置を提案してもらう'}
-              </button>
-            ) : (
-              <div className="space-y-2">
-                <div className="flex items-start gap-2">
-                  <svg className="w-4 h-4 text-[#2383e2] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                    />
-                  </svg>
-                  <div className="flex-1">
-                    <p className="text-[12px] font-semibold text-[#37352f] mb-1">
-                      AI提案: {quadrants.find((q) => q.id === aiSuggestion.quadrant)?.title}
-                    </p>
-                    <p className="text-[12px] text-[#787774]">{aiSuggestion.reason}</p>
-                    <p className="text-[11px] text-[#9b9a97] mt-1">優先度スコア: {aiSuggestion.priority}/100</p>
-                  </div>
-                </div>
+        <div className={isBrainstorming ? '' : 'p-6'}>
+          {isBrainstorming ? (
+            <BrainstormChat
+              taskTitle={taskTitle}
+              onComplete={handleBrainstormComplete}
+              onCancel={() => setIsBrainstorming(false)}
+            />
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                {quadrants.map((quadrant) => (
+                  <button
+                    key={quadrant.id}
+                    onClick={() => setSelectedQuadrant(quadrant.id)}
+                    className={`${quadrant.color} p-4 rounded-[3px] border-2 transition-all text-left ${
+                      selectedQuadrant === quadrant.id
+                        ? 'border-[#2383e2] ring-2 ring-[#2383e2]/20'
+                        : 'border-transparent'
+                    }`}
+                  >
+                    <div className="text-[14px] font-semibold text-[#37352f] mb-1">{quadrant.title}</div>
+                    <div className="text-[12px] text-[#787774]">{quadrant.description}</div>
+                  </button>
+                ))}
               </div>
-            )}
-          </div>
+
+              {/* AI Brainstorm Section */}
+              <div className="mt-4 p-4 bg-[#fafafa] rounded-[3px] border border-[#e9e9e7]">
+                {!aiSuggestion ? (
+                  <button
+                    onClick={() => setIsBrainstorming(true)}
+                    className="w-full flex items-center justify-center gap-2 h-9 px-4 text-[14px] font-medium text-[#37352f] bg-white border border-[#e9e9e7] rounded-[3px] hover:bg-[#f7f6f3] transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                      />
+                    </svg>
+                    AIとブレインストーミングする
+                  </button>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-2">
+                      <svg className="w-4 h-4 text-[#2383e2] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <div className="flex-1">
+                        <p className="text-[12px] font-semibold text-[#37352f] mb-1">
+                          AI提案: {quadrants.find((q) => q.id === aiSuggestion.quadrant)?.title}
+                        </p>
+                        <p className="text-[12px] text-[#787774]">{aiSuggestion.reason}</p>
+                        <p className="text-[11px] text-[#9b9a97] mt-1">優先度スコア: {aiSuggestion.priority}/100</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-[#e9e9e7] flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="h-9 px-4 text-[14px] font-medium text-[#37352f] bg-white border border-[#e9e9e7] rounded-[3px] hover:bg-[#f7f6f3] transition-colors"
-          >
-            キャンセル
-          </button>
-          <button
-            onClick={handlePlace}
-            disabled={!selectedQuadrant}
-            className="h-9 px-4 text-[14px] font-medium text-white bg-[#2383e2] rounded-[3px] hover:bg-[#1a73d1] active:bg-[#155cb3] disabled:bg-[#e9e9e7] disabled:text-[#9b9a97] disabled:cursor-not-allowed transition-colors"
-          >
-            配置する
-          </button>
-        </div>
+        {!isBrainstorming && (
+          <div className="px-6 py-4 border-t border-[#e9e9e7] flex justify-end gap-2">
+            <button
+              onClick={onClose}
+              className="h-9 px-4 text-[14px] font-medium text-[#37352f] bg-white border border-[#e9e9e7] rounded-[3px] hover:bg-[#f7f6f3] transition-colors"
+            >
+              キャンセル
+            </button>
+            <button
+              onClick={handlePlace}
+              disabled={!selectedQuadrant}
+              className="h-9 px-4 text-[14px] font-medium text-white bg-[#2383e2] rounded-[3px] hover:bg-[#1a73d1] active:bg-[#155cb3] disabled:bg-[#e9e9e7] disabled:text-[#9b9a97] disabled:cursor-not-allowed transition-colors"
+            >
+              配置する
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
