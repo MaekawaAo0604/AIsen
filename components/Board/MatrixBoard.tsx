@@ -56,16 +56,7 @@ export function MatrixBoard() {
 
         {/* メイングリッド */}
         <div className="absolute left-16 right-0 top-0 bottom-12 grid grid-cols-2 grid-rows-2 gap-[1px] bg-[#e9e9e7]">
-          {/* Q2: 非緊急 × 重要（左上） */}
-          <QuadrantZone
-            quadrant="q2"
-            tasks={tasks.q2}
-            label="Q2"
-            title="計画してやる"
-            description="重要だが緊急ではない"
-          />
-
-          {/* Q1: 緊急 × 重要（右上） */}
+          {/* Q1: 緊急 × 重要（左上） */}
           <QuadrantZone
             quadrant="q1"
             tasks={tasks.q1}
@@ -74,16 +65,16 @@ export function MatrixBoard() {
             description="重要かつ緊急"
           />
 
-          {/* Q4: 非緊急 × 非重要（左下） */}
+          {/* Q2: 非緊急 × 重要（右上） */}
           <QuadrantZone
-            quadrant="q4"
-            tasks={tasks.q4}
-            label="Q4"
-            title="やらない"
-            description="重要でも緊急でもない"
+            quadrant="q2"
+            tasks={tasks.q2}
+            label="Q2"
+            title="計画してやる"
+            description="重要だが緊急ではない"
           />
 
-          {/* Q3: 緊急 × 非重要（右下） */}
+          {/* Q3: 緊急 × 非重要（左下） */}
           <QuadrantZone
             quadrant="q3"
             tasks={tasks.q3}
@@ -91,14 +82,23 @@ export function MatrixBoard() {
             title="誰かに任せる"
             description="緊急だが重要ではない"
           />
+
+          {/* Q4: 非緊急 × 非重要（右下） */}
+          <QuadrantZone
+            quadrant="q4"
+            tasks={tasks.q4}
+            label="Q4"
+            title="やらない"
+            description="重要でも緊急でもない"
+          />
         </div>
 
 
         {/* 軸ラベル */}
         <div className="absolute left-2 top-12 text-[11px] font-medium text-[#9b9a97]">高</div>
         <div className="absolute left-2 bottom-16 text-[11px] font-medium text-[#9b9a97]">低</div>
-        <div className="absolute left-20 bottom-2 text-[11px] font-medium text-[#9b9a97]">低</div>
-        <div className="absolute right-4 bottom-2 text-[11px] font-medium text-[#9b9a97]">高</div>
+        <div className="absolute left-20 bottom-2 text-[11px] font-medium text-[#9b9a97]">高</div>
+        <div className="absolute right-4 bottom-2 text-[11px] font-medium text-[#9b9a97]">低</div>
       </div>
 
       <DragOverlay>
