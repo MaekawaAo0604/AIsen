@@ -28,11 +28,12 @@ export function Quadrant({ quadrant, title, description, tasks, colorClass, bgCl
   return (
     <div
       ref={setNodeRef}
-      className={`${bgClass || `rounded-lg border-2 ${colorClass}`} p-4 min-h-[400px] overflow-y-auto relative`}
+      className={`${bgClass || `rounded-lg border-2 ${colorClass}`} p-4 overflow-y-auto relative flex flex-col`}
       data-quadrant={quadrant}
+      style={{ height: '100%' }}
     >
-      {label && badgeClass && (
-        <div className="flex items-start justify-between mb-4 pb-3 border-b border-[#e9e9e7]">
+      {label && badgeClass ? (
+        <div className="flex-shrink-0 flex items-start justify-between mb-2 pb-3 border-b border-[#e9e9e7]">
           <div className="flex items-center gap-2">
             <div className={`${badgeClass} text-[11px] font-semibold px-2 py-0.5 rounded-[3px]`}>
               {label}
@@ -40,19 +41,21 @@ export function Quadrant({ quadrant, title, description, tasks, colorClass, bgCl
             <div className="text-[13px] font-medium text-[#37352f]">{title}</div>
           </div>
         </div>
-      )}
-      {!label && (
-        <div className="mb-4">
+      ) : (
+        <div className="flex-shrink-0 mb-4">
           <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
           <p className="text-sm text-gray-600">{description}</p>
         </div>
       )}
-      <div className="text-[11px] text-[#9b9a97] mb-4">{description}</div>
 
-      {!label && <TaskForm quadrant={quadrant} />}
+      {label && (
+        <div className="flex-shrink-0 text-[11px] text-[#9b9a97] mb-3">{description}</div>
+      )}
+
+      {!label && <div className="flex-shrink-0"><TaskForm quadrant={quadrant} /></div>}
 
       {/* アクティブタスク */}
-      <div className="mt-4 space-y-2">
+      <div className="flex-shrink-0 space-y-2">
         {activeTasks.length === 0 ? (
           <p className="text-center text-sm text-gray-400 py-8">
             タスクを追加してください
@@ -66,7 +69,7 @@ export function Quadrant({ quadrant, title, description, tasks, colorClass, bgCl
 
       {/* 完了タスクセクション（折りたたみ式） */}
       {completedTasks.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="flex-shrink-0 mt-4 pt-4 border-t border-gray-200">
           <button
             onClick={() => setIsCompletedExpanded(!isCompletedExpanded)}
             className="flex items-center justify-between w-full text-sm text-gray-600 hover:text-gray-900 transition-colors"
