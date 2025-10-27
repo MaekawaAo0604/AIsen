@@ -48,8 +48,10 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
           <div className="flex items-start gap-2">
             {/* チェックボックス */}
             <button
+              type="button"
               onClick={handleToggleComplete}
-              className="flex-shrink-0 mt-0.5 w-4 h-4 rounded-[3px] border-2 border-[#9b9a97] hover:border-[#2383e2] transition-colors flex items-center justify-center"
+              onPointerDown={(e) => e.stopPropagation()}
+              className="flex-shrink-0 mt-0.5 w-4 h-4 rounded-[3px] border-2 border-[#9b9a97] hover:border-[#2383e2] transition-colors flex items-center justify-center cursor-pointer"
               style={{
                 backgroundColor: task.completed ? '#2383e2' : 'transparent',
                 borderColor: task.completed ? '#2383e2' : undefined,
@@ -96,8 +98,10 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
           </div>
         </div>
         <button
+          type="button"
           onClick={handleDelete}
-          className="opacity-0 group-hover:opacity-100 transition-opacity text-[#9b9a97] hover:text-[#eb5757] p-1 -mt-1 -mr-1 rounded-[3px] hover:bg-[#eb575715]"
+          onPointerDown={(e) => e.stopPropagation()}
+          className="opacity-0 group-hover:opacity-100 transition-opacity text-[#9b9a97] hover:text-[#eb5757] p-1 -mt-1 -mr-1 rounded-[3px] hover:bg-[#eb575715] cursor-pointer"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
