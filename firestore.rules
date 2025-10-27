@@ -1,0 +1,77 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ========================================
+    // Helper Functions
+    // ========================================
+
+    // ユーザーが認証されているか確認
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // ユーザーが自分のリソースにアクセスしているか確認
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ========================================
+    // Boards Collection
+    // ========================================
+
+    match /boards/{boardId} {
+      // 誰でも読み取り可能 (editKeyで保護)
+      allow read: if true;
+
+      // 誰でも作成可能
+      allow create: if true;
+
+      // editKeyが一致する場合のみ更新可能
+      allow update: if request.resource.data.editKey == resource.data.editKey;
+
+      // editKeyが一致する場合のみ削除可能
+      allow delete: if request.resource.data.editKey == resource.data.editKey;
+
+      // Tasks Subcollection
+      match /tasks/{taskId} {
+        // 親ボードが読み取り可能なら読み取り可能
+        allow read: if true;
+
+        // 誰でも作成可能
+        allow create: if true;
+
+        // 誰でも更新・削除可能 (editKeyは親ボードで管理)
+        allow update, delete: if true;
+      }
+    }
+
+    // ========================================
+    // Users Collection
+    // ========================================
+
+    match /users/{userId} {
+      // 自分のユーザー情報のみ読み取り可能
+      allow read: if isOwner(userId);
+
+      // 新規ユーザー作成時のみ作成可能
+      allow create: if isOwner(userId) && !exists(/databases/$(database)/documents/users/$(userId));
+
+      // 自分のユーザー情報のみ更新可能
+      allow update: if isOwner(userId);
+
+      // 削除は不可
+      allow delete: if false;
+    }
+
+    // ========================================
+    // Default Deny
+    // ========================================
+
+    // その他のパスはすべて拒否
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

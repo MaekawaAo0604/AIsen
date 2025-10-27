@@ -117,6 +117,19 @@ export async function updateBoard(
 // ==================== Task 操作 ====================
 
 /**
+ * undefinedフィールドを除外するヘルパー関数
+ */
+function removeUndefinedFields<T extends Record<string, any>>(obj: T): Partial<T> {
+  const cleaned: Partial<T> = {}
+  for (const key in obj) {
+    if (obj[key] !== undefined) {
+      cleaned[key] = obj[key]
+    }
+  }
+  return cleaned
+}
+
+/**
  * タスクを追加
  */
 export async function addTask(
@@ -126,11 +139,13 @@ export async function addTask(
 ): Promise<void> {
   const taskRef = doc(db, 'boards', boardId, 'tasks', task.id)
 
-  await setDoc(taskRef, {
+  const taskData = removeUndefinedFields({
     ...task,
     quadrant,
     createdAt: task.createdAt || new Date().toISOString(),
   })
+
+  await setDoc(taskRef, taskData)
 
   // ボードの更新日時を更新
   await updateBoard(boardId, {})
@@ -147,10 +162,12 @@ export async function updateTask(
 ): Promise<void> {
   const taskRef = doc(db, 'boards', boardId, 'tasks', taskId)
 
-  await updateDoc(taskRef, {
+  const updateData = removeUndefinedFields({
     ...updates,
     quadrant,
   })
+
+  await updateDoc(taskRef, updateData)
 
   // ボードの更新日時を更新
   await updateBoard(boardId, {})
