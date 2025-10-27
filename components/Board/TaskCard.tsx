@@ -11,6 +11,7 @@ interface TaskCardProps {
 
 export function TaskCard({ task, quadrant }: TaskCardProps) {
   const deleteTask = useBoardStore((state) => state.deleteTask)
+  const updateTask = useBoardStore((state) => state.updateTask)
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: task.id,
@@ -24,6 +25,15 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
     }
   }
 
+  const handleToggleComplete = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const newCompleted = !task.completed
+    updateTask(quadrant, task.id, {
+      completed: newCompleted,
+      completedAt: newCompleted ? new Date().toISOString() : undefined,
+    })
+  }
+
   return (
     <div
       ref={setNodeRef}
@@ -31,12 +41,29 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
       {...attributes}
       className={`group relative bg-white rounded-[3px] border border-[#e9e9e7] hover:bg-[#f7f6f3] transition-all cursor-grab active:cursor-grabbing ${
         isDragging ? 'opacity-50 shadow-lg' : 'opacity-100'
-      }`}
+      } ${task.completed ? 'opacity-60' : ''}`}
     >
       <div className="flex items-start justify-between gap-2 px-3 py-2.5">
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-2">
-            <p className="text-[14px] text-[#37352f] leading-[1.5] flex-1">{task.title}</p>
+            {/* チェックボックス */}
+            <button
+              onClick={handleToggleComplete}
+              className="flex-shrink-0 mt-0.5 w-4 h-4 rounded-[3px] border-2 border-[#9b9a97] hover:border-[#2383e2] transition-colors flex items-center justify-center"
+              style={{
+                backgroundColor: task.completed ? '#2383e2' : 'transparent',
+                borderColor: task.completed ? '#2383e2' : undefined,
+              }}
+            >
+              {task.completed && (
+                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </button>
+            <p className={`text-[14px] text-[#37352f] leading-[1.5] flex-1 ${task.completed ? 'line-through text-[#9b9a97]' : ''}`}>
+              {task.title}
+            </p>
             {task.priority !== undefined && (
               <span
                 className={`flex-shrink-0 inline-flex items-center justify-center w-8 h-5 text-[10px] font-semibold rounded-[3px] ${
