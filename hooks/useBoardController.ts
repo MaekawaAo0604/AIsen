@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useBoardStore } from '@/stores/useBoardStore'
 import { useBoardSync } from './useBoardSync'
 import { createBoard, getBoard } from '@/lib/firestore-helpers'
@@ -9,14 +10,15 @@ const BOARD_ID_STORAGE_KEY = 'aisen:boardId'
 
 /**
  * ボードの初期化と同期を管理するコントローラーフック
- * - localStorage からボードIDを読み込み
- * - ボードが存在しない場合は新規作成
+ * - URLまたはlocalStorageからボードIDを読み込み
+ * - ボードが存在しない場合は新規作成してリダイレクト
  * - Firestoreとリアルタイム同期
  */
-export function useBoardController() {
+export function useBoardController(urlBoardId?: string) {
   const [isLoading, setIsLoading] = useState(true)
   const boardId = useBoardStore((state) => state.boardId)
   const setBoard = useBoardStore((state) => state.setBoard)
+  const router = useRouter()
 
   // Firestoreとリアルタイム同期
   useBoardSync(boardId)
@@ -24,6 +26,17 @@ export function useBoardController() {
   useEffect(() => {
     async function initializeBoard() {
       try {
+        // URLにboardIdが指定されている場合
+        if (urlBoardId) {
+          const board = await getBoard(urlBoardId)
+          if (board) {
+            setBoard(board)
+            localStorage.setItem(BOARD_ID_STORAGE_KEY, urlBoardId)
+            setIsLoading(false)
+            return
+          }
+        }
+
         // localStorage からボードIDを取得
         const storedBoardId = localStorage.getItem(BOARD_ID_STORAGE_KEY)
 
@@ -32,6 +45,10 @@ export function useBoardController() {
           const board = await getBoard(storedBoardId)
           if (board) {
             setBoard(board)
+            // URLが / の場合は /b/[boardId] にリダイレクト
+            if (!urlBoardId) {
+              router.push(`/b/${storedBoardId}`)
+            }
             setIsLoading(false)
             return
           }
@@ -53,6 +70,8 @@ export function useBoardController() {
         const board = await getBoard(newBoardId)
         if (board) {
           setBoard(board)
+          // /b/[boardId] にリダイレクト
+          router.push(`/b/${newBoardId}`)
         }
       } catch (error) {
         console.error('Error initializing board:', error)
@@ -62,7 +81,7 @@ export function useBoardController() {
     }
 
     initializeBoard()
-  }, [setBoard])
+  }, [urlBoardId, setBoard, router])
 
   return { isLoading, boardId }
 }
