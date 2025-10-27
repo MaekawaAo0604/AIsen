@@ -159,7 +159,8 @@ export function BoardListModal({ isOpen, onClose }: BoardListModalProps) {
         <div className="px-6 py-4 border-t border-[#e9e9e7]">
           <button
             onClick={() => {
-              router.push('/')
+              const newBoardId = crypto.randomUUID()
+              router.push(`/b/${newBoardId}`)
               onClose()
             }}
             className="w-full h-10 flex items-center justify-center gap-2 text-[14px] font-medium text-[#2383e2] bg-[#eff6ff] rounded-[6px] hover:bg-[#dbeafe] transition-colors"
