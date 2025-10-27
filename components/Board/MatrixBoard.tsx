@@ -2,8 +2,9 @@
 
 import { DndContext, DragEndEvent, DragOverlay, useSensor, useSensors, PointerSensor, useDroppable } from '@dnd-kit/core'
 import { useBoardStore } from '@/stores/useBoardStore'
-import type { Task, Quadrant } from '@/lib/types'
+import type { Task, Quadrant as QuadrantType } from '@/lib/types'
 import { TaskCard } from './TaskCard'
+import { Quadrant } from './Quadrant'
 import { useState } from 'react'
 
 export function MatrixBoard() {
@@ -21,7 +22,7 @@ export function MatrixBoard() {
 
   const handleDragStart = (event: any) => {
     const { active } = event
-    const quadrant = active.data.current.quadrant as Quadrant
+    const quadrant = active.data.current.quadrant as QuadrantType
     const task = tasks[quadrant].find((t) => t.id === active.id)
     if (task) setActiveTask(task)
   }
@@ -31,8 +32,8 @@ export function MatrixBoard() {
     const { active, over } = event
     if (!over) return
 
-    const fromQuadrant = active.data.current.quadrant as Quadrant
-    const toQuadrant = over.id as Quadrant
+    const fromQuadrant = active.data.current.quadrant as QuadrantType
+    const toQuadrant = over.id as QuadrantType
 
     if (fromQuadrant !== toQuadrant) {
       moveTask(active.id as string, fromQuadrant, toQuadrant)
@@ -57,39 +58,51 @@ export function MatrixBoard() {
         {/* メイングリッド */}
         <div className="absolute left-16 right-0 top-0 bottom-12 grid grid-cols-2 grid-rows-2 gap-[1px] bg-[#e9e9e7]">
           {/* Q1: 緊急 × 重要（左上） */}
-          <QuadrantZone
+          <Quadrant
             quadrant="q1"
             tasks={tasks.q1}
             label="Q1"
             title="今すぐやる"
             description="重要かつ緊急"
+            colorClass=""
+            bgClass="bg-[#fef2f2]"
+            badgeClass="bg-[#dc2626] text-white"
           />
 
           {/* Q2: 非緊急 × 重要（右上） */}
-          <QuadrantZone
+          <Quadrant
             quadrant="q2"
             tasks={tasks.q2}
             label="Q2"
             title="計画してやる"
             description="重要だが緊急ではない"
+            colorClass=""
+            bgClass="bg-[#eff6ff]"
+            badgeClass="bg-[#2563eb] text-white"
           />
 
           {/* Q3: 緊急 × 非重要（左下） */}
-          <QuadrantZone
+          <Quadrant
             quadrant="q3"
             tasks={tasks.q3}
             label="Q3"
             title="誰かに任せる"
             description="緊急だが重要ではない"
+            colorClass=""
+            bgClass="bg-[#fefce8]"
+            badgeClass="bg-[#ca8a04] text-white"
           />
 
           {/* Q4: 非緊急 × 非重要（右下） */}
-          <QuadrantZone
+          <Quadrant
             quadrant="q4"
             tasks={tasks.q4}
             label="Q4"
             title="やらない"
             description="重要でも緊急でもない"
+            colorClass=""
+            bgClass="bg-[#fafafa]"
+            badgeClass="bg-[#6b7280] text-white"
           />
         </div>
 
@@ -109,67 +122,5 @@ export function MatrixBoard() {
         ) : null}
       </DragOverlay>
     </DndContext>
-  )
-}
-
-interface QuadrantZoneProps {
-  quadrant: Quadrant
-  tasks: Task[]
-  label: string
-  title: string
-  description: string
-}
-
-function QuadrantZone({ quadrant, tasks, label, title, description }: QuadrantZoneProps) {
-  const { setNodeRef } = useDroppable({ id: quadrant })
-
-  const getColors = () => {
-    switch (quadrant) {
-      case 'q1':
-        return {
-          bg: 'bg-[#fef2f2]',
-          badge: 'bg-[#dc2626] text-white',
-        }
-      case 'q2':
-        return {
-          bg: 'bg-[#eff6ff]',
-          badge: 'bg-[#2563eb] text-white',
-        }
-      case 'q3':
-        return {
-          bg: 'bg-[#fefce8]',
-          badge: 'bg-[#ca8a04] text-white',
-        }
-      case 'q4':
-        return {
-          bg: 'bg-[#fafafa]',
-          badge: 'bg-[#6b7280] text-white',
-        }
-    }
-  }
-
-  const colors = getColors()
-
-  return (
-    <div
-      ref={setNodeRef}
-      id={quadrant}
-      className={`${colors.bg} p-4 overflow-y-auto relative`}
-    >
-      <div className="flex items-start justify-between mb-4 pb-3 border-b border-[#e9e9e7]">
-        <div className="flex items-center gap-2">
-          <div className={`${colors.badge} text-[11px] font-semibold px-2 py-0.5 rounded-[3px]`}>
-            {label}
-          </div>
-          <div className="text-[13px] font-medium text-[#37352f]">{title}</div>
-        </div>
-      </div>
-      <div className="text-[11px] text-[#9b9a97] mb-4">{description}</div>
-      <div className="space-y-2">
-        {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} quadrant={quadrant} />
-        ))}
-      </div>
-    </div>
   )
 }

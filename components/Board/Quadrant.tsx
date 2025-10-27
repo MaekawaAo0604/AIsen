@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useDroppable } from '@dnd-kit/core'
 import type { Task, Quadrant as QuadrantType } from '@/lib/types'
 import { TaskCard } from './TaskCard'
 import { TaskForm } from './TaskForm'
@@ -11,9 +12,13 @@ interface QuadrantProps {
   description: string
   tasks: Task[]
   colorClass: string
+  bgClass?: string
+  badgeClass?: string
+  label?: string
 }
 
-export function Quadrant({ quadrant, title, description, tasks, colorClass }: QuadrantProps) {
+export function Quadrant({ quadrant, title, description, tasks, colorClass, bgClass, badgeClass, label }: QuadrantProps) {
+  const { setNodeRef } = useDroppable({ id: quadrant })
   const [isCompletedExpanded, setIsCompletedExpanded] = useState(false)
 
   // アクティブタスクと完了タスクを分離
@@ -22,15 +27,29 @@ export function Quadrant({ quadrant, title, description, tasks, colorClass }: Qu
 
   return (
     <div
-      className={`rounded-lg border-2 ${colorClass} p-4 min-h-[400px]`}
+      ref={setNodeRef}
+      className={`${bgClass || `rounded-lg border-2 ${colorClass}`} p-4 min-h-[400px] overflow-y-auto relative`}
       data-quadrant={quadrant}
     >
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-        <p className="text-sm text-gray-600">{description}</p>
-      </div>
+      {label && badgeClass && (
+        <div className="flex items-start justify-between mb-4 pb-3 border-b border-[#e9e9e7]">
+          <div className="flex items-center gap-2">
+            <div className={`${badgeClass} text-[11px] font-semibold px-2 py-0.5 rounded-[3px]`}>
+              {label}
+            </div>
+            <div className="text-[13px] font-medium text-[#37352f]">{title}</div>
+          </div>
+        </div>
+      )}
+      {!label && (
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+          <p className="text-sm text-gray-600">{description}</p>
+        </div>
+      )}
+      <div className="text-[11px] text-[#9b9a97] mb-4">{description}</div>
 
-      <TaskForm quadrant={quadrant} />
+      {!label && <TaskForm quadrant={quadrant} />}
 
       {/* アクティブタスク */}
       <div className="mt-4 space-y-2">

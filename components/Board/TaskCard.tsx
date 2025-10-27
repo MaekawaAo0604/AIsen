@@ -27,11 +27,13 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
 
   const handleToggleComplete = (e: React.MouseEvent) => {
     e.stopPropagation()
+    console.log('Toggle clicked:', { taskId: task.id, currentCompleted: task.completed })
     const newCompleted = !task.completed
     updateTask(quadrant, task.id, {
       completed: newCompleted,
       completedAt: newCompleted ? new Date().toISOString() : undefined,
     })
+    console.log('Updated to:', newCompleted)
   }
 
   return (
@@ -50,8 +52,8 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
             <button
               type="button"
               onClick={handleToggleComplete}
-              onPointerDown={(e) => e.stopPropagation()}
-              className="flex-shrink-0 mt-0.5 w-4 h-4 rounded-[3px] border-2 border-[#9b9a97] hover:border-[#2383e2] transition-colors flex items-center justify-center cursor-pointer"
+              onMouseDown={(e) => e.stopPropagation()}
+              className="flex-shrink-0 mt-0.5 w-4 h-4 rounded-[3px] border-2 border-[#9b9a97] hover:border-[#2383e2] transition-colors flex items-center justify-center cursor-pointer z-10 relative"
               style={{
                 backgroundColor: task.completed ? '#2383e2' : 'transparent',
                 borderColor: task.completed ? '#2383e2' : undefined,
@@ -100,8 +102,8 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
         <button
           type="button"
           onClick={handleDelete}
-          onPointerDown={(e) => e.stopPropagation()}
-          className="opacity-0 group-hover:opacity-100 transition-opacity text-[#9b9a97] hover:text-[#eb5757] p-1 -mt-1 -mr-1 rounded-[3px] hover:bg-[#eb575715] cursor-pointer"
+          onMouseDown={(e) => e.stopPropagation()}
+          className="opacity-0 group-hover:opacity-100 transition-opacity text-[#9b9a97] hover:text-[#eb5757] p-1 -mt-1 -mr-1 rounded-[3px] hover:bg-[#eb575715] cursor-pointer z-10 relative"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
