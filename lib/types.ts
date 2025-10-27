@@ -7,6 +7,8 @@ export interface Task {
   notes: string
   due: string | null  // ISO 8601
   createdAt: string   // ISO 8601
+  priority?: number   // AI算出優先度 (0-100)
+  aiReason?: string   // AI判定理由
 }
 
 export interface Board {

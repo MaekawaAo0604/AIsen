@@ -35,7 +35,28 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
     >
       <div className="flex items-start justify-between gap-2 px-3 py-2.5">
         <div className="flex-1 min-w-0">
-          <p className="text-[14px] text-[#37352f] leading-[1.5]">{task.title}</p>
+          <div className="flex items-start gap-2">
+            <p className="text-[14px] text-[#37352f] leading-[1.5] flex-1">{task.title}</p>
+            {task.priority !== undefined && (
+              <span
+                className={`flex-shrink-0 inline-flex items-center justify-center w-8 h-5 text-[10px] font-semibold rounded-[3px] ${
+                  task.priority >= 80
+                    ? 'bg-[#dc2626] text-white'
+                    : task.priority >= 60
+                    ? 'bg-[#f59e0b] text-white'
+                    : task.priority >= 40
+                    ? 'bg-[#2563eb] text-white'
+                    : 'bg-[#6b7280] text-white'
+                }`}
+                title={task.aiReason || '優先度スコア'}
+              >
+                {task.priority}
+              </span>
+            )}
+          </div>
+          {task.aiReason && (
+            <p className="mt-1 text-[11px] text-[#787774] leading-[1.3] italic">{task.aiReason}</p>
+          )}
           {task.notes && (
             <p className="mt-1 text-[12px] text-[#787774] line-clamp-2 leading-[1.4]">{task.notes}</p>
           )}

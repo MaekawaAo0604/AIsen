@@ -19,11 +19,13 @@ export function TaskForm() {
     setIsModalOpen(true)
   }
 
-  const handlePlaceTask = (quadrant: Quadrant) => {
+  const handlePlaceTask = (quadrant: Quadrant, priority?: number, aiReason?: string) => {
     addTask(quadrant, {
       title: pendingTask,
       notes: '',
       due: null,
+      priority,
+      aiReason,
     })
 
     setTitle('')
