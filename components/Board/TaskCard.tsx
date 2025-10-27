@@ -27,13 +27,11 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
 
   const handleToggleComplete = (e: React.MouseEvent) => {
     e.stopPropagation()
-    console.log('Toggle clicked:', { taskId: task.id, currentCompleted: task.completed })
     const newCompleted = !task.completed
     updateTask(quadrant, task.id, {
       completed: newCompleted,
       completedAt: newCompleted ? new Date().toISOString() : undefined,
     })
-    console.log('Updated to:', newCompleted)
   }
 
   return (
