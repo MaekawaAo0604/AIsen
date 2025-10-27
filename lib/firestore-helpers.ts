@@ -69,6 +69,8 @@ export async function getBoard(boardId: string): Promise<Board | null> {
       id: boardId,
       title: boardData.title,
       editKey: boardData.editKey,
+      createdAt: boardData.createdAt,
+      updatedAt: boardData.updatedAt,
       tasks,
     }
   } catch (error) {

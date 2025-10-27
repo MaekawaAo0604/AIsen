@@ -17,7 +17,8 @@ export interface Board {
   id: string
   title: string
   editKey: string
-  updatedAt: number   // Unix timestamp
+  createdAt: string   // ISO 8601 (Firestore用)
+  updatedAt: string   // ISO 8601 (Firestore用)
   tasks: {
     q1: Task[]
     q2: Task[]

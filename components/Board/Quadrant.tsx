@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useDroppable } from '@dnd-kit/core'
 import type { Task, Quadrant as QuadrantType } from '@/lib/types'
 import { TaskCard } from './TaskCard'
-import { TaskForm } from './TaskForm'
 
 interface QuadrantProps {
   quadrant: QuadrantType
@@ -51,8 +50,6 @@ export function Quadrant({ quadrant, title, description, tasks, colorClass, bgCl
       {label && (
         <div className="flex-shrink-0 text-[11px] text-[#9b9a97] mb-3">{description}</div>
       )}
-
-      {!label && <div className="flex-shrink-0"><TaskForm quadrant={quadrant} /></div>}
 
       {/* アクティブタスク */}
       <div className="flex-shrink-0 space-y-2">

@@ -30,7 +30,7 @@ export function MatrixBoard() {
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveTask(null)
     const { active, over } = event
-    if (!over) return
+    if (!over || !active.data.current) return
 
     const fromQuadrant = active.data.current.quadrant as QuadrantType
     const toQuadrant = over.id as QuadrantType
