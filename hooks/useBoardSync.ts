@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect } from 'react'
-import { doc, onSnapshot } from 'firebase/firestore'
+import { doc, collection, onSnapshot } from 'firebase/firestore'
 import { db } from '@/lib/firestore'
 import { useBoardStore } from '@/stores/useBoardStore'
-import type { Board } from '@/lib/types'
+import type { Board, Task, Quadrant } from '@/lib/types'
 
 /**
  * Firestoreとボードを自動同期するフック
@@ -16,29 +16,65 @@ export function useBoardSync(boardId: string | null) {
   useEffect(() => {
     if (!boardId) return
 
-    // Firestoreのリアルタイムリスナー設定
-    const unsubscribe = onSnapshot(
+    let boardData: Omit<Board, 'tasks'> | null = null
+    const tasks: Board['tasks'] = { q1: [], q2: [], q3: [], q4: [] }
+
+    // ボードメタデータのリスナー
+    const unsubscribeBoard = onSnapshot(
       doc(db, 'boards', boardId),
       (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data()
-          const board: Board = {
+          boardData = {
             id: docSnap.id,
             title: data.title,
             editKey: data.editKey,
-            tasks: data.tasks || { q1: [], q2: [], q3: [], q4: [] },
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
           }
-          setBoard(board)
+
+          // ボードデータが揃ったら更新
+          if (boardData) {
+            setBoard({ ...boardData, tasks })
+          }
         }
       },
       (error) => {
-        console.error('Error syncing board from Firestore:', error)
+        console.error('Error syncing board metadata from Firestore:', error)
+      }
+    )
+
+    // タスクサブコレクションのリスナー
+    const unsubscribeTasks = onSnapshot(
+      collection(db, 'boards', boardId, 'tasks'),
+      (snapshot) => {
+        // タスクをクリア
+        tasks.q1 = []
+        tasks.q2 = []
+        tasks.q3 = []
+        tasks.q4 = []
+
+        // タスクを象限ごとに振り分け
+        snapshot.forEach((doc) => {
+          const taskData = doc.data() as Task & { quadrant: Quadrant }
+          const { quadrant, ...task } = taskData
+          tasks[quadrant].push(task as Task)
+        })
+
+        // ボードデータが揃ったら更新
+        if (boardData) {
+          setBoard({ ...boardData, tasks })
+        }
+      },
+      (error) => {
+        console.error('Error syncing tasks from Firestore:', error)
       }
     )
 
     // クリーンアップ
-    return () => unsubscribe()
+    return () => {
+      unsubscribeBoard()
+      unsubscribeTasks()
+    }
   }, [boardId, setBoard])
 }
