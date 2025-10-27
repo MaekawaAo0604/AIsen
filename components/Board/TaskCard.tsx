@@ -60,11 +60,13 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
           {task.notes && (
             <p className="mt-1 text-[12px] text-[#787774] line-clamp-2 leading-[1.4]">{task.notes}</p>
           )}
-          {task.due && (
-            <p className="mt-1.5 text-[11px] text-[#9b9a97] leading-[1.3]">
-              期限: {new Date(task.due).toLocaleDateString('ja-JP')}
-            </p>
-          )}
+          <div className="mt-1.5 flex items-center gap-2 text-[11px] text-[#9b9a97] leading-[1.3]">
+            {task.due && (
+              <span>📅 期限: {new Date(task.due).toLocaleDateString('ja-JP')}</span>
+            )}
+            {task.due && task.createdAt && <span>•</span>}
+            <span>🕒 追加: {new Date(task.createdAt).toLocaleDateString('ja-JP')}</span>
+          </div>
         </div>
         <button
           onClick={handleDelete}
