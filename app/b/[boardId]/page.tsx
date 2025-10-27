@@ -1,7 +1,9 @@
 import { MatrixBoard } from '@/components/Board/MatrixBoard'
 import { TaskForm } from '@/components/Board/TaskForm'
 
-export default function BoardPage({ params }: { params: { boardId: string } }) {
+export default async function BoardPage({ params }: { params: Promise<{ boardId: string }> }) {
+  const { boardId } = await params
+
   return (
     <div className="min-h-screen bg-[#ffffff] px-24 py-12">
       <div className="max-w-[1600px] mx-auto space-y-8">
@@ -14,7 +16,7 @@ export default function BoardPage({ params }: { params: { boardId: string } }) {
             タスクを重要度と緊急度で整理して、優先順位を明確にしましょう
           </p>
           <p className="text-[12px] text-[#9b9a97]">
-            Board ID: {params.boardId}
+            Board ID: {boardId}
           </p>
         </div>
 
