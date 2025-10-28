@@ -17,7 +17,14 @@ export function useBoardSync(boardId: string | null) {
     if (!boardId) return
 
     let boardData: Omit<Board, 'tasks'> | null = null
-    const tasks: Board['tasks'] = { q1: [], q2: [], q3: [], q4: [] }
+    let tasks: Board['tasks'] = { q1: [], q2: [], q3: [], q4: [] }
+
+    // 状態を更新するヘルパー関数
+    const updateBoard = () => {
+      if (boardData) {
+        setBoard({ ...boardData, tasks: { ...tasks } })
+      }
+    }
 
     // ボードメタデータのリスナー
     const unsubscribeBoard = onSnapshot(
@@ -32,11 +39,7 @@ export function useBoardSync(boardId: string | null) {
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
           }
-
-          // ボードデータが揃ったら更新
-          if (boardData) {
-            setBoard({ ...boardData, tasks })
-          }
+          updateBoard()
         }
       },
       (error) => {
@@ -48,11 +51,8 @@ export function useBoardSync(boardId: string | null) {
     const unsubscribeTasks = onSnapshot(
       collection(db, 'boards', boardId, 'tasks'),
       (snapshot) => {
-        // タスクをクリア
-        tasks.q1 = []
-        tasks.q2 = []
-        tasks.q3 = []
-        tasks.q4 = []
+        // 新しいtasksオブジェクトを作成
+        tasks = { q1: [], q2: [], q3: [], q4: [] }
 
         // タスクを象限ごとに振り分け
         snapshot.forEach((doc) => {
@@ -61,10 +61,7 @@ export function useBoardSync(boardId: string | null) {
           tasks[quadrant].push(task as Task)
         })
 
-        // ボードデータが揃ったら更新
-        if (boardData) {
-          setBoard({ ...boardData, tasks })
-        }
+        updateBoard()
       },
       (error) => {
         console.error('Error syncing tasks from Firestore:', error)
