@@ -17,11 +17,6 @@ export function TaskPlacementModal({ isOpen, taskTitle: initialTaskTitle, onClos
   const [dueDate, setDueDate] = useState('')
   const [selectedQuadrant, setSelectedQuadrant] = useState<Quadrant | null>(null)
   const [isBrainstorming, setIsBrainstorming] = useState(false)
-  const [aiSuggestion, setAiSuggestion] = useState<{
-    quadrant: Quadrant
-    priority: number
-    reason: string
-  } | null>(null)
 
   if (!isOpen) return null
 
@@ -57,8 +52,20 @@ export function TaskPlacementModal({ isOpen, taskTitle: initialTaskTitle, onClos
     priority: number
     reason: string
   }) => {
-    setAiSuggestion(result)
-    setSelectedQuadrant(result.quadrant)
+    // ブレインストーミング完了後、自動的にタスクを配置してモーダルを閉じる
+    onPlace(
+      result.quadrant,
+      taskTitle.trim(),
+      subtasks.trim(),
+      dueDate ? new Date(dueDate).toISOString() : null,
+      result.priority,
+      result.reason
+    )
+    // 状態をリセット
+    setTaskTitle('')
+    setSubtasks('')
+    setDueDate('')
+    setSelectedQuadrant(null)
     setIsBrainstorming(false)
   }
 
@@ -68,15 +75,12 @@ export function TaskPlacementModal({ isOpen, taskTitle: initialTaskTitle, onClos
         selectedQuadrant,
         taskTitle.trim(),
         subtasks.trim(),
-        dueDate ? new Date(dueDate).toISOString() : null,
-        aiSuggestion?.priority,
-        aiSuggestion?.reason
+        dueDate ? new Date(dueDate).toISOString() : null
       )
       setTaskTitle('')
       setSubtasks('')
       setDueDate('')
       setSelectedQuadrant(null)
-      setAiSuggestion(null)
     }
   }
 
@@ -150,7 +154,7 @@ export function TaskPlacementModal({ isOpen, taskTitle: initialTaskTitle, onClos
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 mb-4">
                 {quadrants.map((quadrant) => (
                   <button
                     key={quadrant.id}
@@ -168,43 +172,22 @@ export function TaskPlacementModal({ isOpen, taskTitle: initialTaskTitle, onClos
               </div>
 
               {/* AI Brainstorm Section */}
-              <div className="mt-4 p-4 bg-[#fafafa] rounded-[3px] border border-[#e9e9e7]">
-                {!aiSuggestion ? (
-                  <button
-                    onClick={() => setIsBrainstorming(true)}
-                    className="w-full flex items-center justify-center gap-2 h-9 px-4 text-[14px] font-medium text-[#37352f] bg-white border border-[#e9e9e7] rounded-[3px] hover:bg-[#f7f6f3] transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                      />
-                    </svg>
-                    AIとブレインストーミングする
-                  </button>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                      <svg className="w-4 h-4 text-[#2383e2] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      <div className="flex-1">
-                        <p className="text-[12px] font-semibold text-[#37352f] mb-1">
-                          AI提案: {quadrants.find((q) => q.id === aiSuggestion.quadrant)?.title}
-                        </p>
-                        <p className="text-[12px] text-[#787774]">{aiSuggestion.reason}</p>
-                        <p className="text-[11px] text-[#9b9a97] mt-1">優先度スコア: {aiSuggestion.priority}/100</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
+              <div className="p-4 bg-[#fafafa] rounded-[3px] border border-[#e9e9e7]">
+                <button
+                  onClick={() => setIsBrainstorming(true)}
+                  disabled={!taskTitle.trim()}
+                  className="w-full flex items-center justify-center gap-2 h-9 px-4 text-[14px] font-medium text-[#37352f] bg-white border border-[#e9e9e7] rounded-[3px] hover:bg-[#f7f6f3] disabled:bg-[#fafafa] disabled:text-[#9b9a97] disabled:cursor-not-allowed transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                    />
+                  </svg>
+                  AIとブレインストーミングする
+                </button>
               </div>
             </>
           )}
