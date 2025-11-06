@@ -52,8 +52,7 @@ export function Sidebar() {
       >
         {/* Menu Button */}
         <button
-          onClick={handleToggle}
-          className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
+          className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f] cursor-default"
         >
           <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
