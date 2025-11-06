@@ -114,6 +114,43 @@ export async function updateBoard(
   })
 }
 
+/**
+ * ボード全体を保存（タスク含む）
+ */
+export async function saveBoardWithTasks(board: Board): Promise<void> {
+  const batch = writeBatch(db)
+
+  // ボードメタデータを保存
+  const boardRef = doc(db, 'boards', board.id)
+  batch.set(boardRef, {
+    id: board.id,
+    title: board.title,
+    editKey: board.editKey,
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  })
+
+  // 既存のタスクを全て削除してから新しいタスクを保存
+  const tasksRef = collection(db, 'boards', board.id, 'tasks')
+  const existingTasks = await getDocs(tasksRef)
+  existingTasks.forEach((taskDoc) => {
+    batch.delete(taskDoc.ref)
+  })
+
+  // 新しいタスクを保存
+  Object.entries(board.tasks).forEach(([quadrant, tasks]) => {
+    tasks.forEach((task) => {
+      const taskRef = doc(db, 'boards', board.id, 'tasks', task.id)
+      batch.set(taskRef, {
+        ...task,
+        quadrant,
+      })
+    })
+  })
+
+  await batch.commit()
+}
+
 // ==================== Task 操作 ====================
 
 /**

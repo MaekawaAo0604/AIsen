@@ -63,6 +63,18 @@ service cloud.firestore {
 
       // 削除は不可
       allow delete: if false;
+
+      // User's Boards Subcollection
+      match /boards/{boardId} {
+        // 自分の保存済みボードのみ読み取り可能
+        allow read: if isOwner(userId);
+
+        // 自分の保存済みボードのみ作成・更新可能
+        allow create, update: if isOwner(userId);
+
+        // 自分の保存済みボードのみ削除可能
+        allow delete: if isOwner(userId);
+      }
     }
 
     // ========================================

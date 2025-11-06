@@ -1,24 +1,124 @@
 'use client'
 
-import { useState } from 'react'
-import { useAuthStore } from '@/stores/useAuthStore'
+import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
+import { useAuthStore } from '@/lib/store/useAuthStore'
+import { useBoardStore } from '@/stores/useBoardStore'
 import { ShareLinkModal } from '@/components/Board/ShareLinkModal'
+import { SaveBoardModal } from '@/components/Board/SaveBoardModal'
+import { saveBoard, updateBoard, getBoard } from '@/lib/boardStorage'
+import { saveBoardWithTasks } from '@/lib/firestore-helpers'
+import type { Board } from '@/lib/types'
 
 export function Header() {
   const user = useAuthStore((state) => state.user)
-  const isPro = user?.entitlements?.pro ?? false
+  const boardState = useBoardStore((state) => state)
+  const params = useParams()
+  const boardId = params?.boardId as string
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isBoardSaved, setIsBoardSaved] = useState(false)
+
+  // 保存済みかどうかを確認
+  useEffect(() => {
+    async function checkIfBoardIsSaved() {
+      if (!user || !boardId) {
+        setIsBoardSaved(false)
+        return
+      }
+
+      try {
+        const existingBoard = await getBoard(user.uid, boardId)
+        setIsBoardSaved(!!existingBoard)
+      } catch (error) {
+        console.error('Error checking board save status:', error)
+        setIsBoardSaved(false)
+      }
+    }
+
+    checkIfBoardIsSaved()
+  }, [user, boardId])
+
+  const handleSave = async (boardTitle: string) => {
+    if (!user || !boardId) return
+
+    setIsSaving(true)
+    try {
+      // BoardStateからBoard型に変換
+      const board: Board = {
+        id: boardState.boardId || boardId,
+        title: boardTitle,
+        editKey: boardState.editKey || crypto.randomUUID(),
+        tasks: boardState.tasks,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+
+      // ユーザー専用ボード (users/{userId}/boards/{boardId}) に保存
+      const existingBoard = await getBoard(user.uid, boardId)
+
+      if (existingBoard) {
+        await updateBoard(user.uid, boardId, board)
+      } else {
+        await saveBoard(user.uid, boardId, board)
+      }
+
+      // 共有ボード (boards/{boardId}) にタスクも含めて保存
+      await saveBoardWithTasks(board)
+
+      // 保存状態を更新
+      setIsBoardSaved(true)
+
+      alert(existingBoard ? 'ボードを更新しました' : 'ボードを保存しました')
+      setIsSaveModalOpen(false)
+    } catch (error) {
+      console.error('ボード保存エラー:', error)
+      alert('ボードの保存に失敗しました')
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   return (
     <>
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center">
+            <div className="flex items-center gap-6">
               <h1 className="text-2xl font-bold text-gray-900">AIsen</h1>
+              {isBoardSaved && (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
+                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-[15px] font-medium text-gray-700">
+                    {boardState.title}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-4">
+              {/* 保存ボタン（未保存ボードのみ） */}
+              {user && !isBoardSaved && (
+                <button
+                  onClick={() => setIsSaveModalOpen(true)}
+                  disabled={isSaving || !boardId}
+                  className="flex items-center gap-2 h-9 px-4 text-[14px] font-medium text-white bg-[#10b981] rounded-[6px] hover:bg-[#059669] disabled:bg-[#e9e9e7] disabled:text-[#9b9a97] disabled:cursor-not-allowed transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+                    />
+                  </svg>
+                  {isSaving ? '保存中...' : '保存'}
+                </button>
+              )}
+
               {/* 共有ボタン */}
               <button
                 onClick={() => setIsShareModalOpen(true)}
@@ -34,23 +134,18 @@ export function Header() {
                 </svg>
                 共有
               </button>
-
-              {isPro && (
-                <span className="rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 px-3 py-1 text-sm font-semibold text-white">
-                  Pro
-                </span>
-              )}
-              {user && (
-                <span className="text-sm text-gray-600">
-                  {user.email}
-                </span>
-              )}
             </div>
           </div>
         </div>
       </header>
 
       <ShareLinkModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} />
+      <SaveBoardModal
+        isOpen={isSaveModalOpen}
+        currentTitle={boardState.title}
+        onSave={handleSave}
+        onClose={() => setIsSaveModalOpen(false)}
+      />
     </>
   )
 }

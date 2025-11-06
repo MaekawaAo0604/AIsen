@@ -3,18 +3,36 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getBoardHistory, formatRelativeTime, type BoardHistory } from '@/lib/boardHistory'
+import { useAuthStore } from '@/lib/store/useAuthStore'
+import { useBoardStore } from '@/stores/useBoardStore'
+import { signOut } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
+import { LoginModal } from '@/components/Auth/LoginModal'
+import { getUserBoards, updateBoard, type SavedBoard } from '@/lib/boardStorage'
 
 export function Sidebar() {
   const router = useRouter()
   const [history, setHistory] = useState<BoardHistory[]>([])
+  const [savedBoards, setSavedBoards] = useState<SavedBoard[]>([])
   const [isExpanded, setIsExpanded] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
+  const [editingBoardId, setEditingBoardId] = useState<string | null>(null)
+  const [editingTitle, setEditingTitle] = useState('')
+  const { user } = useAuthStore()
+  const clearBoard = useBoardStore((state) => state.clearBoard)
 
   useEffect(() => {
     if (isExpanded) {
       setHistory(getBoardHistory())
+
+      // ログイン済みの場合は保存済みボードを読み込む
+      if (user) {
+        getUserBoards(user.uid).then(setSavedBoards).catch(console.error)
+      }
     }
-  }, [isExpanded])
+  }, [isExpanded, user])
 
   const handleBoardClick = (boardId: string) => {
     router.push(`/b/${boardId}`)
@@ -29,6 +47,49 @@ export function Sidebar() {
     }
   }
 
+  const handleEditStart = (board: SavedBoard, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setEditingBoardId(board.boardId)
+    setEditingTitle(board.title)
+  }
+
+  const handleEditSave = async (boardId: string, e: React.MouseEvent | React.FormEvent) => {
+    e.stopPropagation()
+    if (!user || !editingTitle.trim()) return
+
+    try {
+      const board = savedBoards.find((b) => b.boardId === boardId)
+      if (!board) return
+
+      const updatedBoard = {
+        ...board.board,
+        title: editingTitle.trim(),
+      }
+
+      await updateBoard(user.uid, boardId, updatedBoard)
+
+      // ローカル状態を更新
+      setSavedBoards(
+        savedBoards.map((b) =>
+          b.boardId === boardId ? { ...b, title: editingTitle.trim() } : b
+        )
+      )
+
+      setEditingBoardId(null)
+      setEditingTitle('')
+    } catch (error) {
+      console.error('ボード名更新エラー:', error)
+      alert('ボード名の更新に失敗しました')
+    }
+  }
+
+  const handleEditCancel = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setEditingBoardId(null)
+    setEditingTitle('')
+  }
+
+  // ローカル履歴のボード（後方互換性のため維持）
   const myBoards = history.filter((board) => board.isOwner)
   const sharedBoards = history.filter((board) => !board.isOwner)
 
@@ -85,23 +146,88 @@ export function Sidebar() {
           )}
         </button>
 
-        {/* Login Icon (placeholder) */}
-        <button
-          className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
-        >
-          <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
-          {(isHovered || isExpanded) && (
-            <span className="text-[14px] font-medium whitespace-nowrap">ログイン</span>
-          )}
-        </button>
+        {/* Login/User Icon */}
+        {user ? (
+          <button
+            onClick={() => setIsLogoutModalOpen(true)}
+            className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
+          >
+            <div className="w-6 h-6 flex-shrink-0 rounded-full bg-[#2383e2] flex items-center justify-center text-white text-[12px] font-medium">
+              {user.displayName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
+            </div>
+            {(isHovered || isExpanded) && (
+              <span className="text-[14px] font-medium whitespace-nowrap truncate max-w-[120px]">
+                {user.displayName || user.email}
+              </span>
+            )}
+          </button>
+        ) : (
+          <button
+            onClick={() => setIsLoginModalOpen(true)}
+            className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
+          >
+            <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+              />
+            </svg>
+            {(isHovered || isExpanded) && (
+              <span className="text-[14px] font-medium whitespace-nowrap">ログイン</span>
+            )}
+          </button>
+        )}
       </div>
+
+      {/* Login Modal */}
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+
+      {/* Logout Confirmation Modal */}
+      {isLogoutModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/20" onClick={() => setIsLogoutModalOpen(false)} />
+
+          {/* Modal */}
+          <div className="relative bg-white rounded-[3px] shadow-2xl w-full max-w-sm mx-4 border border-[#e9e9e7]">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-[#e9e9e7]">
+              <h2 className="text-[16px] font-semibold text-[#37352f]">ログアウト確認</h2>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              <p className="text-[14px] text-[#37352f]">本当にログアウトしますか？</p>
+              {user && (
+                <p className="text-[13px] text-[#787774] mt-2">
+                  ログアウトすると、{user.email} からサインアウトされます。
+                </p>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-[#e9e9e7] flex justify-end gap-2">
+              <button
+                onClick={() => setIsLogoutModalOpen(false)}
+                className="h-9 px-4 text-[14px] font-medium text-[#37352f] bg-white border border-[#e9e9e7] rounded-[3px] hover:bg-[#f7f6f3] transition-colors"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={async () => {
+                  await signOut(auth)
+                  setIsLogoutModalOpen(false)
+                }}
+                className="h-9 px-4 text-[14px] font-medium text-white bg-[#dc2626] rounded-[3px] hover:bg-[#b91c1c] active:bg-[#991b1b] transition-colors"
+              >
+                ログアウト
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Expanded Sidebar */}
       <div
@@ -124,7 +250,7 @@ export function Sidebar() {
 
         {/* Content */}
         <div className="h-[calc(100vh-144px)] overflow-y-auto">
-          {history.length === 0 ? (
+          {user && savedBoards.length === 0 && history.length === 0 ? (
             <div className="px-6 py-12 text-center">
               <svg className="w-12 h-12 mx-auto mb-3 text-[#e9e9e7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -135,11 +261,122 @@ export function Sidebar() {
                 />
               </svg>
               <p className="text-[14px] text-[#9b9a97]">まだボードがありません</p>
-              <p className="text-[12px] text-[#9b9a97] mt-1">新しいボードを作成するか、共有リンクからアクセスしてください</p>
+              <p className="text-[12px] text-[#9b9a97] mt-1">新しいボードを作成して「保存」ボタンで保存してください</p>
+            </div>
+          ) : !user && history.length === 0 ? (
+            <div className="px-6 py-12 text-center">
+              <svg className="w-12 h-12 mx-auto mb-3 text-[#e9e9e7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              <p className="text-[14px] text-[#9b9a97]">まだボードがありません</p>
+              <p className="text-[12px] text-[#9b9a97] mt-1">ログインしてボードを保存しましょう</p>
             </div>
           ) : (
             <>
-              {/* 自分のボード */}
+              {/* 保存済みボード（ログイン時） */}
+              {user && savedBoards.length > 0 && (
+                <div className="px-6 py-4">
+                  <h3 className="text-[12px] font-semibold text-[#9b9a97] uppercase mb-3">保存済みボード</h3>
+                  <div className="space-y-2">
+                    {savedBoards.map((board) => (
+                      <div
+                        key={board.boardId}
+                        className="w-full p-3 rounded-[6px] border border-[#e9e9e7] hover:bg-[#f7f6f3] transition-colors group"
+                      >
+                        {editingBoardId === board.boardId ? (
+                          // 編集モード
+                          <form
+                            onSubmit={(e) => {
+                              e.preventDefault()
+                              handleEditSave(board.boardId, e)
+                            }}
+                            className="flex flex-col gap-2"
+                          >
+                            <input
+                              type="text"
+                              value={editingTitle}
+                              onChange={(e) => setEditingTitle(e.target.value)}
+                              className="w-full px-2 py-1 text-[14px] border border-[#2383e2] rounded-[3px] focus:outline-none focus:ring-2 focus:ring-[#2383e2]"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === 'Escape') {
+                                  handleEditCancel(e as any)
+                                }
+                              }}
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                type="submit"
+                                className="flex-1 px-3 py-1 text-[12px] text-white bg-[#2383e2] rounded-[3px] hover:bg-[#1a73d1] transition-colors"
+                              >
+                                保存
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleEditCancel}
+                                className="flex-1 px-3 py-1 text-[12px] text-[#37352f] bg-[#e9e9e7] rounded-[3px] hover:bg-[#d3d3d1] transition-colors"
+                              >
+                                キャンセル
+                              </button>
+                            </div>
+                          </form>
+                        ) : (
+                          // 通常モード
+                          <button
+                            onClick={() => handleBoardClick(board.boardId)}
+                            className="w-full text-left"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <svg className="w-4 h-4 text-[#10b981] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M5 13l4 4L19 7"
+                                    />
+                                  </svg>
+                                  <p className="text-[14px] font-medium text-[#37352f] truncate">{board.title}</p>
+                                </div>
+                                <p className="text-[11px] text-[#9b9a97] mt-1">
+                                  🕒 {formatRelativeTime(board.updatedAt.toISOString())}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={(e) => handleEditStart(board, e)}
+                                  className="p-1 rounded-[3px] hover:bg-[#e9e9e7] transition-colors opacity-0 group-hover:opacity-100"
+                                  title="ボード名を編集"
+                                >
+                                  <svg className="w-4 h-4 text-[#9b9a97]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                  </svg>
+                                </button>
+                                <svg
+                                  className="w-5 h-5 text-[#9b9a97] group-hover:text-[#37352f] transition-colors flex-shrink-0"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </div>
+                            </div>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ローカル履歴のボード */}
               {myBoards.length > 0 && (
                 <div className="px-6 py-4">
                   <h3 className="text-[12px] font-semibold text-[#9b9a97] uppercase mb-3">自分のボード</h3>
@@ -233,6 +470,7 @@ export function Sidebar() {
           <button
             onClick={() => {
               const newBoardId = crypto.randomUUID()
+              clearBoard()
               router.push(`/b/${newBoardId}`)
               setIsExpanded(false)
             }}

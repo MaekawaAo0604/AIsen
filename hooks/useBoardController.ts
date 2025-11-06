@@ -18,6 +18,7 @@ export function useBoardController(urlBoardId?: string) {
   const [isLoading, setIsLoading] = useState(true)
   const boardId = useBoardStore((state) => state.boardId)
   const setBoard = useBoardStore((state) => state.setBoard)
+  const clearBoard = useBoardStore((state) => state.clearBoard)
   const router = useRouter()
 
   // Firestoreとリアルタイム同期
@@ -30,14 +31,40 @@ export function useBoardController(urlBoardId?: string) {
         if (urlBoardId) {
           const board = await getBoard(urlBoardId)
           if (board) {
+            // 既存ボードが見つかった場合
             setBoard(board)
             localStorage.setItem(BOARD_ID_STORAGE_KEY, urlBoardId)
+            setIsLoading(false)
+            return
+          } else {
+            // URLのboardIdが存在しない場合は新規作成
+            clearBoard()
+            const newBoardId = await createBoard({
+              title: 'マイボード',
+              editKey: crypto.randomUUID(),
+              tasks: { q1: [], q2: [], q3: [], q4: [] },
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            })
+
+            // Firestoreに新しいボードIDで保存
+            localStorage.setItem(BOARD_ID_STORAGE_KEY, newBoardId)
+
+            // 新しいボードを取得してストアにセット
+            const board = await getBoard(newBoardId)
+            if (board) {
+              setBoard(board)
+              // 作成したboardIdにリダイレクト
+              if (urlBoardId !== newBoardId) {
+                router.replace(`/b/${newBoardId}`)
+              }
+            }
             setIsLoading(false)
             return
           }
         }
 
-        // localStorage からボードIDを取得
+        // URLにboardIdがない場合は、localStorageから取得
         const storedBoardId = localStorage.getItem(BOARD_ID_STORAGE_KEY)
 
         if (storedBoardId) {
@@ -46,15 +73,14 @@ export function useBoardController(urlBoardId?: string) {
           if (board) {
             setBoard(board)
             // URLが / の場合は /b/[boardId] にリダイレクト
-            if (!urlBoardId) {
-              router.push(`/b/${storedBoardId}`)
-            }
+            router.push(`/b/${storedBoardId}`)
             setIsLoading(false)
             return
           }
         }
 
-        // ボードが存在しない場合は新規作成
+        // どこにもボードがない場合は新規作成
+        clearBoard()
         const newBoardId = await createBoard({
           title: 'マイボード',
           editKey: crypto.randomUUID(),
@@ -81,7 +107,7 @@ export function useBoardController(urlBoardId?: string) {
     }
 
     initializeBoard()
-  }, [urlBoardId, setBoard, router])
+  }, [urlBoardId, setBoard, clearBoard, router])
 
   return { isLoading, boardId }
 }

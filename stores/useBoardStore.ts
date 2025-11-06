@@ -13,6 +13,7 @@ interface BoardState {
     q4: Task[]
   }
   setBoard: (board: Board) => void
+  clearBoard: () => void
   addTask: (quadrant: Quadrant, task: Omit<Task, 'id' | 'createdAt'>) => Promise<void>
   updateTask: (quadrant: Quadrant, taskId: string, updates: Partial<Task>) => Promise<void>
   deleteTask: (quadrant: Quadrant, taskId: string) => Promise<void>
@@ -35,6 +36,18 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     title: board.title,
     editKey: board.editKey,
     tasks: board.tasks,
+  }),
+
+  clearBoard: () => set({
+    boardId: null,
+    title: 'マイボード',
+    editKey: null,
+    tasks: {
+      q1: [],
+      q2: [],
+      q3: [],
+      q4: [],
+    },
   }),
 
   addTask: async (quadrant, taskData) => {
