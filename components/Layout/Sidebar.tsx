@@ -10,12 +10,21 @@ import { auth } from '@/lib/firebase'
 import { LoginModal } from '@/components/Auth/LoginModal'
 import { getUserBoards, updateBoard, type SavedBoard } from '@/lib/boardStorage'
 
-export function Sidebar() {
+interface SidebarProps {
+  isExpanded?: boolean
+  onToggle?: () => void
+}
+
+export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarProps = {}) {
   const router = useRouter()
   const [history, setHistory] = useState<BoardHistory[]>([])
   const [savedBoards, setSavedBoards] = useState<SavedBoard[]>([])
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [internalIsExpanded, setInternalIsExpanded] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
+
+  // 外部からの制御がある場合はそちらを優先、なければ内部状態を使用
+  const isExpanded = externalIsExpanded !== undefined ? externalIsExpanded : internalIsExpanded
+  const setIsExpanded = onToggle || setInternalIsExpanded
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
   const [editingBoardId, setEditingBoardId] = useState<string | null>(null)
@@ -103,9 +112,9 @@ export function Sidebar() {
         />
       )}
 
-      {/* Collapsed Sidebar - Always visible */}
+      {/* Collapsed Sidebar - Always visible on desktop, hidden on mobile */}
       <div
-        className={`fixed top-0 left-0 h-full bg-white border-r border-[#e9e9e7] z-[100] flex flex-col py-4 gap-4 transition-all duration-300 ${
+        className={`fixed top-0 left-0 h-full bg-white border-r border-[#e9e9e7] z-[100] flex-col py-4 gap-4 transition-all duration-300 hidden sm:flex ${
           isHovered || isExpanded ? 'w-48' : 'w-16'
         }`}
         onMouseEnter={() => setIsHovered(true)}
@@ -231,9 +240,9 @@ export function Sidebar() {
 
       {/* Expanded Sidebar */}
       <div
-        className={`fixed top-0 h-full w-80 bg-white shadow-2xl border-r border-[#e9e9e7] z-[95] transform transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 h-full w-full sm:w-80 bg-white shadow-2xl border-r border-[#e9e9e7] z-[95] transform transition-all duration-300 ease-in-out ${
           isExpanded ? 'translate-x-0' : '-translate-x-full'
-        } ${isHovered || isExpanded ? 'left-48' : 'left-16'}`}
+        } ${isHovered || isExpanded ? 'sm:left-48' : 'sm:left-16'} left-0`}
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#e9e9e7] flex items-center justify-between">

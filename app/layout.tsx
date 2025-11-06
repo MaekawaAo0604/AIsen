@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/Layout/Header";
-import { Sidebar } from "@/components/Layout/Sidebar";
+import { ClientLayout } from "./ClientLayout";
 
 const notoSansJP = Noto_Sans_JP({
   subsets: ["latin"],
@@ -22,11 +21,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={`${notoSansJP.variable} antialiased`}>
-        <Sidebar />
-        <div className="ml-16 transition-all duration-300">
-          <Header />
-          <main>{children}</main>
-        </div>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
