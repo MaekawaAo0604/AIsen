@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Layout/Header";
+import { Sidebar } from "@/components/Layout/Sidebar";
 
 const notoSansJP = Noto_Sans_JP({
   subsets: ["latin"],
@@ -21,8 +22,11 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={`${notoSansJP.variable} antialiased`}>
-        <Header />
-        <main>{children}</main>
+        <Sidebar />
+        <div className="pl-16">
+          <Header />
+          <main>{children}</main>
+        </div>
       </body>
     </html>
   );

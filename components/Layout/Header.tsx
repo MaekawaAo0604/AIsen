@@ -2,13 +2,11 @@
 
 import { useState } from 'react'
 import { useAuthStore } from '@/stores/useAuthStore'
-import { Sidebar } from '@/components/Layout/Sidebar'
 import { ShareLinkModal } from '@/components/Board/ShareLinkModal'
 
 export function Header() {
   const user = useAuthStore((state) => state.user)
   const isPro = user?.entitlements?.pro ?? false
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
 
   return (
@@ -21,22 +19,6 @@ export function Header() {
             </div>
 
             <div className="flex items-center gap-4">
-              {/* サイドバー開閉ボタン */}
-              <button
-                onClick={() => setIsSidebarOpen(true)}
-                className="flex items-center gap-2 h-9 px-4 text-[14px] font-medium text-[#37352f] bg-white border border-[#e9e9e7] rounded-[6px] hover:bg-[#f7f6f3] transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 10h16M4 14h16M4 18h16"
-                  />
-                </svg>
-                ボード
-              </button>
-
               {/* 共有ボタン */}
               <button
                 onClick={() => setIsShareModalOpen(true)}
@@ -68,7 +50,6 @@ export function Header() {
         </div>
       </header>
 
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <ShareLinkModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} />
     </>
   )

@@ -4,24 +4,24 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getBoardHistory, formatRelativeTime, type BoardHistory } from '@/lib/boardHistory'
 
-interface SidebarProps {
-  isOpen: boolean
-  onClose: () => void
-}
-
-export function Sidebar({ isOpen, onClose }: SidebarProps) {
+export function Sidebar() {
   const router = useRouter()
   const [history, setHistory] = useState<BoardHistory[]>([])
+  const [isExpanded, setIsExpanded] = useState(false)
 
   useEffect(() => {
-    if (isOpen) {
+    if (isExpanded) {
       setHistory(getBoardHistory())
     }
-  }, [isOpen])
+  }, [isExpanded])
 
   const handleBoardClick = (boardId: string) => {
     router.push(`/b/${boardId}`)
-    onClose()
+    setIsExpanded(false)
+  }
+
+  const handleToggle = () => {
+    setIsExpanded(!isExpanded)
   }
 
   const myBoards = history.filter((board) => board.isOwner)
@@ -30,24 +30,74 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
     <>
       {/* Backdrop */}
-      {isOpen && (
+      {isExpanded && (
         <div
           className="fixed inset-0 bg-black/20 z-40 transition-opacity duration-300"
-          onClick={onClose}
+          onClick={() => setIsExpanded(false)}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Collapsed Sidebar - Always visible */}
+      <div className="fixed top-0 left-0 h-full w-16 bg-white border-r border-[#e9e9e7] z-30 flex flex-col items-center py-4 gap-4">
+        {/* Menu Button */}
+        <button
+          onClick={handleToggle}
+          className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
+          title="メニュー"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+
+        {/* Board Icon */}
+        <button
+          onClick={handleToggle}
+          className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
+          title="ボード"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+        </button>
+
+        {/* Login Icon (placeholder) */}
+        <button
+          className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
+          title="ログイン"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            />
+          </svg>
+        </button>
+      </div>
+
+      {/* Expanded Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl border-r border-[#e9e9e7] z-50 transform transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-0 left-16 h-full w-80 bg-white shadow-2xl border-r border-[#e9e9e7] z-50 transform transition-transform duration-300 ease-in-out ${
+          isExpanded ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#e9e9e7] flex items-center justify-between">
           <h2 className="text-[16px] font-semibold text-[#37352f]">ボード一覧</h2>
           <button
-            onClick={onClose}
+            onClick={() => setIsExpanded(false)}
             className="text-[#9b9a97] hover:text-[#37352f] p-1 rounded-[3px] hover:bg-[#f7f6f3] transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,7 +218,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             onClick={() => {
               const newBoardId = crypto.randomUUID()
               router.push(`/b/${newBoardId}`)
-              onClose()
+              setIsExpanded(false)
             }}
             className="w-full h-10 flex items-center justify-center gap-2 text-[14px] font-medium text-[#2383e2] bg-[#eff6ff] rounded-[6px] hover:bg-[#dbeafe] transition-colors"
           >
