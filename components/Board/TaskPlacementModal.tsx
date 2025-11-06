@@ -6,12 +6,15 @@ import { BrainstormChat } from './BrainstormChat'
 
 interface TaskPlacementModalProps {
   isOpen: boolean
-  taskTitle: string
+  taskTitle?: string
   onClose: () => void
-  onPlace: (quadrant: Quadrant, priority?: number, aiReason?: string) => void
+  onPlace: (quadrant: Quadrant, title: string, subtasks: string, dueDate: string | null, priority?: number, aiReason?: string) => void
 }
 
-export function TaskPlacementModal({ isOpen, taskTitle, onClose, onPlace }: TaskPlacementModalProps) {
+export function TaskPlacementModal({ isOpen, taskTitle: initialTaskTitle, onClose, onPlace }: TaskPlacementModalProps) {
+  const [taskTitle, setTaskTitle] = useState(initialTaskTitle || '')
+  const [subtasks, setSubtasks] = useState('')
+  const [dueDate, setDueDate] = useState('')
   const [selectedQuadrant, setSelectedQuadrant] = useState<Quadrant | null>(null)
   const [isBrainstorming, setIsBrainstorming] = useState(false)
   const [aiSuggestion, setAiSuggestion] = useState<{
@@ -60,12 +63,18 @@ export function TaskPlacementModal({ isOpen, taskTitle, onClose, onPlace }: Task
   }
 
   const handlePlace = () => {
-    if (selectedQuadrant) {
+    if (selectedQuadrant && taskTitle.trim()) {
       onPlace(
         selectedQuadrant,
+        taskTitle.trim(),
+        subtasks.trim(),
+        dueDate ? new Date(dueDate).toISOString() : null,
         aiSuggestion?.priority,
         aiSuggestion?.reason
       )
+      setTaskTitle('')
+      setSubtasks('')
+      setDueDate('')
       setSelectedQuadrant(null)
       setAiSuggestion(null)
     }
@@ -100,6 +109,47 @@ export function TaskPlacementModal({ isOpen, taskTitle, onClose, onPlace }: Task
             />
           ) : (
             <>
+              {/* タイトル入力フィールド */}
+              <div className="mb-4">
+                <label className="block text-[13px] font-medium text-[#37352f] mb-2">
+                  タスクのタイトル
+                </label>
+                <input
+                  type="text"
+                  value={taskTitle}
+                  onChange={(e) => setTaskTitle(e.target.value)}
+                  placeholder="例: プロジェクトの提案書を作成"
+                  className="w-full h-9 px-3 text-[14px] text-[#37352f] placeholder:text-[#9b9a97] bg-[#ffffff] border border-[#e9e9e7] rounded-[3px] hover:bg-[#f7f6f3] focus:outline-none focus:bg-[#ffffff] focus:border-[#2383e2] transition-colors"
+                  autoFocus
+                />
+              </div>
+
+              {/* サブタスク入力フィールド */}
+              <div className="mb-4">
+                <label className="block text-[13px] font-medium text-[#37352f] mb-2">
+                  詳細・サブタスク（任意）
+                </label>
+                <textarea
+                  value={subtasks}
+                  onChange={(e) => setSubtasks(e.target.value)}
+                  placeholder="例: 目次作成、予算見積もり、スケジュール調整"
+                  className="w-full h-20 px-3 py-2 text-[14px] text-[#37352f] placeholder:text-[#9b9a97] bg-[#ffffff] border border-[#e9e9e7] rounded-[3px] hover:bg-[#f7f6f3] focus:outline-none focus:bg-[#ffffff] focus:border-[#2383e2] transition-colors resize-none"
+                />
+              </div>
+
+              {/* 期限入力フィールド */}
+              <div className="mb-4">
+                <label className="block text-[13px] font-medium text-[#37352f] mb-2">
+                  期限（任意）
+                </label>
+                <input
+                  type="datetime-local"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  className="w-full h-9 px-3 text-[14px] text-[#37352f] bg-[#ffffff] border border-[#e9e9e7] rounded-[3px] hover:bg-[#f7f6f3] focus:outline-none focus:bg-[#ffffff] focus:border-[#2383e2] transition-colors"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 {quadrants.map((quadrant) => (
                   <button
@@ -171,7 +221,7 @@ export function TaskPlacementModal({ isOpen, taskTitle, onClose, onPlace }: Task
             </button>
             <button
               onClick={handlePlace}
-              disabled={!selectedQuadrant}
+              disabled={!selectedQuadrant || !taskTitle.trim()}
               className="h-9 px-4 text-[14px] font-medium text-white bg-[#2383e2] rounded-[3px] hover:bg-[#1a73d1] active:bg-[#155cb3] disabled:bg-[#e9e9e7] disabled:text-[#9b9a97] disabled:cursor-not-allowed transition-colors"
             >
               配置する

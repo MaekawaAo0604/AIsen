@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import type { Task, Quadrant } from '@/lib/types'
 import { useBoardStore } from '@/stores/useBoardStore'
+import { TaskDetailModal } from './TaskDetailModal'
 
 interface TaskCardProps {
   task: Task
@@ -10,6 +12,7 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, quadrant }: TaskCardProps) {
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const deleteTask = useBoardStore((state) => state.deleteTask)
   const updateTask = useBoardStore((state) => state.updateTask)
 
@@ -34,15 +37,21 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
     })
   }
 
+  const handleCardClick = () => {
+    setIsDetailModalOpen(true)
+  }
+
   return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      className={`group relative bg-white rounded-[3px] border border-[#e9e9e7] hover:bg-[#f7f6f3] transition-all cursor-grab active:cursor-grabbing ${
-        isDragging ? 'opacity-50 shadow-lg' : 'opacity-100'
-      } ${task.completed ? 'opacity-60' : ''}`}
-    >
+    <>
+      <div
+        ref={setNodeRef}
+        {...listeners}
+        {...attributes}
+        onClick={handleCardClick}
+        className={`group relative bg-white rounded-[3px] border border-[#e9e9e7] hover:bg-[#f7f6f3] transition-all cursor-grab active:cursor-grabbing ${
+          isDragging ? 'opacity-50 shadow-lg' : 'opacity-100'
+        } ${task.completed ? 'opacity-60' : ''}`}
+      >
       <div className="flex items-start justify-between gap-2 px-3 py-2.5">
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-2">
@@ -86,9 +95,6 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
           {task.aiReason && (
             <p className="mt-1 text-[11px] text-[#787774] leading-[1.3] italic">{task.aiReason}</p>
           )}
-          {task.notes && (
-            <p className="mt-1 text-[12px] text-[#787774] line-clamp-2 leading-[1.4]">{task.notes}</p>
-          )}
           <div className="mt-1.5 flex items-center gap-2 text-[11px] text-[#9b9a97] leading-[1.3]">
             {task.due && (
               <span>📅 期限: {new Date(task.due).toLocaleDateString('ja-JP')}</span>
@@ -109,5 +115,12 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
         </button>
       </div>
     </div>
+
+      <TaskDetailModal
+        isOpen={isDetailModalOpen}
+        task={task}
+        onClose={() => setIsDetailModalOpen(false)}
+      />
+    </>
   )
 }
