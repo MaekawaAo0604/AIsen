@@ -23,7 +23,7 @@ export default function RootLayout({
     <html lang="ja">
       <body className={`${notoSansJP.variable} antialiased`}>
         <Sidebar />
-        <div className="pl-16">
+        <div className="ml-16 transition-all duration-300">
           <Header />
           <main>{children}</main>
         </div>

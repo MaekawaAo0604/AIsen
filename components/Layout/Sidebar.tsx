@@ -8,6 +8,7 @@ export function Sidebar() {
   const router = useRouter()
   const [history, setHistory] = useState<BoardHistory[]>([])
   const [isExpanded, setIsExpanded] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
     if (isExpanded) {
@@ -18,10 +19,14 @@ export function Sidebar() {
   const handleBoardClick = (boardId: string) => {
     router.push(`/b/${boardId}`)
     setIsExpanded(false)
+    setIsHovered(false)
   }
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded)
+    if (!isExpanded) {
+      setIsHovered(false)
+    }
   }
 
   const myBoards = history.filter((board) => board.isOwner)
@@ -32,20 +37,25 @@ export function Sidebar() {
       {/* Backdrop */}
       {isExpanded && (
         <div
-          className="fixed inset-0 bg-black/20 z-40 transition-opacity duration-300"
+          className="fixed inset-0 bg-black/20 z-[90] transition-opacity duration-300"
           onClick={() => setIsExpanded(false)}
         />
       )}
 
       {/* Collapsed Sidebar - Always visible */}
-      <div className="fixed top-0 left-0 h-full w-16 bg-white border-r border-[#e9e9e7] z-30 flex flex-col items-center py-4 gap-4">
+      <div
+        className={`fixed top-0 left-0 h-full bg-white border-r border-[#e9e9e7] z-[100] flex flex-col py-4 gap-4 transition-all duration-300 ${
+          isHovered || isExpanded ? 'w-48' : 'w-16'
+        }`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         {/* Menu Button */}
         <button
           onClick={handleToggle}
-          className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
-          title="メニュー"
+          className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -53,15 +63,17 @@ export function Sidebar() {
               d="M4 6h16M4 12h16M4 18h16"
             />
           </svg>
+          {(isHovered || isExpanded) && (
+            <span className="text-[14px] font-medium whitespace-nowrap">メニュー</span>
+          )}
         </button>
 
         {/* Board Icon */}
         <button
           onClick={handleToggle}
-          className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
-          title="ボード"
+          className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -69,14 +81,16 @@ export function Sidebar() {
               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
+          {(isHovered || isExpanded) && (
+            <span className="text-[14px] font-medium whitespace-nowrap">ボード</span>
+          )}
         </button>
 
         {/* Login Icon (placeholder) */}
         <button
-          className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
-          title="ログイン"
+          className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -84,14 +98,17 @@ export function Sidebar() {
               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
             />
           </svg>
+          {(isHovered || isExpanded) && (
+            <span className="text-[14px] font-medium whitespace-nowrap">ログイン</span>
+          )}
         </button>
       </div>
 
       {/* Expanded Sidebar */}
       <div
-        className={`fixed top-0 left-16 h-full w-80 bg-white shadow-2xl border-r border-[#e9e9e7] z-50 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 h-full w-80 bg-white shadow-2xl border-r border-[#e9e9e7] z-[95] transform transition-all duration-300 ease-in-out ${
           isExpanded ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        } ${isHovered || isExpanded ? 'left-48' : 'left-16'}`}
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#e9e9e7] flex items-center justify-between">
