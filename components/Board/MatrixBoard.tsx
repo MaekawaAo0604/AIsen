@@ -43,21 +43,21 @@ export function MatrixBoard() {
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="relative w-full h-[700px] bg-white rounded-[3px] border border-[#e9e9e7] overflow-hidden">
+      <div className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] bg-white rounded-[3px] border border-[#e9e9e7] overflow-hidden">
         {/* Y軸ラベル（左側） */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 flex items-center justify-center bg-[#fafafa] border-r border-[#e9e9e7]">
-          <div className="transform -rotate-90 whitespace-nowrap text-[12px] font-medium text-[#787774] tracking-wide">
+        <div className="absolute left-0 top-0 bottom-0 w-10 sm:w-12 md:w-16 flex items-center justify-center bg-[#fafafa] border-r border-[#e9e9e7]">
+          <div className="transform -rotate-90 whitespace-nowrap text-[10px] sm:text-[11px] md:text-[12px] font-medium text-[#787774] tracking-wide">
             重要度
           </div>
         </div>
 
         {/* X軸ラベル（下部） */}
-        <div className="absolute left-16 right-0 bottom-0 h-12 flex items-center justify-center bg-[#fafafa] border-t border-[#e9e9e7]">
-          <div className="text-[12px] font-medium text-[#787774] tracking-wide">緊急度</div>
+        <div className="absolute left-10 sm:left-12 md:left-16 right-0 bottom-0 h-8 sm:h-10 md:h-12 flex items-center justify-center bg-[#fafafa] border-t border-[#e9e9e7]">
+          <div className="text-[10px] sm:text-[11px] md:text-[12px] font-medium text-[#787774] tracking-wide">緊急度</div>
         </div>
 
         {/* メイングリッド */}
-        <div className="absolute left-16 right-0 top-0 bottom-12 grid grid-cols-2 grid-rows-2 gap-[1px] bg-[#e9e9e7]">
+        <div className="absolute left-10 sm:left-12 md:left-16 right-0 top-0 bottom-8 sm:bottom-10 md:bottom-12 grid grid-cols-2 grid-rows-2 gap-[1px] bg-[#e9e9e7]">
           {/* Q1: 緊急 × 重要（左上） */}
           <Quadrant
             quadrant="q1"
@@ -109,10 +109,10 @@ export function MatrixBoard() {
 
 
         {/* 軸ラベル */}
-        <div className="absolute left-2 top-12 text-[11px] font-medium text-[#9b9a97]">高</div>
-        <div className="absolute left-2 bottom-16 text-[11px] font-medium text-[#9b9a97]">低</div>
-        <div className="absolute left-20 bottom-2 text-[11px] font-medium text-[#9b9a97]">高</div>
-        <div className="absolute right-4 bottom-2 text-[11px] font-medium text-[#9b9a97]">低</div>
+        <div className="absolute left-0.5 sm:left-1 md:left-2 top-8 sm:top-10 md:top-12 text-[9px] sm:text-[10px] md:text-[11px] font-medium text-[#9b9a97]">高</div>
+        <div className="absolute left-0.5 sm:left-1 md:left-2 bottom-12 sm:bottom-14 md:bottom-16 text-[9px] sm:text-[10px] md:text-[11px] font-medium text-[#9b9a97]">低</div>
+        <div className="absolute left-12 sm:left-16 md:left-20 bottom-0.5 sm:bottom-1 md:bottom-2 text-[9px] sm:text-[10px] md:text-[11px] font-medium text-[#9b9a97]">高</div>
+        <div className="absolute right-2 sm:right-3 md:right-4 bottom-0.5 sm:bottom-1 md:bottom-2 text-[9px] sm:text-[10px] md:text-[11px] font-medium text-[#9b9a97]">低</div>
       </div>
 
       <DragOverlay>
