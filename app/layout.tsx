@@ -11,6 +11,12 @@ const notoSansJP = Noto_Sans_JP({
 export const metadata: Metadata = {
   title: "AIsen - アイゼンハワー・マトリクス タスク管理",
   description: "AIによるタスク優先度付けと4象限管理",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "AIsen",
+  },
 };
 
 export default function RootLayout({

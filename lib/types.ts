@@ -109,3 +109,31 @@ export interface DynamoDBPayment {
   stripeSessionId: string
   status: 'succeeded' | 'pending' | 'failed'
 }
+
+// Notification Types
+export interface NotificationSettings {
+  enabled: boolean
+  deadlineReminder: {
+    enabled: boolean
+    oneDayBefore: boolean
+    oneHourBefore: boolean
+  }
+  dailySummary: {
+    enabled: boolean
+    time: string  // HH:mm format (例: "09:00")
+  }
+  pushSubscription?: PushSubscriptionJSON
+}
+
+export interface NotificationPayload {
+  title: string
+  body: string
+  icon?: string
+  badge?: string
+  tag?: string
+  data?: {
+    url?: string
+    taskId?: string
+    boardId?: string
+  }
+}
