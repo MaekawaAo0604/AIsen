@@ -173,13 +173,32 @@ export function NotificationSettings() {
 
       {/* テスト通知 */}
       {settings.enabled && (
-        <button
-          onClick={sendTestNotification}
-          disabled={isLoading}
-          className="w-full px-4 py-2 text-[13px] sm:text-[14px] font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          テスト通知を送信
-        </button>
+        <div className="space-y-2">
+          <button
+            onClick={async () => {
+              console.log('🔘 テスト通知ボタンがクリックされました')
+              try {
+                await sendTestNotification()
+                alert('✅ テスト通知を送信しました！デスクトップに表示されているか確認してください。')
+              } catch (error) {
+                console.error('❌ テスト通知エラー:', error)
+                alert(`❌ エラーが発生しました: ${error}`)
+              }
+            }}
+            disabled={isLoading}
+            className="w-full px-4 py-2 text-[13px] sm:text-[14px] font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            テスト通知を送信
+          </button>
+
+          {/* デバッグ情報 */}
+          <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-[11px] sm:text-[12px] text-gray-600 space-y-1">
+            <p>🔍 デバッグ情報:</p>
+            <p>• 通知権限: {permission}</p>
+            <p>• Service Worker: {'serviceWorker' in navigator ? '対応' : '非対応'}</p>
+            <p>• 通知API: {'Notification' in window ? '対応' : '非対応'}</p>
+          </div>
+        </div>
       )}
     </div>
   )

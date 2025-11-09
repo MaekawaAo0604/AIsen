@@ -78,21 +78,35 @@ export async function unsubscribeFromPushNotifications(
 
 // ローカル通知の表示（開発・テスト用）
 export async function showLocalNotification(payload: NotificationPayload): Promise<void> {
+  console.log('🔔 showLocalNotification called with:', payload)
+
   const permission = await requestNotificationPermission()
+  console.log('📋 Notification permission:', permission)
+
   if (permission !== 'granted') {
-    console.warn('Notification permission not granted')
+    console.warn('❌ Notification permission not granted')
+    alert('通知が許可されていません。ブラウザの設定から通知を許可してください。')
     return
   }
 
-  const registration = await navigator.serviceWorker.ready
-  await registration.showNotification(payload.title, {
-    body: payload.body,
-    icon: payload.icon || '/icon-192.png',
-    badge: payload.badge || '/icon-192.png',
-    tag: payload.tag || 'default',
-    data: payload.data || {},
-    requireInteraction: false,
-  })
+  try {
+    console.log('⏳ Waiting for service worker registration...')
+    const registration = await navigator.serviceWorker.ready
+    console.log('✅ Service worker ready:', registration)
+
+    await registration.showNotification(payload.title, {
+      body: payload.body,
+      icon: payload.icon || '/icon-192.png',
+      badge: payload.badge || '/icon-192.png',
+      tag: payload.tag || 'default',
+      data: payload.data || {},
+      requireInteraction: false,
+    })
+    console.log('✅ Notification displayed successfully')
+  } catch (error) {
+    console.error('❌ Failed to show notification:', error)
+    alert(`通知の表示に失敗しました: ${error}`)
+  }
 }
 
 // VAPID公開鍵のBase64文字列をUint8Arrayに変換
