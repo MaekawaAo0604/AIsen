@@ -17,16 +17,23 @@ export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
 // Service Workerの登録
 export async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (!('serviceWorker' in navigator)) {
-    console.warn('Service Worker not supported')
+    console.warn('⚠️ Service Worker not supported')
     return null
   }
 
   try {
-    const registration = await navigator.serviceWorker.register('/sw.js')
-    console.log('Service Worker registered:', registration)
+    console.log('🔄 Registering Service Worker at /sw.js...')
+    const registration = await navigator.serviceWorker.register('/sw.js', {
+      scope: '/',
+    })
+    console.log('✅ Service Worker registered:', registration)
+    console.log('   - Installing:', registration.installing)
+    console.log('   - Waiting:', registration.waiting)
+    console.log('   - Active:', registration.active)
+
     return registration
   } catch (error) {
-    console.error('Service Worker registration failed:', error)
+    console.error('❌ Service Worker registration failed:', error)
     return null
   }
 }
@@ -91,7 +98,14 @@ export async function showLocalNotification(payload: NotificationPayload): Promi
 
   try {
     console.log('⏳ Waiting for service worker registration...')
-    const registration = await navigator.serviceWorker.ready
+
+    // タイムアウト付きでService Workerを待機
+    const registration = await Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Service Worker ready timeout (5s)')), 5000)
+      )
+    ])
     console.log('✅ Service worker ready:', registration)
 
     await registration.showNotification(payload.title, {
