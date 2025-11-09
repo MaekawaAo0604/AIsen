@@ -21,6 +21,7 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
   const [savedBoards, setSavedBoards] = useState<SavedBoard[]>([])
   const [internalIsExpanded, setInternalIsExpanded] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
+  const [isBoardListExpanded, setIsBoardListExpanded] = useState(false)
 
   // 外部からの制御がある場合はそちらを優先、なければ内部状態を使用
   const isExpanded = externalIsExpanded !== undefined ? externalIsExpanded : internalIsExpanded
@@ -33,7 +34,7 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
   const clearBoard = useBoardStore((state) => state.clearBoard)
 
   useEffect(() => {
-    if (isExpanded) {
+    if (isBoardListExpanded) {
       setHistory(getBoardHistory())
 
       // ログイン済みの場合は保存済みボードを読み込む
@@ -41,19 +42,25 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
         getUserBoards(user.uid).then(setSavedBoards).catch(console.error)
       }
     }
-  }, [isExpanded, user])
+  }, [isBoardListExpanded, user])
 
   const handleBoardClick = (boardId: string) => {
     router.push(`/b/${boardId}`)
+    setIsBoardListExpanded(false)
     setIsExpanded(false)
     setIsHovered(false)
   }
 
   const handleToggle = () => {
-    setIsExpanded(!isExpanded)
-    if (!isExpanded) {
+    setIsBoardListExpanded(!isBoardListExpanded)
+    if (!isBoardListExpanded) {
       setIsHovered(false)
     }
+  }
+
+  const handleOpenBoardList = () => {
+    setIsBoardListExpanded(true)
+    setIsExpanded(false)
   }
 
   const handleEditStart = (board: SavedBoard, e: React.MouseEvent) => {
@@ -105,17 +112,20 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
   return (
     <>
       {/* Backdrop */}
-      {isExpanded && (
+      {(isExpanded || isBoardListExpanded) && (
         <div
           className="fixed inset-0 bg-black/20 z-[90] transition-opacity duration-300"
-          onClick={() => setIsExpanded(false)}
+          onClick={() => {
+            setIsExpanded(false)
+            setIsBoardListExpanded(false)
+          }}
         />
       )}
 
       {/* Collapsed Sidebar - Always visible on desktop, hidden on mobile */}
       <div
         className={`fixed top-0 left-0 h-full bg-white border-r border-[#e9e9e7] z-[100] flex-col py-4 gap-4 transition-all duration-300 hidden sm:flex ${
-          isHovered || isExpanded ? 'w-48' : 'w-16'
+          isHovered || isBoardListExpanded ? 'w-48' : 'w-16'
         }`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -132,7 +142,7 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
               d="M4 6h16M4 12h16M4 18h16"
             />
           </svg>
-          {(isHovered || isExpanded) && (
+          {(isHovered || isBoardListExpanded) && (
             <span className="text-[14px] font-medium whitespace-nowrap">メニュー</span>
           )}
         </button>
@@ -150,7 +160,7 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
-          {(isHovered || isExpanded) && (
+          {(isHovered || isBoardListExpanded) && (
             <span className="text-[14px] font-medium whitespace-nowrap">ボード</span>
           )}
         </button>
@@ -164,7 +174,7 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
             <div className="w-6 h-6 flex-shrink-0 rounded-full bg-[#2383e2] flex items-center justify-center text-white text-[12px] font-medium">
               {user.displayName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
             </div>
-            {(isHovered || isExpanded) && (
+            {(isHovered || isBoardListExpanded) && (
               <span className="text-[14px] font-medium whitespace-nowrap truncate max-w-[120px]">
                 {user.displayName || user.email}
               </span>
@@ -183,12 +193,85 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
                 d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
               />
             </svg>
-            {(isHovered || isExpanded) && (
+            {(isHovered || isBoardListExpanded) && (
               <span className="text-[14px] font-medium whitespace-nowrap">ログイン</span>
             )}
           </button>
         )}
       </div>
+
+      {/* Mobile Sidebar - Shown when hamburger is clicked */}
+      {isExpanded && (
+        <div className="fixed top-0 left-0 h-full w-64 bg-white shadow-2xl border-r border-[#e9e9e7] z-[95] sm:hidden flex flex-col">
+          {/* Header */}
+          <div className="px-6 py-4 border-b border-[#e9e9e7] flex items-center justify-between">
+            <h2 className="text-[16px] font-semibold text-[#37352f]">メニュー</h2>
+            <button
+              onClick={() => setIsExpanded(false)}
+              className="text-[#9b9a97] hover:text-[#37352f] p-1 rounded-[3px] hover:bg-[#f7f6f3] transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Menu Items */}
+          <div className="flex-1 overflow-y-auto py-4">
+            {/* Board Button */}
+            <button
+              onClick={handleOpenBoardList}
+              className="w-full flex items-center gap-3 px-6 py-3 hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
+            >
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              <span className="text-[14px] font-medium">ボード一覧</span>
+            </button>
+
+            {/* Login/User Button */}
+            {user ? (
+              <button
+                onClick={() => {
+                  setIsLogoutModalOpen(true)
+                  setIsExpanded(false)
+                }}
+                className="w-full flex items-center gap-3 px-6 py-3 hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
+              >
+                <div className="w-5 h-5 flex-shrink-0 rounded-full bg-[#2383e2] flex items-center justify-center text-white text-[11px] font-medium">
+                  {user.displayName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
+                </div>
+                <span className="text-[14px] font-medium truncate">
+                  {user.displayName || user.email}
+                </span>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setIsLoginModalOpen(true)
+                  setIsExpanded(false)
+                }}
+                className="w-full flex items-center gap-3 px-6 py-3 hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
+              >
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                  />
+                </svg>
+                <span className="text-[14px] font-medium">ログイン</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Login Modal */}
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
@@ -238,17 +321,17 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
         </div>
       )}
 
-      {/* Expanded Sidebar */}
+      {/* Expanded Sidebar - Board List */}
       <div
         className={`fixed top-0 h-full w-full sm:w-80 bg-white shadow-2xl border-r border-[#e9e9e7] z-[95] transform transition-all duration-300 ease-in-out ${
-          isExpanded ? 'translate-x-0' : '-translate-x-full'
-        } ${isHovered || isExpanded ? 'sm:left-48' : 'sm:left-16'} left-0`}
+          isBoardListExpanded ? 'translate-x-0' : '-translate-x-full'
+        } ${isHovered || isBoardListExpanded ? 'sm:left-48' : 'sm:left-16'} left-0`}
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#e9e9e7] flex items-center justify-between">
           <h2 className="text-[16px] font-semibold text-[#37352f]">ボード一覧</h2>
           <button
-            onClick={() => setIsExpanded(false)}
+            onClick={() => setIsBoardListExpanded(false)}
             className="text-[#9b9a97] hover:text-[#37352f] p-1 rounded-[3px] hover:bg-[#f7f6f3] transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -481,7 +564,7 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
               const newBoardId = crypto.randomUUID()
               clearBoard()
               router.push(`/b/${newBoardId}`)
-              setIsExpanded(false)
+              setIsBoardListExpanded(false)
             }}
             className="w-full h-10 flex items-center justify-center gap-2 text-[14px] font-medium text-[#2383e2] bg-[#eff6ff] rounded-[6px] hover:bg-[#dbeafe] transition-colors"
           >
