@@ -5,6 +5,8 @@ import { useDraggable } from '@dnd-kit/core'
 import type { Task, Quadrant } from '@/lib/types'
 import { useBoardStore } from '@/stores/useBoardStore'
 import { TaskDetailModal } from './TaskDetailModal'
+import { SWIPE_THRESHOLD } from '@/lib/constants'
+import { formatDateJP } from '@/lib/utils'
 
 interface TaskCardProps {
   task: Task
@@ -55,20 +57,20 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
     const touchX = e.touches[0].clientX
     const diff = touchX - touchStartX.current
 
-    // スワイプ判定（30px以上移動でスワイプと認識）
-    if (Math.abs(diff) > 30) {
+    // スワイプ判定
+    if (Math.abs(diff) > SWIPE_THRESHOLD.MIN_DISTANCE) {
       isSwiping.current = true
     }
 
     // 左スワイプのみ対応（削除アクション用）
-    if (diff < 0 && diff > -100) {
+    if (diff < 0 && diff > SWIPE_THRESHOLD.MAX_RANGE) {
       setSwipeOffset(diff)
     }
   }
 
   const handleTouchEnd = () => {
-    // -80px以上スワイプで削除確認
-    if (swipeOffset < -80) {
+    // 削除距離を超えたら削除確認
+    if (swipeOffset < SWIPE_THRESHOLD.DELETE_DISTANCE) {
       if (confirm('このタスクを削除しますか？')) {
         deleteTask(quadrant, task.id)
       }
@@ -143,10 +145,10 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
           )}
           <div className="mt-1 sm:mt-1.5 flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-[#9b9a97] leading-[1.3] flex-wrap">
             {task.due && (
-              <span className="whitespace-nowrap">📅 期限: {new Date(task.due).toLocaleDateString('ja-JP')}</span>
+              <span className="whitespace-nowrap">📅 期限: {formatDateJP(task.due)}</span>
             )}
             {task.due && task.createdAt && <span className="hidden sm:inline">•</span>}
-            <span className="whitespace-nowrap">🕒 追加: {new Date(task.createdAt).toLocaleDateString('ja-JP')}</span>
+            <span className="whitespace-nowrap">🕒 追加: {formatDateJP(task.createdAt)}</span>
           </div>
         </div>
         {/* 削除ボタン（タップ領域拡大） */}

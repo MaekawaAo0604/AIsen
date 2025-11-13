@@ -1,10 +1,10 @@
 'use client'
 
-import { DndContext, DragEndEvent, DragOverlay, useSensor, useSensors, PointerSensor, useDroppable } from '@dnd-kit/core'
+import { DndContext, DragEndEvent, DragOverlay, useSensor, useSensors, PointerSensor } from '@dnd-kit/core'
 import { useBoardStore } from '@/stores/useBoardStore'
 import type { Task, Quadrant as QuadrantType } from '@/lib/types'
-import { TaskCard } from './TaskCard'
 import { Quadrant } from './Quadrant'
+import { QUADRANT_CONFIG, QUADRANTS } from '@/lib/constants'
 import { useState } from 'react'
 
 export function MatrixBoard() {
@@ -58,53 +58,22 @@ export function MatrixBoard() {
 
         {/* メイングリッド */}
         <div className="absolute left-10 sm:left-12 md:left-16 right-0 top-0 bottom-8 sm:bottom-10 md:bottom-12 grid grid-cols-2 grid-rows-2 gap-[1px] bg-[#e9e9e7]">
-          {/* Q1: 緊急 × 重要（左上） */}
-          <Quadrant
-            quadrant="q1"
-            tasks={tasks.q1}
-            label="Q1"
-            title="今すぐやる"
-            description="重要かつ緊急"
-            colorClass=""
-            bgClass="bg-[#fef2f2]"
-            badgeClass="bg-[#dc2626] text-white"
-          />
-
-          {/* Q2: 非緊急 × 重要（右上） */}
-          <Quadrant
-            quadrant="q2"
-            tasks={tasks.q2}
-            label="Q2"
-            title="計画してやる"
-            description="重要だが緊急ではない"
-            colorClass=""
-            bgClass="bg-[#eff6ff]"
-            badgeClass="bg-[#2563eb] text-white"
-          />
-
-          {/* Q3: 緊急 × 非重要（左下） */}
-          <Quadrant
-            quadrant="q3"
-            tasks={tasks.q3}
-            label="Q3"
-            title="誰かに任せる"
-            description="緊急だが重要ではない"
-            colorClass=""
-            bgClass="bg-[#fefce8]"
-            badgeClass="bg-[#ca8a04] text-white"
-          />
-
-          {/* Q4: 非緊急 × 非重要（右下） */}
-          <Quadrant
-            quadrant="q4"
-            tasks={tasks.q4}
-            label="Q4"
-            title="やらない"
-            description="重要でも緊急でもない"
-            colorClass=""
-            bgClass="bg-[#fafafa]"
-            badgeClass="bg-[#6b7280] text-white"
-          />
+          {QUADRANTS.map((quadrant) => {
+            const config = QUADRANT_CONFIG[quadrant]
+            return (
+              <Quadrant
+                key={quadrant}
+                quadrant={quadrant}
+                tasks={tasks[quadrant]}
+                label={config.label}
+                title={config.title}
+                description={config.description}
+                colorClass=""
+                bgClass={config.bgClass}
+                badgeClass={config.badgeClass}
+              />
+            )
+          })}
         </div>
 
 
