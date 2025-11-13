@@ -12,6 +12,11 @@ import {
   saveNotificationSettings,
   showLocalNotification,
 } from '@/lib/notifications'
+import {
+  startNotificationScheduler,
+  stopNotificationScheduler,
+  updateNotificationSchedules,
+} from '@/lib/notificationScheduler'
 
 export function useNotifications() {
   const [settings, setSettings] = useState<NotificationSettings>(DEFAULT_NOTIFICATION_SETTINGS)
@@ -21,6 +26,12 @@ export function useNotifications() {
 
   // 初期化
   useEffect(() => {
+    // ブラウザ環境でのみ実行
+    if (typeof window === 'undefined') {
+      setIsLoading(false)
+      return
+    }
+
     const init = async () => {
       // 通知設定を読み込み
       const savedSettings = getNotificationSettings()
@@ -37,10 +48,20 @@ export function useNotifications() {
         setRegistration(reg)
       }
 
+      // 通知が有効な場合、スケジューラーを起動
+      if (savedSettings.enabled) {
+        startNotificationScheduler()
+      }
+
       setIsLoading(false)
     }
 
     init()
+
+    // クリーンアップ
+    return () => {
+      stopNotificationScheduler()
+    }
   }, [])
 
   // 通知を有効化
@@ -79,6 +100,10 @@ export function useNotifications() {
 
     setSettings(newSettings)
     saveNotificationSettings(newSettings)
+
+    // スケジューラーを起動
+    startNotificationScheduler()
+
     setIsLoading(false)
 
     return true
@@ -99,6 +124,10 @@ export function useNotifications() {
 
     setSettings(newSettings)
     saveNotificationSettings(newSettings)
+
+    // スケジューラーを停止
+    stopNotificationScheduler()
+
     setIsLoading(false)
 
     return true

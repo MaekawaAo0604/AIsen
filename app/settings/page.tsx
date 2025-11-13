@@ -1,6 +1,5 @@
 'use client'
 
-import { NotificationSettings } from '@/components/Settings/NotificationSettings'
 import dynamic from 'next/dynamic'
 
 // SSRを無効化してクライアントサイドのみでレンダリング

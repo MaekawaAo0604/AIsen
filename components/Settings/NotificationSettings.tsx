@@ -1,6 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import { useNotifications } from '@/hooks/useNotifications'
+import { getScheduledNotifications } from '@/lib/notificationScheduler'
 
 export function NotificationSettings() {
   const {
@@ -13,6 +15,14 @@ export function NotificationSettings() {
     updateSettings,
     sendTestNotification,
   } = useNotifications()
+
+  const [scheduledCount, setScheduledCount] = useState<number | null>(null)
+
+  const checkScheduledNotifications = async () => {
+    const scheduled = await getScheduledNotifications()
+    setScheduledCount(scheduled.length)
+    console.log('📅 Scheduled notifications:', scheduled)
+  }
 
   if (!isSupported) {
     return (
@@ -174,22 +184,31 @@ export function NotificationSettings() {
       {/* テスト通知 */}
       {settings.enabled && (
         <div className="space-y-2">
-          <button
-            onClick={async () => {
-              console.log('🔘 テスト通知ボタンがクリックされました')
-              try {
-                await sendTestNotification()
-                alert('✅ テスト通知を送信しました！デスクトップに表示されているか確認してください。')
-              } catch (error) {
-                console.error('❌ テスト通知エラー:', error)
-                alert(`❌ エラーが発生しました: ${error}`)
-              }
-            }}
-            disabled={isLoading}
-            className="w-full px-4 py-2 text-[13px] sm:text-[14px] font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            テスト通知を送信
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button
+              onClick={async () => {
+                console.log('🔘 テスト通知ボタンがクリックされました')
+                try {
+                  await sendTestNotification()
+                  alert('✅ テスト通知を送信しました！デスクトップに表示されているか確認してください。')
+                } catch (error) {
+                  console.error('❌ テスト通知エラー:', error)
+                  alert(`❌ エラーが発生しました: ${error}`)
+                }
+              }}
+              disabled={isLoading}
+              className="px-4 py-2 text-[13px] sm:text-[14px] font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              テスト通知を送信
+            </button>
+
+            <button
+              onClick={checkScheduledNotifications}
+              className="px-4 py-2 text-[13px] sm:text-[14px] font-medium text-purple-600 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors"
+            >
+              スケジュール確認 {scheduledCount !== null && `(${scheduledCount}件)`}
+            </button>
+          </div>
 
           {/* デバッグ情報 */}
           <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-[11px] sm:text-[12px] text-gray-600 space-y-1">
