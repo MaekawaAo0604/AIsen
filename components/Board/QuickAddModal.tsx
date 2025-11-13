@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, FormEvent } from 'react'
 import { useBoardStore } from '@/stores/useBoardStore'
 import { parseQuick } from '@/lib/parseQuick'
+import { trackTaskAdd } from '@/lib/analytics'
 
 interface QuickAddModalProps {
   isOpen: boolean
@@ -32,6 +33,13 @@ export function QuickAddModal({ isOpen, onClose }: QuickAddModalProps) {
     try {
       // parseQuick関数で自動解析
       const parsed = parseQuick(input)
+
+      // イベント計測（Quick Addから）
+      trackTaskAdd({
+        source: 'quick_add',
+        quadrant: parsed.quadrant,
+        has_due: !!parsed.due,
+      })
 
       // タスク追加
       addTask(parsed.quadrant, {

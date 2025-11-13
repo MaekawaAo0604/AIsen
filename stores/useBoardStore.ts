@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { Board, Task, Quadrant } from '@/lib/types'
 import * as firestoreHelpers from '@/lib/firestore-helpers'
+import { trackTaskAdd, trackTaskMove, trackTaskDelete } from '@/lib/analytics'
 
 interface BoardState {
   boardId: string | null
@@ -66,6 +67,13 @@ export const useBoardStore = create<BoardState>((set, get) => ({
       },
     })
 
+    // イベント計測（source判定は呼び出し側で行う想定だが、ここではmanualとする）
+    trackTaskAdd({
+      source: 'manual',
+      quadrant,
+      has_due: !!newTask.due,
+    })
+
     // Firestoreに保存
     if (state.boardId) {
       try {
@@ -118,6 +126,9 @@ export const useBoardStore = create<BoardState>((set, get) => ({
     const state = get()
     const oldTasks = state.tasks[quadrant]
 
+    // イベント計測
+    trackTaskDelete({ quadrant })
+
     // Optimistic UI更新
     set({
       tasks: {
@@ -150,6 +161,9 @@ export const useBoardStore = create<BoardState>((set, get) => ({
 
     const oldFromTasks = state.tasks[fromQuadrant]
     const oldToTasks = state.tasks[toQuadrant]
+
+    // イベント計測
+    trackTaskMove({ from: fromQuadrant, to: toQuadrant })
 
     // Optimistic UI更新
     set({

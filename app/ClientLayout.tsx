@@ -4,10 +4,16 @@ import { useState, useEffect } from 'react'
 import { Header } from '@/components/Layout/Header'
 import { Sidebar } from '@/components/Layout/Sidebar'
 import { QuickAddModal } from '@/components/Board/QuickAddModal'
+import { initAnalytics } from '@/lib/analytics'
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false)
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
+
+  // PostHog初期化
+  useEffect(() => {
+    initAnalytics()
+  }, [])
 
   // タスク変更を監視して通知スケジュールを自動更新（ブラウザのみ）
   useEffect(() => {
