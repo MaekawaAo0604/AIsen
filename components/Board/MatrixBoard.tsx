@@ -117,8 +117,23 @@ export function MatrixBoard() {
 
       <DragOverlay>
         {activeTask ? (
-          <div className="bg-white p-3 shadow-lg border-2 border-[#2383e2] rounded-[3px] cursor-grabbing">
-            <p className="text-[14px] text-[#37352f]">{activeTask.title}</p>
+          <div className="bg-white p-3 shadow-2xl border-2 border-[#2383e2] rounded-[3px] cursor-grabbing opacity-90 scale-105 transition-transform">
+            <div className="flex items-start gap-2">
+              <div className="w-4 h-4 rounded-[3px] border-2 border-[#9b9a97]" />
+              <div className="flex-1">
+                <p className="text-[14px] text-[#37352f] font-medium">{activeTask.title}</p>
+                {activeTask.due && (
+                  <p className="text-[11px] text-[#9b9a97] mt-1">
+                    📅 {new Date(activeTask.due).toLocaleDateString('ja-JP')}
+                  </p>
+                )}
+              </div>
+              {activeTask.priority !== undefined && (
+                <span className="inline-flex items-center justify-center w-8 h-5 text-[10px] font-semibold rounded-[3px] bg-[#2563eb] text-white">
+                  {activeTask.priority}
+                </span>
+              )}
+            </div>
           </div>
         ) : null}
       </DragOverlay>

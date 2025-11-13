@@ -17,7 +17,7 @@ interface QuadrantProps {
 }
 
 export function Quadrant({ quadrant, title, description, tasks, colorClass, bgClass, badgeClass, label }: QuadrantProps) {
-  const { setNodeRef } = useDroppable({ id: quadrant })
+  const { setNodeRef, isOver } = useDroppable({ id: quadrant })
   const [isCompletedExpanded, setIsCompletedExpanded] = useState(false)
 
   // アクティブタスクと完了タスクを分離
@@ -27,7 +27,9 @@ export function Quadrant({ quadrant, title, description, tasks, colorClass, bgCl
   return (
     <div
       ref={setNodeRef}
-      className={`${bgClass || `rounded-lg border-2 ${colorClass}`} p-2 sm:p-3 md:p-4 overflow-y-auto relative flex flex-col`}
+      className={`${bgClass || `rounded-lg border-2 ${colorClass}`} p-2 sm:p-3 md:p-4 overflow-y-auto relative flex flex-col transition-all ${
+        isOver ? 'ring-4 ring-blue-400 ring-opacity-50 bg-blue-50 scale-[1.02]' : ''
+      }`}
       data-quadrant={quadrant}
       style={{ height: '100%' }}
     >

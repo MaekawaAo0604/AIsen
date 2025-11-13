@@ -1,0 +1,2 @@
+NEXT_PUBLIC_POSTHOG_KEY=phc_MLmm1S9vveEf8L8h73hzVaJ9tt2HMtcVrfttL2dlLiD
+NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
