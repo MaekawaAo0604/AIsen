@@ -36,15 +36,12 @@ export function LandingPage() {
             >
               無料で始める
             </Link>
-            <button
-              onClick={() => {
-                // デモボードへスクロール
-                document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })
-              }}
+            <Link
+              href="/s/DEMO?utm_source=lp&utm_medium=cta"
               className="px-8 py-4 text-lg font-semibold text-gray-700 bg-white border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all"
             >
               デモを見る
-            </button>
+            </Link>
           </div>
         </div>
       </section>

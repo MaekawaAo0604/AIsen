@@ -14,10 +14,11 @@ interface QuadrantProps {
   bgClass?: string
   badgeClass?: string
   label?: string
+  readOnly?: boolean
 }
 
-export function Quadrant({ quadrant, title, description, tasks, colorClass, bgClass, badgeClass, label }: QuadrantProps) {
-  const { setNodeRef, isOver } = useDroppable({ id: quadrant })
+export function Quadrant({ quadrant, title, description, tasks, colorClass, bgClass, badgeClass, label, readOnly = false }: QuadrantProps) {
+  const { setNodeRef, isOver } = useDroppable({ id: quadrant, disabled: readOnly })
   const [isCompletedExpanded, setIsCompletedExpanded] = useState(false)
 
   // アクティブタスクと完了タスクを分離
@@ -57,11 +58,11 @@ export function Quadrant({ quadrant, title, description, tasks, colorClass, bgCl
       <div className="flex-shrink-0 space-y-1.5 sm:space-y-2">
         {activeTasks.length === 0 ? (
           <p className="text-center text-[11px] sm:text-sm text-gray-400 py-6 sm:py-8">
-            タスクを追加してください
+            {readOnly ? 'タスクがありません' : 'タスクを追加してください'}
           </p>
         ) : (
           activeTasks.map((task) => (
-            <TaskCard key={task.id} task={task} quadrant={quadrant} />
+            <TaskCard key={task.id} task={task} quadrant={quadrant} readOnly={readOnly} />
           ))
         )}
       </div>
@@ -90,7 +91,7 @@ export function Quadrant({ quadrant, title, description, tasks, colorClass, bgCl
           {isCompletedExpanded && (
             <div className="mt-2 space-y-2">
               {completedTasks.map((task) => (
-                <TaskCard key={task.id} task={task} quadrant={quadrant} />
+                <TaskCard key={task.id} task={task} quadrant={quadrant} readOnly={readOnly} />
               ))}
             </div>
           )}

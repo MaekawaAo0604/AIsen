@@ -3,12 +3,21 @@
 import { DndContext, DragEndEvent, DragOverlay, useSensor, useSensors, PointerSensor } from '@dnd-kit/core'
 import { useBoardStore } from '@/stores/useBoardStore'
 import type { Task, Quadrant as QuadrantType } from '@/lib/types'
+import type { TasksByQuadrant } from '@/lib/demo-data'
 import { Quadrant } from './Quadrant'
 import { QUADRANT_CONFIG, QUADRANTS } from '@/lib/constants'
 import { useState } from 'react'
 
-export function MatrixBoard() {
-  const tasks = useBoardStore((state) => state.tasks)
+interface MatrixBoardProps {
+  readOnly?: boolean
+  initialTasks?: TasksByQuadrant
+}
+
+export function MatrixBoard({ readOnly = false, initialTasks }: MatrixBoardProps) {
+  // read-onlyの場合はinitialTasksを使用、それ以外はstoreから取得
+  const storeTasks = useBoardStore((state) => state.tasks)
+  const tasks = readOnly && initialTasks ? initialTasks : storeTasks
+
   const moveTask = useBoardStore((state) => state.moveTask)
   const [activeTask, setActiveTask] = useState<Task | null>(null)
 
@@ -29,6 +38,10 @@ export function MatrixBoard() {
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveTask(null)
+
+    // read-onlyの場合はD&D無効
+    if (readOnly) return
+
     const { active, over } = event
     if (!over) return
     if (!active.data.current) return
@@ -41,10 +54,10 @@ export function MatrixBoard() {
     }
   }
 
-  return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] bg-white rounded-[3px] border border-[#e9e9e7] overflow-hidden">
-        {/* Y軸ラベル（左側） */}
+  // read-onlyの場合はD&Dコンテキストを無効化
+  const BoardContent = () => (
+    <div className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] bg-white rounded-[3px] border border-[#e9e9e7] overflow-hidden">
+      {/* Y軸ラベル（左側） */}
         <div className="absolute left-0 top-0 bottom-0 w-10 sm:w-12 md:w-16 flex items-center justify-center bg-[#fafafa] border-r border-[#e9e9e7]">
           <div className="transform -rotate-90 whitespace-nowrap text-[10px] sm:text-[11px] md:text-[12px] font-medium text-[#787774] tracking-wide">
             重要度
@@ -71,19 +84,28 @@ export function MatrixBoard() {
                 colorClass=""
                 bgClass={config.bgClass}
                 badgeClass={config.badgeClass}
+                readOnly={readOnly}
               />
             )
           })}
         </div>
-
 
         {/* 軸ラベル */}
         <div className="absolute left-0.5 sm:left-1 md:left-2 top-8 sm:top-10 md:top-12 text-[9px] sm:text-[10px] md:text-[11px] font-medium text-[#9b9a97]">高</div>
         <div className="absolute left-0.5 sm:left-1 md:left-2 bottom-12 sm:bottom-14 md:bottom-16 text-[9px] sm:text-[10px] md:text-[11px] font-medium text-[#9b9a97]">低</div>
         <div className="absolute left-12 sm:left-16 md:left-20 bottom-0.5 sm:bottom-1 md:bottom-2 text-[9px] sm:text-[10px] md:text-[11px] font-medium text-[#9b9a97]">高</div>
         <div className="absolute right-2 sm:right-3 md:right-4 bottom-0.5 sm:bottom-1 md:bottom-2 text-[9px] sm:text-[10px] md:text-[11px] font-medium text-[#9b9a97]">低</div>
-      </div>
+    </div>
+  )
 
+  // read-onlyの場合はD&Dなしで表示
+  if (readOnly) {
+    return <BoardContent />
+  }
+
+  return (
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <BoardContent />
       <DragOverlay>
         {activeTask ? (
           <div className="bg-white p-3 shadow-2xl border-2 border-[#2383e2] rounded-[3px] cursor-grabbing opacity-90 scale-105 transition-transform">

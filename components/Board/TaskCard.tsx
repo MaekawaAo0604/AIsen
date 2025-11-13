@@ -11,9 +11,10 @@ import { formatDateJP } from '@/lib/utils'
 interface TaskCardProps {
   task: Task
   quadrant: Quadrant
+  readOnly?: boolean
 }
 
-export function TaskCard({ task, quadrant }: TaskCardProps) {
+export function TaskCard({ task, quadrant, readOnly = false }: TaskCardProps) {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [swipeOffset, setSwipeOffset] = useState(0)
   const deleteTask = useBoardStore((state) => state.deleteTask)
@@ -24,6 +25,7 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: task.id,
     data: { quadrant },
+    disabled: readOnly,
   })
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -54,6 +56,8 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    if (readOnly) return // read-onlyの場合はスワイプ無効
+
     const touchX = e.touches[0].clientX
     const diff = touchX - touchStartX.current
 
@@ -69,6 +73,8 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
   }
 
   const handleTouchEnd = () => {
+    if (readOnly) return // read-onlyの場合はスワイプ無効
+
     // 削除距離を超えたら削除確認
     if (swipeOffset < SWIPE_THRESHOLD.DELETE_DISTANCE) {
       if (confirm('このタスクを削除しますか？')) {
@@ -99,27 +105,31 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
       <div className="flex items-start justify-between gap-2 sm:gap-2 px-3 sm:px-3 py-3 sm:py-2.5">
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-1.5 sm:gap-2">
-            {/* チェックボックス（タップ領域拡大） */}
-            <button
-              type="button"
-              onClick={handleToggleComplete}
-              onMouseDown={(e) => e.stopPropagation()}
-              className="flex-shrink-0 mt-0.5 p-2 -m-2 rounded-[3px] hover:bg-[#f7f6f3] transition-colors cursor-pointer z-10 relative"
-            >
-              <span
-                className="block w-4 h-4 sm:w-5 sm:h-5 rounded-[3px] border-2 border-[#9b9a97] hover:border-[#2383e2] transition-colors flex items-center justify-center"
-                style={{
-                  backgroundColor: task.completed ? '#2383e2' : 'transparent',
-                  borderColor: task.completed ? '#2383e2' : undefined,
-                }}
+            {/* チェックボックス（read-onlyの場合は無効化） */}
+            {!readOnly ? (
+              <button
+                type="button"
+                onClick={handleToggleComplete}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="flex-shrink-0 mt-0.5 p-2 -m-2 rounded-[3px] hover:bg-[#f7f6f3] transition-colors cursor-pointer z-10 relative"
               >
-                {task.completed && (
-                  <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </span>
-            </button>
+                <span
+                  className="block w-4 h-4 sm:w-5 sm:h-5 rounded-[3px] border-2 border-[#9b9a97] hover:border-[#2383e2] transition-colors flex items-center justify-center"
+                  style={{
+                    backgroundColor: task.completed ? '#2383e2' : 'transparent',
+                    borderColor: task.completed ? '#2383e2' : undefined,
+                  }}
+                >
+                  {task.completed && (
+                    <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </span>
+              </button>
+            ) : (
+              <span className="flex-shrink-0 mt-0.5 block w-4 h-4 sm:w-5 sm:h-5 rounded-[3px] border-2 border-[#9b9a97]" />
+            )}
             <p className={`text-[12px] sm:text-[13px] md:text-[14px] text-[#37352f] leading-[1.5] flex-1 ${task.completed ? 'line-through text-[#9b9a97]' : ''}`}>
               {task.title}
             </p>
@@ -151,17 +161,19 @@ export function TaskCard({ task, quadrant }: TaskCardProps) {
             <span className="whitespace-nowrap">🕒 追加: {formatDateJP(task.createdAt)}</span>
           </div>
         </div>
-        {/* 削除ボタン（タップ領域拡大） */}
-        <button
-          type="button"
-          onClick={handleDelete}
-          onMouseDown={(e) => e.stopPropagation()}
-          className="opacity-0 group-hover:opacity-100 md:opacity-100 transition-opacity text-[#9b9a97] hover:text-[#eb5757] p-2 -mt-1 -mr-1 rounded-[3px] hover:bg-[#eb575715] cursor-pointer z-10 relative"
-        >
-          <svg className="w-4 h-4 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        {/* 削除ボタン（read-onlyの場合は非表示） */}
+        {!readOnly && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="opacity-0 group-hover:opacity-100 md:opacity-100 transition-opacity text-[#9b9a97] hover:text-[#eb5757] p-2 -mt-1 -mr-1 rounded-[3px] hover:bg-[#eb575715] cursor-pointer z-10 relative"
+          >
+            <svg className="w-4 h-4 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
 

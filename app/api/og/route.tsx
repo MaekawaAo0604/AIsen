@@ -1,8 +1,14 @@
 import { ImageResponse } from 'next/og'
+import { NextRequest } from 'next/server'
 
 export const runtime = 'edge'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // URLパラメータからtitleとtasksを取得
+  const searchParams = request.nextUrl.searchParams
+  const title = searchParams.get('title') || 'AIsen'
+  const tasks = searchParams.get('tasks')
+
   return new ImageResponse(
     (
       <div
@@ -36,31 +42,56 @@ export async function GET() {
               display: 'flex',
             }}
           >
-            AIsen
+            {title}
           </div>
-          <div
-            style={{
-              fontSize: 48,
-              color: '#111827',
-              textAlign: 'center',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px',
-            }}
-          >
-            <div>重要と緊急を、</div>
-            <div>迷わず仕分ける</div>
-          </div>
-          <div
-            style={{
-              fontSize: 28,
-              color: '#6b7280',
-              textAlign: 'center',
-              display: 'flex',
-            }}
-          >
-            自動判定する4象限タスク管理
-          </div>
+          {tasks ? (
+            <div
+              style={{
+                fontSize: 48,
+                color: '#111827',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+              }}
+            >
+              <div>{tasks}件のタスク</div>
+              <div
+                style={{
+                  fontSize: 32,
+                  color: '#6b7280',
+                }}
+              >
+                自動判定する4象限タスク管理
+              </div>
+            </div>
+          ) : (
+            <>
+              <div
+                style={{
+                  fontSize: 48,
+                  color: '#111827',
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                }}
+              >
+                <div>重要と緊急を、</div>
+                <div>迷わず仕分ける</div>
+              </div>
+              <div
+                style={{
+                  fontSize: 28,
+                  color: '#6b7280',
+                  textAlign: 'center',
+                  display: 'flex',
+                }}
+              >
+                自動判定する4象限タスク管理
+              </div>
+            </>
+          )}
         </div>
       </div>
     ),
