@@ -1,12 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { Header } from '@/components/Layout/Header'
 import { Sidebar } from '@/components/Layout/Sidebar'
 import { QuickAddModal } from '@/components/Board/QuickAddModal'
 import { initAnalytics } from '@/lib/analytics'
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
+  const isLandingPage = pathname === '/'
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false)
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
 
@@ -54,6 +57,11 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isQuickAddOpen])
+
+  // LPページではSidebar/Headerなしで表示
+  if (isLandingPage) {
+    return <>{children}</>
+  }
 
   return (
     <>
