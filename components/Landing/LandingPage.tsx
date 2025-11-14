@@ -130,7 +130,7 @@ export function LandingPage() {
                 1
               </div>
               <div>
-                <code className="text-lg text-gray-800">明日17時 見積り送付 至急</code>
+                <code className="text-lg text-gray-800">今日中 社内アンケート回答</code>
                 <p className="text-sm text-gray-600 mt-1">→ Q3（緊急×非重要）に自動配置</p>
               </div>
             </div>

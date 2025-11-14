@@ -17,5 +17,5 @@ export const metadata: Metadata = {
 }
 
 export default function NewBoardPage() {
-  return <BoardPage />
+  return <BoardPage isSSR />
 }

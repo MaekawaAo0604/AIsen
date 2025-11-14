@@ -4,16 +4,42 @@ import { useBoardController } from '@/hooks/useBoardController'
 import { MatrixBoard } from './MatrixBoard'
 import { TaskForm } from './TaskForm'
 
-export function BoardPage() {
+interface BoardPageProps {
+  isSSR?: boolean
+}
+
+export function BoardPage({ isSSR = false }: BoardPageProps) {
   const { isLoading } = useBoardController()
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#ffffff] px-24 py-12 flex items-center justify-center">
-        <div className="text-[14px] text-[#787774]">ボードを読み込んでいます...</div>
-      </div>
-    )
-  }
+  // SSR用の仮タスク（空の4象限 + サンプル1〜2件）
+  const ssrInitialTasks = isSSR
+    ? {
+        q1: [
+          {
+            id: 'ssr-demo-1',
+            title: '今日中 顧客対応',
+            quadrant: 'q1' as const,
+            createdAt: new Date().toISOString(),
+            priority: 1,
+            notes: '',
+            due: null,
+          },
+        ],
+        q2: [
+          {
+            id: 'ssr-demo-2',
+            title: '採用戦略の見直し',
+            quadrant: 'q2' as const,
+            createdAt: new Date().toISOString(),
+            priority: 2,
+            notes: '',
+            due: null,
+          },
+        ],
+        q3: [],
+        q4: [],
+      }
+    : undefined
 
   return (
     <div className="min-h-screen bg-[#ffffff] px-4 sm:px-8 md:px-12 lg:px-24 py-8 sm:py-12">
@@ -31,8 +57,8 @@ export function BoardPage() {
         {/* Task Form */}
         <TaskForm />
 
-        {/* Matrix Board */}
-        <MatrixBoard />
+        {/* Matrix Board - SSR時は仮タスクを表示、クライアント側で実データに差し替え */}
+        <MatrixBoard initialTasks={ssrInitialTasks} />
       </div>
     </div>
   )
