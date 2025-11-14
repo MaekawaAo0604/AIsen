@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Desktop - Task CRUD Operations', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/b/new')
     await page.waitForLoadState('domcontentloaded')
     // ページの主要コンテンツが表示されるまで待つ
     await page.waitForSelector('text=アイゼンハワー・マトリクス', { timeout: 15000 })

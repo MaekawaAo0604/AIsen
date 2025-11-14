@@ -2,10 +2,10 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Mobile - Navigation', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/b/new')
     await page.waitForLoadState('domcontentloaded')
     // ページの主要コンテンツが表示されるまで待つ
-    await page.waitForSelector('text=AIsen', { timeout: 15000 })
+    await page.waitForSelector('text=アイゼンハワー・マトリクス', { timeout: 15000 })
   })
 
   test('モバイルで4象限のグリッドが表示される', async ({ page }) => {
