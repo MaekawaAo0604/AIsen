@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect } from 'react'
 import { trackPageView } from '@/lib/analytics'
+import { PublicHeader } from '@/components/Layout/PublicHeader'
 
 export function LandingPage() {
   useEffect(() => {
@@ -11,6 +12,7 @@ export function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#ffffff]">
+      <PublicHeader />
       {/* ヒーローセクション */}
       <section className="relative px-6 py-32 mx-auto max-w-7xl sm:py-40">
         {/* 背景装飾 */}
