@@ -6,6 +6,7 @@ import posthog from 'posthog-js'
 import { trackPageView } from '@/lib/analytics'
 import { useAuthStore } from '@/lib/store/useAuthStore'
 import { PublicHeader } from '@/components/Layout/PublicHeader'
+import { Footer } from '@/components/Layout/Footer'
 
 type Plan = 'free' | 'pro' | 'team'
 
@@ -334,6 +335,8 @@ export function PricingPage() {
           </div>
         </div>
       </section>
+
+      <Footer />
 
       <style jsx>{`
         @keyframes blob {

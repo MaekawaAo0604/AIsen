@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect } from 'react'
 import { trackPageView } from '@/lib/analytics'
 import { PublicHeader } from '@/components/Layout/PublicHeader'
+import { Footer } from '@/components/Layout/Footer'
 
 export function LandingPage() {
   useEffect(() => {
@@ -360,33 +361,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* フッター - モダンスタイル */}
-      <footer className="px-6 py-12 mx-auto max-w-7xl border-t border-[#e9e9e7]">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <div className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-              AIsen
-            </div>
-            <div className="text-sm text-[#9b9a97]">© 2025 All rights reserved.</div>
-          </div>
-          <div className="flex gap-8 text-sm">
-            <Link href="/privacy" className="text-[#787774] hover:text-[#37352f] transition-colors">
-              プライバシーポリシー
-            </Link>
-            <Link href="/terms" className="text-[#787774] hover:text-[#37352f] transition-colors">
-              利用規約
-            </Link>
-            <a
-              href="https://github.com/MaekawaAo0604/AIsen"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#787774] hover:text-[#37352f] transition-colors"
-            >
-              GitHub
-            </a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* カスタムアニメーション用スタイル */}
       <style jsx>{`
