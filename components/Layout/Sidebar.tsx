@@ -183,6 +183,24 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
           )}
         </button>
 
+        {/* Inbox Icon */}
+        <button
+          onClick={() => router.push('/inbox')}
+          className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
+        >
+          <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+            />
+          </svg>
+          {(isHovered || isBoardListExpanded) && (
+            <span className="text-[14px] font-medium whitespace-nowrap">Inbox</span>
+          )}
+        </button>
+
         {/* Pricing Icon */}
         <button
           onClick={() => router.push('/pricing')}
@@ -287,6 +305,25 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
                 />
               </svg>
               <span className="text-[14px] font-medium">通知設定</span>
+            </button>
+
+            {/* Inbox Button */}
+            <button
+              onClick={() => {
+                router.push('/inbox')
+                setIsExpanded(false)
+              }}
+              className="w-full flex items-center gap-3 px-6 py-3 hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
+            >
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                />
+              </svg>
+              <span className="text-[14px] font-medium">Inbox</span>
             </button>
 
             {/* Pricing Button */}

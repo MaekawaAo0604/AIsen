@@ -1,5 +1,7 @@
 // Core Types
 export type Quadrant = 'q1' | 'q2' | 'q3' | 'q4'
+export type InboxQuadrant = 'INBOX' | 'Q1' | 'Q2' | 'Q3' | 'Q4'
+export type AIStatus = 'pending' | 'processed' | 'failed'
 
 export interface Task {
   id: string
@@ -11,6 +13,24 @@ export interface Task {
   aiReason?: string   // AI判定理由
   completed?: boolean // 完了状態
   completedAt?: string // 完了日時 (ISO 8601)
+}
+
+export interface InboxTask {
+  id: string
+  title: string
+  description: string
+  source: 'gmail'
+  gmail: {
+    messageId: string
+    threadId: string
+  }
+  quadrant: InboxQuadrant
+  aiStatus: AIStatus
+  aiMeta?: {
+    lastOrganizedAt: string  // ISO 8601
+    model: string
+  }
+  createdAt: string  // ISO 8601
 }
 
 export interface Board {
