@@ -9,7 +9,7 @@ import { initAnalytics } from '@/lib/analytics'
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const isLandingPage = pathname === '/'
+  const isPublicPage = pathname === '/' || pathname === '/pricing'
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false)
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
 
@@ -58,8 +58,8 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isQuickAddOpen])
 
-  // LPページではSidebar/Headerなしで表示
-  if (isLandingPage) {
+  // パブリックページ（LP・料金ページ）ではSidebar/Headerなしで表示
+  if (isPublicPage) {
     return <>{children}</>
   }
 
