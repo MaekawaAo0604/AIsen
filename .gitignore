@@ -43,3 +43,7 @@ firebase-debug.log
 
 # Claude MCP
 .playwright-mcp
+
+# Firebase Functions
+functions/node_modules/
+functions/lib/
