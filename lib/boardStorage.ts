@@ -75,3 +75,40 @@ export async function deleteBoard(userId: string, boardId: string): Promise<void
   const boardRef = doc(db, 'users', userId, 'boards', boardId)
   await deleteDoc(boardRef)
 }
+
+// デフォルトボードを取得または作成（Inbox用）
+export async function getOrCreateDefaultBoard(userId: string): Promise<{ boardId: string; board: Board }> {
+  // 既存ボードがあれば最初のものを使用
+  const boards = await getUserBoards(userId)
+
+  if (boards.length > 0) {
+    const firstBoard = boards[0]
+    return {
+      boardId: firstBoard.boardId,
+      board: firstBoard.board,
+    }
+  }
+
+  // なければ新規作成
+  const newBoardId = crypto.randomUUID()
+  const newBoard: Board = {
+    id: newBoardId,
+    title: 'My Board',
+    editKey: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    tasks: {
+      q1: [],
+      q2: [],
+      q3: [],
+      q4: [],
+    },
+  }
+
+  await saveBoard(userId, newBoardId, newBoard)
+
+  return {
+    boardId: newBoardId,
+    board: newBoard,
+  }
+}

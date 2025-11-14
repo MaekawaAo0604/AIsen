@@ -1,6 +1,6 @@
-import { collection, query, where, getDocs, addDoc, updateDoc, doc, Timestamp, orderBy, limit } from 'firebase/firestore'
+import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp, orderBy, limit } from 'firebase/firestore'
 import { db } from './firebase'
-import type { InboxTask, InboxQuadrant, AIStatus } from './types'
+import type { InboxTask, InboxQuadrant, AIStatus, Task } from './types'
 
 /**
  * Inbox タスクを Firestore から取得
@@ -126,5 +126,32 @@ export async function getPendingInboxTasks(userId: string, maxCount: number = 50
   } catch (error) {
     console.error('Error fetching pending inbox tasks:', error)
     throw error
+  }
+}
+
+/**
+ * InboxTask を削除
+ */
+export async function deleteInboxTask(userId: string, taskId: string): Promise<void> {
+  try {
+    const taskRef = doc(db, 'users', userId, 'inboxTasks', taskId)
+    await deleteDoc(taskRef)
+  } catch (error) {
+    console.error('Error deleting inbox task:', error)
+    throw error
+  }
+}
+
+/**
+ * InboxTask を Board の Task に変換
+ */
+export function convertInboxTaskToTask(inboxTask: InboxTask): Task {
+  return {
+    id: crypto.randomUUID(),
+    title: inboxTask.title,
+    notes: inboxTask.description,
+    due: null,
+    createdAt: inboxTask.createdAt,
+    completed: false,
   }
 }

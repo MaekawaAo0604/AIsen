@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/lib/store/useAuthStore'
-import { getInboxTasks } from '@/lib/inboxStorage'
-import type { InboxTask } from '@/lib/types'
+import { getInboxTasks, deleteInboxTask, convertInboxTaskToTask } from '@/lib/inboxStorage'
+import { getOrCreateDefaultBoard, updateBoard } from '@/lib/boardStorage'
+import type { InboxTask, InboxQuadrant, Quadrant } from '@/lib/types'
 
 export function InboxPage() {
   const user = useAuthStore((state) => state.user)
@@ -52,6 +53,49 @@ export function InboxPage() {
       alert('タスクの整理に失敗しました')
     } finally {
       setOrganizing(false)
+    }
+  }
+
+  const handleMoveToQuadrant = async (task: InboxTask, inboxQuadrant: InboxQuadrant) => {
+    if (!user) return
+
+    try {
+      // InboxQuadrant (Q1,Q2,Q3,Q4) を Quadrant (q1,q2,q3,q4) に変換
+      const quadrantMap: Record<string, Quadrant> = {
+        Q1: 'q1',
+        Q2: 'q2',
+        Q3: 'q3',
+        Q4: 'q4',
+      }
+      const quadrant = quadrantMap[inboxQuadrant]
+      if (!quadrant) return
+
+      // デフォルトボードを取得または作成
+      const { boardId, board } = await getOrCreateDefaultBoard(user.uid)
+
+      // InboxTask を Task に変換
+      const newTask = convertInboxTaskToTask(task)
+
+      // ボードの該当象限に追加
+      const updatedBoard = {
+        ...board,
+        tasks: {
+          ...board.tasks,
+          [quadrant]: [...board.tasks[quadrant], newTask],
+        },
+      }
+
+      // ボード更新
+      await updateBoard(user.uid, boardId, updatedBoard)
+
+      // InboxTask を削除
+      await deleteInboxTask(user.uid, task.id)
+
+      // ローカル状態から削除
+      setTasks(tasks.filter((t) => t.id !== task.id))
+    } catch (error) {
+      console.error('Error moving task:', error)
+      alert('タスクの移動に失敗しました')
     }
   }
 
@@ -135,7 +179,7 @@ export function InboxPage() {
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-semibold text-[#37352f] mb-2">{task.title}</h3>
                     <p className="text-sm text-[#787774] mb-3 line-clamp-2">{task.description}</p>
-                    <div className="flex items-center gap-4 text-xs text-[#9b9a97]">
+                    <div className="flex items-center gap-4 text-xs text-[#9b9a97] mb-4">
                       <span className="flex items-center gap-1">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path
@@ -153,6 +197,35 @@ export function InboxPage() {
                         })}
                       </span>
                       <span className="px-2 py-1 bg-[#f7f6f3] rounded-[4px]">{task.source}</span>
+                    </div>
+
+                    {/* 象限選択ボタン */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-[#9b9a97]">移動先:</span>
+                      <button
+                        onClick={() => handleMoveToQuadrant(task, 'Q1')}
+                        className="px-3 py-1.5 text-xs font-semibold text-white bg-[#ef4444] rounded-[6px] hover:bg-[#dc2626] transition-colors"
+                      >
+                        Q1 緊急重要
+                      </button>
+                      <button
+                        onClick={() => handleMoveToQuadrant(task, 'Q2')}
+                        className="px-3 py-1.5 text-xs font-semibold text-white bg-[#3b82f6] rounded-[6px] hover:bg-[#2563eb] transition-colors"
+                      >
+                        Q2 重要
+                      </button>
+                      <button
+                        onClick={() => handleMoveToQuadrant(task, 'Q3')}
+                        className="px-3 py-1.5 text-xs font-semibold text-white bg-[#f59e0b] rounded-[6px] hover:bg-[#d97706] transition-colors"
+                      >
+                        Q3 緊急
+                      </button>
+                      <button
+                        onClick={() => handleMoveToQuadrant(task, 'Q4')}
+                        className="px-3 py-1.5 text-xs font-semibold text-white bg-[#10b981] rounded-[6px] hover:bg-[#059669] transition-colors"
+                      >
+                        Q4 その他
+                      </button>
                     </div>
                   </div>
                 </div>
