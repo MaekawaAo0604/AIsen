@@ -530,12 +530,12 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
                           </form>
                         ) : (
                           // 通常モード
-                          <button
-                            onClick={() => handleBoardClick(board.boardId)}
-                            className="w-full text-left"
-                          >
+                          <div className="w-full">
                             <div className="flex items-start justify-between gap-3">
-                              <div className="flex-1 min-w-0">
+                              <button
+                                onClick={() => handleBoardClick(board.boardId)}
+                                className="flex-1 min-w-0 text-left"
+                              >
                                 <div className="flex items-center gap-2">
                                   <svg className="w-4 h-4 text-[#10b981] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path
@@ -550,7 +550,7 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
                                 <p className="text-[11px] text-[#9b9a97] mt-1">
                                   🕒 {formatRelativeTime(board.updatedAt.toISOString())}
                                 </p>
-                              </div>
+                              </button>
                               <div className="flex items-center gap-1">
                                 <button
                                   onClick={(e) => handleEditStart(board, e)}
@@ -571,7 +571,7 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
                                 </svg>
                               </div>
                             </div>
-                          </button>
+                          </div>
                         )}
                       </div>
                     ))}

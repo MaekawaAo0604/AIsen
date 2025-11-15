@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useBoardStore } from '@/stores/useBoardStore'
 import { useBoardSync } from './useBoardSync'
 import { createBoard, getBoard } from '@/lib/firestore-helpers'
+import { getBoard as getUserBoard } from '@/lib/boardStorage'
+import { useAuthStore } from '@/lib/store/useAuthStore'
 
 const BOARD_ID_STORAGE_KEY = 'aisen:boardId'
 
@@ -19,6 +21,7 @@ export function useBoardController(urlBoardId?: string) {
   const boardId = useBoardStore((state) => state.boardId)
   const setBoard = useBoardStore((state) => state.setBoard)
   const clearBoard = useBoardStore((state) => state.clearBoard)
+  const user = useAuthStore((state) => state.user)
   const router = useRouter()
 
   // Firestoreとリアルタイム同期
@@ -29,6 +32,18 @@ export function useBoardController(urlBoardId?: string) {
       try {
         // URLにboardIdが指定されている場合
         if (urlBoardId) {
+          // ログイン済みならユーザーボードから取得を試みる
+          if (user) {
+            const userBoardData = await getUserBoard(user.uid, urlBoardId)
+            if (userBoardData) {
+              setBoard(userBoardData.board)
+              localStorage.setItem(BOARD_ID_STORAGE_KEY, urlBoardId)
+              setIsLoading(false)
+              return
+            }
+          }
+
+          // 匿名ボードまたはユーザーボードがない場合
           const board = await getBoard(urlBoardId)
           if (board) {
             // 既存ボードが見つかった場合

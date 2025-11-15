@@ -1,10 +1,217 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import {google} from "googleapis";
+import OpenAI from "openai";
 
 admin.initializeApp();
 
 const db = admin.firestore();
+
+// OpenAI client (lazy initialization)
+let openaiClient: OpenAI | null = null;
+
+/**
+ * Get or initialize OpenAI client
+ * @return {OpenAI} OpenAI client instance
+ */
+function getOpenAI(): OpenAI {
+  if (!openaiClient) {
+    openaiClient = new OpenAI({
+      apiKey: functions.config().openai?.key || process.env.OPENAI_API_KEY,
+    });
+  }
+  return openaiClient;
+}
+
+/**
+ * Inbox tasks AI organizing function
+ * Called from frontend to analyze and classify tasks using AI
+ * and move them to the default board
+ */
+export const organizeInboxTasks = functions
+  .runWith({timeoutSeconds: 540, memory: "1GB"})
+  .https.onCall(async (data, context) => {
+    // Authenticate user
+    if (!context.auth) {
+      throw new functions.https.HttpsError(
+        "unauthenticated",
+        "User must be authenticated"
+      );
+    }
+
+    const userId = context.auth.uid;
+
+    try {
+      // Get user settings to find default board
+      const userRef = db.collection("users").doc(userId);
+      const userDoc = await userRef.get();
+      const userData = userDoc.data();
+      let defaultBoardId = userData?.defaultBoardId;
+
+      // If no default board set, find most recently updated board
+      if (!defaultBoardId) {
+        const boardsSnapshot = await userRef
+          .collection("boards")
+          .orderBy("updatedAt", "desc")
+          .limit(1)
+          .get();
+
+        if (boardsSnapshot.empty) {
+          throw new functions.https.HttpsError(
+            "failed-precondition",
+            "No boards found. Please create a board first."
+          );
+        }
+
+        defaultBoardId = boardsSnapshot.docs[0].id;
+      }
+
+      // Get the default board
+      const boardRef = userRef.collection("boards").doc(defaultBoardId);
+      const boardDoc = await boardRef.get();
+
+      if (!boardDoc.exists) {
+        throw new functions.https.HttpsError(
+          "not-found",
+          "Default board not found"
+        );
+      }
+
+      const boardData = boardDoc.data();
+
+      // Fetch INBOX tasks from Firestore
+      const inboxTasksRef = db
+        .collection("users")
+        .doc(userId)
+        .collection("inboxTasks");
+
+      const snapshot = await inboxTasksRef
+        .where("quadrant", "==", "INBOX")
+        .get();
+
+      if (snapshot.empty) {
+        return {success: true, organized: 0, message: "No tasks to organize"};
+      }
+
+      const tasks = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Analyze each task with OpenAI
+      const organizedTasks = await Promise.all(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        tasks.map(async (task: any) => {
+          try {
+            const prompt = `あなたはタスク管理のエキスパートです。
+以下のメールをアイゼンハワー・マトリクスに基づいて、4つの象限に分類してください。
+
+メール情報:
+件名: ${task.title}
+内容: ${task.description || ""}
+
+4つの象限:
+- Q1: 重要かつ緊急 (今すぐやる)
+- Q2: 重要だが緊急ではない (計画してやる)
+- Q3: 緊急だが重要ではない (誰かに任せる)
+- Q4: 重要でも緊急でもない (やらない)
+
+以下のJSON形式で回答してください:
+{
+  "quadrant": "Q1" | "Q2" | "Q3" | "Q4",
+  "reason": "判定理由の説明（簡潔に）"
+}`;
+
+            const completion = await getOpenAI().chat.completions.create({
+              model: "gpt-4o-mini",
+              messages: [
+                {
+                  role: "system",
+                  content: "あなたはタスク管理のエキスパートです。アイゼンハワー・マトリクスに基づいてメールを分類します。",
+                },
+                {
+                  role: "user",
+                  content: prompt,
+                },
+              ],
+              response_format: {type: "json_object"},
+              temperature: 0.7,
+            });
+
+            const result = JSON.parse(
+              completion.choices[0].message.content || "{}"
+            );
+
+            return {
+              taskId: task.id,
+              task: task,
+              quadrant: result.quadrant.toLowerCase(),
+              reason: result.reason,
+            };
+          } catch (error) {
+            console.error(`Error analyzing task ${task.id}:`, error);
+            return {
+              taskId: task.id,
+              task: task,
+              quadrant: "q4",
+              reason: "AI分析エラー",
+            };
+          }
+        })
+      );
+
+      // Move tasks to board and delete from inbox
+      const batch = db.batch();
+
+      organizedTasks.forEach(({taskId, task, quadrant, reason}) => {
+        // Create task object for board
+        const newTask = {
+          id: crypto.randomUUID(),
+          title: task.title,
+          description: task.description || "",
+          createdAt: new Date().toISOString(),
+          aiMeta: {
+            organizedAt: admin.firestore.Timestamp.now(),
+            model: "gpt-4o-mini",
+            reason,
+          },
+        };
+
+        // Add task to appropriate quadrant in board
+        const currentQuadrantTasks = boardData?.[quadrant] || [];
+        currentQuadrantTasks.push(newTask);
+
+        // Update board with new task
+        batch.update(boardRef, {
+          [quadrant]: currentQuadrantTasks,
+          updatedAt: new Date().toISOString(),
+        });
+
+        // Delete task from inbox
+        const inboxTaskRef = inboxTasksRef.doc(taskId);
+        batch.delete(inboxTaskRef);
+      });
+
+      await batch.commit();
+
+      return {
+        success: true,
+        organized: organizedTasks.length,
+        boardId: defaultBoardId,
+        results: organizedTasks.map(({taskId, quadrant, reason}) => ({
+          taskId,
+          quadrant,
+          reason,
+        })),
+      };
+    } catch (error) {
+      console.error("Error organizing inbox tasks:", error);
+      throw new functions.https.HttpsError(
+        "internal",
+        "Failed to organize tasks"
+      );
+    }
+  });
 
 /**
  * Gmail同期のスケジュールされた関数
@@ -13,7 +220,7 @@ const db = admin.firestore();
 export const syncGmailToInbox = functions
   .runWith({timeoutSeconds: 540, memory: "1GB"})
   .pubsub.schedule("every 15 minutes")
-  .onRun(async (context) => {
+  .onRun(async () => {
     console.log("Starting Gmail sync...");
 
     try {
@@ -40,8 +247,15 @@ export const syncGmailToInbox = functions
 
 /**
  * 個別ユーザーのGmail同期
+ * @param {string} userId ユーザーID
+ * @param {any} userData ユーザーデータ
+ * @return {Promise<void>}
  */
-async function syncUserGmail(userId: string, userData: any) {
+async function syncUserGmail(
+  userId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  userData: any
+): Promise<void> {
   try {
     console.log(`Syncing Gmail for user: ${userId}`);
 
@@ -82,8 +296,12 @@ async function syncUserGmail(userId: string, userData: any) {
 
       // ヘッダーから件名と送信者を抽出
       const headers = messageDetail.data.payload?.headers || [];
-      const subject = headers.find((h) => h.name === "Subject")?.value || "（件名なし）";
-      const from = headers.find((h) => h.name === "From")?.value || "（送信者不明）";
+      const subject =
+        headers.find((h) => h.name === "Subject")?.value ||
+        "（件名なし）";
+      const from =
+        headers.find((h) => h.name === "From")?.value ||
+        "（送信者不明）";
 
       // 本文を抽出（簡易版）
       let body = "";
@@ -145,6 +363,43 @@ async function syncUserGmail(userId: string, userData: any) {
 }
 
 /**
+ * Gmail OAuth認証URLを生成
+ * フロントエンドから呼び出される
+ */
+export const getGmailAuthUrl = functions.https.onCall(async (data, context) => {
+  // 認証チェック
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      "unauthenticated",
+      "User must be authenticated"
+    );
+  }
+
+  try {
+    const oauth2Client = new google.auth.OAuth2(
+      functions.config().gmail.client_id,
+      functions.config().gmail.client_secret,
+      functions.config().gmail.redirect_uri
+    );
+
+    const authUrl = oauth2Client.generateAuthUrl({
+      access_type: "offline",
+      scope: ["https://www.googleapis.com/auth/gmail.readonly"],
+      state: context.auth.uid, // ユーザーIDを state に含める
+      prompt: "consent", // 常に同意画面を表示してrefresh tokenを取得
+    });
+
+    return {authUrl};
+  } catch (error) {
+    console.error("Error generating auth URL:", error);
+    throw new functions.https.HttpsError(
+      "internal",
+      "Failed to generate auth URL"
+    );
+  }
+});
+
+/**
  * Gmail OAuth認証用のトークン保存エンドポイント
  * フロントエンドから呼び出される
  */
@@ -158,22 +413,39 @@ export const saveGmailToken = functions.https.onCall(async (data, context) => {
   }
 
   const userId = context.auth.uid;
-  const {refreshToken, accessToken} = data;
+  const {code} = data;
 
-  if (!refreshToken || !accessToken) {
+  if (!code) {
     throw new functions.https.HttpsError(
       "invalid-argument",
-      "Missing required tokens"
+      "Missing OAuth code"
     );
   }
 
   try {
+    // OAuth2クライアント設定
+    const oauth2Client = new google.auth.OAuth2(
+      functions.config().gmail.client_id,
+      functions.config().gmail.client_secret,
+      functions.config().gmail.redirect_uri
+    );
+
+    // codeをトークンに交換
+    const {tokens} = await oauth2Client.getToken(code);
+
+    if (!tokens.refresh_token || !tokens.access_token) {
+      throw new functions.https.HttpsError(
+        "internal",
+        "Failed to get tokens from OAuth code"
+      );
+    }
+
     // トークンをFirestoreに保存
     await db.collection("users").doc(userId).set(
       {
         gmailToken: {
-          refresh_token: refreshToken,
-          access_token: accessToken,
+          refresh_token: tokens.refresh_token,
+          access_token: tokens.access_token,
           updated_at: admin.firestore.Timestamp.now(),
         },
       },

@@ -8,14 +8,11 @@ import type { InboxTask, InboxQuadrant, AIStatus, Task } from './types'
 export async function getInboxTasks(userId: string, quadrantFilter?: InboxQuadrant): Promise<InboxTask[]> {
   try {
     const inboxRef = collection(db, 'users', userId, 'inboxTasks')
-    let q = query(inboxRef, orderBy('createdAt', 'desc'), limit(100))
-
-    if (quadrantFilter) {
-      q = query(inboxRef, where('quadrant', '==', quadrantFilter), orderBy('createdAt', 'desc'), limit(100))
-    }
+    // インデックスが完成するまで、orderByなしで全件取得してクライアント側でソート
+    const q = query(inboxRef, limit(100))
 
     const snapshot = await getDocs(q)
-    return snapshot.docs.map((doc) => {
+    let tasks = snapshot.docs.map((doc) => {
       const data = doc.data()
       return {
         id: doc.id,
@@ -29,6 +26,14 @@ export async function getInboxTasks(userId: string, quadrantFilter?: InboxQuadra
         createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
       } as InboxTask
     })
+
+    // クライアント側でフィルタリングとソート
+    if (quadrantFilter) {
+      tasks = tasks.filter((task) => task.quadrant === quadrantFilter)
+    }
+    tasks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+
+    return tasks
   } catch (error) {
     console.error('Error fetching inbox tasks:', error)
     throw error
@@ -100,16 +105,11 @@ export async function updateInboxTask(
 export async function getPendingInboxTasks(userId: string, maxCount: number = 50): Promise<InboxTask[]> {
   try {
     const inboxRef = collection(db, 'users', userId, 'inboxTasks')
-    const q = query(
-      inboxRef,
-      where('quadrant', '==', 'INBOX'),
-      where('aiStatus', '==', 'pending'),
-      orderBy('createdAt', 'desc'),
-      limit(maxCount)
-    )
+    // インデックスが完成するまで、全件取得してクライアント側でフィルタリング
+    const q = query(inboxRef, limit(100))
 
     const snapshot = await getDocs(q)
-    return snapshot.docs.map((doc) => {
+    let tasks = snapshot.docs.map((doc) => {
       const data = doc.data()
       return {
         id: doc.id,
@@ -123,6 +123,14 @@ export async function getPendingInboxTasks(userId: string, maxCount: number = 50
         createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
       } as InboxTask
     })
+
+    // クライアント側でフィルタリングとソート
+    tasks = tasks
+      .filter((task) => task.quadrant === 'INBOX' && task.aiStatus === 'pending')
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, maxCount)
+
+    return tasks
   } catch (error) {
     console.error('Error fetching pending inbox tasks:', error)
     throw error

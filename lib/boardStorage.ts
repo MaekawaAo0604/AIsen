@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase'
-import { collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, orderBy, Timestamp } from 'firebase/firestore'
+import { collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, orderBy, Timestamp, updateDoc } from 'firebase/firestore'
 import type { Board } from '@/lib/types'
 
 export interface SavedBoard {
@@ -8,6 +8,10 @@ export interface SavedBoard {
   createdAt: Date
   updatedAt: Date
   board: Board
+}
+
+export interface UserSettings {
+  defaultBoardId?: string
 }
 
 // ボードを保存
@@ -76,9 +80,45 @@ export async function deleteBoard(userId: string, boardId: string): Promise<void
   await deleteDoc(boardRef)
 }
 
+// ユーザー設定を取得
+export async function getUserSettings(userId: string): Promise<UserSettings> {
+  const userRef = doc(db, 'users', userId)
+  const userSnap = await getDoc(userRef)
+
+  if (!userSnap.exists()) {
+    return {}
+  }
+
+  const data = userSnap.data()
+  return {
+    defaultBoardId: data.defaultBoardId,
+  }
+}
+
+// デフォルトボードIDを設定
+export async function setDefaultBoardId(userId: string, boardId: string): Promise<void> {
+  const userRef = doc(db, 'users', userId)
+  await setDoc(userRef, {
+    defaultBoardId: boardId,
+  }, { merge: true })
+}
+
 // デフォルトボードを取得または作成（Inbox用）
 export async function getOrCreateDefaultBoard(userId: string): Promise<{ boardId: string; board: Board }> {
-  // 既存ボードがあれば最初のものを使用
+  // ユーザー設定からdefaultBoardIdを取得
+  const settings = await getUserSettings(userId)
+
+  if (settings.defaultBoardId) {
+    const defaultBoard = await getBoard(userId, settings.defaultBoardId)
+    if (defaultBoard) {
+      return {
+        boardId: settings.defaultBoardId,
+        board: defaultBoard.board,
+      }
+    }
+  }
+
+  // defaultBoardIdが設定されていないか、ボードが存在しない場合は最新のボードを使用
   const boards = await getUserBoards(userId)
 
   if (boards.length > 0) {

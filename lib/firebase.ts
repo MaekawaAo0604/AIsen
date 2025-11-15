@@ -1,6 +1,7 @@
 import { initializeApp, getApps } from 'firebase/app'
 import { getAuth, GoogleAuthProvider } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
+import { getFunctions } from 'firebase/functions'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -19,5 +20,11 @@ export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getA
 export const auth = getAuth(app)
 export const googleProvider = new GoogleAuthProvider()
 
+// Gmail OAuth用にスコープを追加
+googleProvider.addScope('https://www.googleapis.com/auth/gmail.readonly')
+
 // Firestore
 export const db = getFirestore(app)
+
+// Cloud Functions
+export const functions = getFunctions(app)

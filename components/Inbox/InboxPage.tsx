@@ -1,16 +1,59 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { httpsCallable } from 'firebase/functions'
+import { functions } from '@/lib/firebase'
 import { useAuthStore } from '@/lib/store/useAuthStore'
 import { getInboxTasks, deleteInboxTask, convertInboxTaskToTask } from '@/lib/inboxStorage'
-import { getOrCreateDefaultBoard, updateBoard } from '@/lib/boardStorage'
+import { getOrCreateDefaultBoard, updateBoard, getUserBoards, setDefaultBoardId, getUserSettings, type SavedBoard } from '@/lib/boardStorage'
+import { GmailConnectButton } from '@/components/GmailConnectButton'
+import { AlertModal } from '@/components/Modal/AlertModal'
 import type { InboxTask, InboxQuadrant, Quadrant } from '@/lib/types'
 
 export function InboxPage() {
   const user = useAuthStore((state) => state.user)
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const [tasks, setTasks] = useState<InboxTask[]>([])
   const [loading, setLoading] = useState(true)
   const [organizing, setOrganizing] = useState(false)
+  const [gmailConnectKey, setGmailConnectKey] = useState(0)
+  const [boards, setBoards] = useState<SavedBoard[]>([])
+  const [defaultBoardId, setDefaultBoardIdState] = useState<string | undefined>()
+  const [alertModal, setAlertModal] = useState<{ isOpen: boolean; title: string; message: string; type: 'success' | 'error' | 'info' }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info',
+  })
+
+  // OAuth callbackを処理
+  useEffect(() => {
+    const code = searchParams.get('code')
+    const state = searchParams.get('state')
+
+    if (code && user) {
+      // codeを使う前にURLから削除（1回しか使えないため）
+      window.history.replaceState({}, '', '/inbox')
+
+      const saveToken = async () => {
+        try {
+          const saveGmailToken = httpsCallable(functions, 'saveGmailToken')
+          await saveGmailToken({ code })
+
+          alert('Gmail連携が完了しました！15分ごとに自動的にメールが同期されます。')
+          // GmailConnectButtonを再レンダリングして状態を更新
+          setGmailConnectKey(prev => prev + 1)
+        } catch (error) {
+          console.error('Token save error:', error)
+          alert('Gmail連携に失敗しました。もう一度お試しください。')
+        }
+      }
+
+      saveToken()
+    }
+  }, [searchParams, user])
 
   useEffect(() => {
     if (!user) {
@@ -18,39 +61,92 @@ export function InboxPage() {
       return
     }
 
-    const fetchTasks = async () => {
+    const fetchData = async () => {
       try {
-        const inboxTasks = await getInboxTasks(user.uid, 'INBOX')
+        const [inboxTasks, userBoards, settings] = await Promise.all([
+          getInboxTasks(user.uid, 'INBOX'),
+          getUserBoards(user.uid),
+          getUserSettings(user.uid),
+        ])
         setTasks(inboxTasks)
+        setBoards(userBoards)
+        setDefaultBoardIdState(settings.defaultBoardId)
       } catch (error) {
-        console.error('Error fetching inbox tasks:', error)
+        console.error('Error fetching data:', error)
       } finally {
         setLoading(false)
       }
     }
 
-    fetchTasks()
+    fetchData()
   }, [user])
+
+  const handleSetDefaultBoard = async (boardId: string) => {
+    if (!user) return
+
+    try {
+      await setDefaultBoardId(user.uid, boardId)
+      setDefaultBoardIdState(boardId)
+    } catch (error) {
+      console.error('Error setting default board:', error)
+      setAlertModal({
+        isOpen: true,
+        title: 'エラー',
+        message: 'デフォルトボードの設定に失敗しました',
+        type: 'error',
+      })
+    }
+  }
 
   const handleOrganize = async () => {
     if (!user) return
 
     setOrganizing(true)
     try {
-      const res = await fetch('/api/inbox/organize', {
-        method: 'POST',
-      })
-      if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || 'Failed to organize tasks')
-      }
+      const organizeInboxTasks = httpsCallable(functions, 'organizeInboxTasks')
+      const result = await organizeInboxTasks()
+      const data = result.data as any
 
-      // 結果を反映（リロード）
+      console.log('AI整理完了:', data)
+
+      // 象限ごとの件数を集計
+      const counts = { q1: 0, q2: 0, q3: 0, q4: 0 }
+      data.results?.forEach((r: any) => {
+        const q = r.quadrant.toLowerCase()
+        if (q in counts) counts[q as keyof typeof counts]++
+      })
+
+      // 結果を反映（Inboxリロード）
       const inboxTasks = await getInboxTasks(user.uid, 'INBOX')
       setTasks(inboxTasks)
+
+      // 結果サマリを表示してボードに遷移
+      setAlertModal({
+        isOpen: true,
+        title: 'AI整理完了',
+        message: `AIが ${data.organized} 件のタスクを整理しました
+
+Q1（緊急・重要）: ${counts.q1}件
+Q2（重要）: ${counts.q2}件
+Q3（緊急）: ${counts.q3}件
+Q4（後回し）: ${counts.q4}件
+
+ボードページに移動します。`,
+        type: 'success',
+      })
+
+      // モーダルを閉じた後にボードに遷移
+      setTimeout(() => {
+        router.push(`/boards/${data.boardId}`)
+      }, 2000)
     } catch (error) {
       console.error('Error organizing inbox:', error)
-      alert('タスクの整理に失敗しました')
+      setAlertModal({
+        isOpen: true,
+        title: 'エラー',
+        message: 'タスクの整理に失敗しました',
+        type: 'error',
+      })
     } finally {
       setOrganizing(false)
     }
@@ -95,7 +191,12 @@ export function InboxPage() {
       setTasks(tasks.filter((t) => t.id !== task.id))
     } catch (error) {
       console.error('Error moving task:', error)
-      alert('タスクの移動に失敗しました')
+      setAlertModal({
+        isOpen: true,
+        title: 'エラー',
+        message: 'タスクの移動に失敗しました',
+        type: 'error',
+      })
     }
   }
 
@@ -114,18 +215,66 @@ export function InboxPage() {
     <div className="min-h-screen bg-[#fafafa] p-6">
       <div className="max-w-5xl mx-auto">
         {/* ヘッダー */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-[#37352f]">Inbox</h1>
-            <p className="text-[#787774] mt-2">Gmail から取り込んだタスクを AI で整理</p>
+        <div className="space-y-4 mb-8">
+          {/* 機能説明カード */}
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 rounded-[12px] p-6">
+            <div className="mb-4">
+              <h2 className="text-lg font-bold text-[#37352f] mb-2 flex items-center gap-2">
+                <span>📬</span>
+                <span>AIでInboxを一括整理</span>
+              </h2>
+              <p className="text-sm text-[#787774] leading-relaxed">
+                Gmailから集めたタスク候補を、AIが4象限（Q1〜Q4）にまとめて分類します。<br />
+                整理後も、各タスクの象限はいつでも変更できます。
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-[#9b9a97] bg-white/50 rounded-[6px] px-3 py-2">
+              <svg className="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>Gmail同期 → AI分類 → ボードに自動配置</span>
+            </div>
           </div>
-          <button
-            disabled={organizing || tasks.length === 0 || loading}
-            onClick={handleOrganize}
-            className="px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-[10px] hover:shadow-lg hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-          >
-            {organizing ? '整理中...' : 'AIで整理する'}
-          </button>
+
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-[#37352f]">Inbox</h1>
+              <p className="text-[#787774] mt-2">タスク候補を確認・整理</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <GmailConnectButton key={gmailConnectKey} />
+              <button
+                disabled={organizing || tasks.length === 0 || loading}
+                onClick={handleOrganize}
+                className="px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-[10px] hover:shadow-lg hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {organizing ? '整理中...' : 'AIで整理する'}
+              </button>
+            </div>
+          </div>
+
+          {/* デフォルトボード選択 */}
+          {boards.length > 0 && (
+            <div className="bg-white border-2 border-[#e9e9e7] rounded-[12px] p-4">
+              <div className="flex items-center gap-3">
+                <label className="text-sm font-medium text-[#37352f]">
+                  タスクの移動先ボード:
+                </label>
+                <select
+                  value={defaultBoardId || ''}
+                  onChange={(e) => handleSetDefaultBoard(e.target.value)}
+                  className="flex-1 px-3 py-2 text-sm border-2 border-[#e9e9e7] rounded-[8px] focus:outline-none focus:border-blue-500 transition-colors"
+                >
+                  {!defaultBoardId && <option value="">最新のボードを使用</option>}
+                  {boards.map((board) => (
+                    <option key={board.boardId} value={board.boardId}>
+                      {board.title} {board.boardId === defaultBoardId && '(デフォルト)'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* タスク一覧 */}
@@ -234,6 +383,15 @@ export function InboxPage() {
           </div>
         )}
       </div>
+
+      {/* Alert Modal */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ ...alertModal, isOpen: false })}
+        title={alertModal.title}
+        message={alertModal.message}
+        type={alertModal.type}
+      />
     </div>
   )
 }

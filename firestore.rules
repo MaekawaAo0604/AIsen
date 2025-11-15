@@ -75,6 +75,18 @@ service cloud.firestore {
         // 自分の保存済みボードのみ削除可能
         allow delete: if isOwner(userId);
       }
+
+      // User's Inbox Tasks Subcollection
+      match /inboxTasks/{taskId} {
+        // 自分のInboxタスクのみ読み取り可能
+        allow read: if isOwner(userId);
+
+        // 自分のInboxタスクのみ作成・更新可能
+        allow create, update: if isOwner(userId);
+
+        // 自分のInboxタスクのみ削除可能
+        allow delete: if isOwner(userId);
+      }
     }
 
     // ========================================

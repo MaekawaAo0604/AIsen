@@ -5,6 +5,7 @@ import { useDraggable } from '@dnd-kit/core'
 import type { Task, Quadrant } from '@/lib/types'
 import { useBoardStore } from '@/stores/useBoardStore'
 import { TaskDetailModal } from './TaskDetailModal'
+import { ConfirmModal } from '@/components/Modal/ConfirmModal'
 import { SWIPE_THRESHOLD } from '@/lib/constants'
 import { formatDateJP } from '@/lib/utils'
 
@@ -12,15 +13,42 @@ interface TaskCardProps {
   task: Task
   quadrant: Quadrant
   readOnly?: boolean
+  onQuadrantChange?: (taskId: string, fromQuadrant: Quadrant, toQuadrant: Quadrant) => void
 }
 
-export function TaskCard({ task, quadrant, readOnly = false }: TaskCardProps) {
+export function TaskCard({ task, quadrant, readOnly = false, onQuadrantChange }: TaskCardProps) {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false)
   const [swipeOffset, setSwipeOffset] = useState(0)
+  const [showQuadrantPicker, setShowQuadrantPicker] = useState(false)
   const deleteTask = useBoardStore((state) => state.deleteTask)
   const updateTask = useBoardStore((state) => state.updateTask)
+  const moveTask = useBoardStore((state) => state.moveTask)
   const touchStartX = useRef(0)
   const isSwiping = useRef(false)
+
+  const handleQuadrantChange = (toQuadrant: Quadrant) => {
+    if (toQuadrant === quadrant) {
+      setShowQuadrantPicker(false)
+      return
+    }
+
+    moveTask(task.id, quadrant, toQuadrant)
+
+    // aiMetaがある場合、userOverrideフラグを追加
+    if (task.aiMeta) {
+      updateTask(toQuadrant, task.id, {
+        aiMeta: {
+          ...task.aiMeta,
+          userOverride: true,
+          from: quadrant,
+        },
+      })
+    }
+
+    setShowQuadrantPicker(false)
+    onQuadrantChange?.(task.id, quadrant, toQuadrant)
+  }
 
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: task.id,
@@ -30,9 +58,11 @@ export function TaskCard({ task, quadrant, readOnly = false }: TaskCardProps) {
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (confirm('このタスクを削除しますか？')) {
-      deleteTask(quadrant, task.id)
-    }
+    setIsConfirmDeleteOpen(true)
+  }
+
+  const confirmDelete = () => {
+    deleteTask(quadrant, task.id)
   }
 
   const handleToggleComplete = (e: React.MouseEvent) => {
@@ -77,9 +107,7 @@ export function TaskCard({ task, quadrant, readOnly = false }: TaskCardProps) {
 
     // 削除距離を超えたら削除確認
     if (swipeOffset < SWIPE_THRESHOLD.DELETE_DISTANCE) {
-      if (confirm('このタスクを削除しますか？')) {
-        deleteTask(quadrant, task.id)
-      }
+      setIsConfirmDeleteOpen(true)
     }
     setSwipeOffset(0)
     setTimeout(() => {
@@ -160,6 +188,53 @@ export function TaskCard({ task, quadrant, readOnly = false }: TaskCardProps) {
             {task.due && task.createdAt && <span className="hidden sm:inline">•</span>}
             <span className="whitespace-nowrap">🕒 追加: {formatDateJP(task.createdAt)}</span>
           </div>
+
+          {/* AI整理されたタスクの象限変更UI */}
+          {!readOnly && task.aiMeta && (
+            <div className="mt-2 relative">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowQuadrantPicker(!showQuadrantPicker)
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="flex items-center gap-1.5 px-2 py-1 rounded-[3px] text-[10px] sm:text-[11px] text-[#787774] hover:bg-[#e9e9e7] transition-colors"
+              >
+                <span className="text-[#2383e2]">🤖</span>
+                <span>
+                  現在: <span className="font-medium">{quadrant.toUpperCase()}</span>
+                  {task.aiMeta.userOverride && <span className="ml-1">(変更済み)</span>}
+                </span>
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {showQuadrantPicker && (
+                <div className="absolute left-0 top-full mt-1 z-20 bg-white border-2 border-[#e9e9e7] rounded-[6px] shadow-lg p-2 flex gap-1">
+                  {(['q1', 'q2', 'q3', 'q4'] as Quadrant[]).map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleQuadrantChange(q)
+                      }}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      className={`px-2 py-1 rounded-[3px] text-[10px] sm:text-[11px] font-medium transition-colors ${
+                        q === quadrant
+                          ? 'bg-[#2383e2] text-white'
+                          : 'bg-[#f7f6f3] text-[#37352f] hover:bg-[#e9e9e7]'
+                      }`}
+                    >
+                      {q.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
         {/* 削除ボタン（read-onlyの場合は非表示） */}
         {!readOnly && (
@@ -181,6 +256,17 @@ export function TaskCard({ task, quadrant, readOnly = false }: TaskCardProps) {
         isOpen={isDetailModalOpen}
         task={task}
         onClose={() => setIsDetailModalOpen(false)}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmDeleteOpen}
+        onClose={() => setIsConfirmDeleteOpen(false)}
+        onConfirm={confirmDelete}
+        title="タスクを削除"
+        message="このタスクを削除してもよろしいですか？"
+        confirmText="削除"
+        cancelText="キャンセル"
+        type="danger"
       />
     </>
   )
