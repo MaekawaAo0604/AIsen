@@ -13,6 +13,12 @@ export interface Task {
   aiReason?: string   // AI判定理由
   completed?: boolean // 完了状態
   completedAt?: string // 完了日時 (ISO 8601)
+  aiMeta?: {
+    organizedAt: string  // AI整理日時 (ISO 8601)
+    model: string        // 使用AIモデル
+    userOverride?: boolean  // ユーザーが象限を変更したか
+    from?: string        // 元の象限（変更時のみ）
+  }
 }
 
 export interface InboxTask {
