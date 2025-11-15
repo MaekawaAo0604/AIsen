@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { InboxPage } from '@/components/Inbox/InboxPage'
 
 export const metadata = {
@@ -6,5 +7,9 @@ export const metadata = {
 }
 
 export default function InboxRoute() {
-  return <InboxPage />
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">読み込み中...</div>}>
+      <InboxPage />
+    </Suspense>
+  )
 }
