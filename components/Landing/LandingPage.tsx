@@ -370,7 +370,4 @@ export function LandingPage() {
       `}</style>
     </div>
   )
-}</style>
-    </div>
-  )
 }
