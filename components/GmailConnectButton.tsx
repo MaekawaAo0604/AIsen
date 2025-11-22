@@ -6,27 +6,32 @@ import { doc, getDoc } from 'firebase/firestore'
 import { functions, db } from '@/lib/firebase'
 import { useAuthStore } from '@/lib/store/useAuthStore'
 import { isPro } from '@/lib/utils'
+import type { User } from '@/lib/types'
 import Link from 'next/link'
 
 export function GmailConnectButton() {
-  const user = useAuthStore((state) => state.user)
+  const firebaseUser = useAuthStore((state) => state.user)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [checking, setChecking] = useState(true)
+  const [userData, setUserData] = useState<User | null>(null)
 
-  // Gmail連携状態をチェック
+  // Gmail連携状態とユーザーデータをチェック
   useEffect(() => {
     const checkConnection = async () => {
-      if (!user) {
+      if (!firebaseUser) {
         setChecking(false)
         return
       }
 
       try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid))
-        const userData = userDoc.data()
-        setIsConnected(!!userData?.gmailToken?.refresh_token)
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid))
+        const data = userDoc.data() as User | undefined
+        if (data) {
+          setUserData(data)
+        }
+        setIsConnected(!!data?.gmailToken?.refresh_token)
       } catch (err) {
         console.error('Connection check error:', err)
       } finally {
@@ -35,16 +40,16 @@ export function GmailConnectButton() {
     }
 
     checkConnection()
-  }, [user])
+  }, [firebaseUser])
 
   const handleConnect = async () => {
-    if (!user) {
+    if (!firebaseUser) {
       setError('ログインが必要です')
       return
     }
 
     // Proプランチェック
-    if (!isPro(user)) {
+    if (!isPro(userData)) {
       setError('Gmail連携はProプラン専用です')
       return
     }
@@ -69,7 +74,7 @@ export function GmailConnectButton() {
     }
   }
 
-  if (!user) {
+  if (!firebaseUser) {
     return null
   }
 
@@ -105,7 +110,7 @@ export function GmailConnectButton() {
   }
 
   // Freeプランの場合は案内を表示
-  if (!isPro(user)) {
+  if (!isPro(userData)) {
     return (
       <div className="space-y-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <h3 className="font-semibold text-blue-900">Gmail連携はProプラン専用です</h3>

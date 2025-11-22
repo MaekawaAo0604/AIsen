@@ -7,11 +7,15 @@ import { trackPageView } from '@/lib/analytics'
 import { useAuthStore } from '@/lib/store/useAuthStore'
 import { PublicHeader } from '@/components/Layout/PublicHeader'
 import { Footer } from '@/components/Layout/Footer'
+import { db } from '@/lib/firebase'
+import { doc, getDoc } from 'firebase/firestore'
+import type { User } from '@/lib/types'
 
 type Plan = 'free' | 'pro' | 'team'
 
 export function PricingPage() {
-  const user = useAuthStore((state) => state.user)
+  const firebaseUser = useAuthStore((state) => state.user)
+  const [userData, setUserData] = useState<User | null>(null)
   const [hasScrolledToCompare, setHasScrolledToCompare] = useState(false)
   const compareRef = useRef<HTMLDivElement>(null)
 
@@ -19,6 +23,28 @@ export function PricingPage() {
     trackPageView('/pricing')
     posthog.capture('pricing_view', {})
   }, [])
+
+  // Firestoreからユーザーデータを取得
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!firebaseUser) {
+        setUserData(null)
+        return
+      }
+
+      try {
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid))
+        const data = userDoc.data() as User | undefined
+        if (data) {
+          setUserData(data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error)
+      }
+    }
+
+    fetchUserData()
+  }, [firebaseUser])
 
   // スクロール監視
   useEffect(() => {
@@ -46,7 +72,7 @@ export function PricingPage() {
   }
 
   // ユーザーの現在プラン
-  const currentPlan = user ? (user.plan || 'free') : 'free'
+  const currentPlan = userData ? (userData.plan || 'free') : 'free'
 
   return (
     <div className="min-h-screen bg-[#ffffff]">
@@ -100,7 +126,7 @@ export function PricingPage() {
           <div className="grid gap-8 md:grid-cols-2">
             {/* Free */}
             <div className="relative p-8 bg-white border-2 border-[#e9e9e7] rounded-[16px] hover:shadow-lg transition-all duration-300">
-              {currentPlan === 'free' && user && (
+              {currentPlan === 'free' && firebaseUser && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-500 text-white text-sm font-semibold rounded-full">
                   現在のプラン
                 </div>
@@ -154,7 +180,7 @@ export function PricingPage() {
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold rounded-full">
                 おすすめ
               </div>
-              {currentPlan === 'pro' && user && (
+              {currentPlan === 'pro' && firebaseUser && (
                 <div className="absolute -top-3 right-4 px-4 py-1 bg-green-500 text-white text-sm font-semibold rounded-full">
                   現在のプラン
                 </div>

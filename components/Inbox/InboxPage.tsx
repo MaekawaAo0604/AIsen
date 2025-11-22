@@ -3,18 +3,20 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { httpsCallable } from 'firebase/functions'
-import { functions } from '@/lib/firebase'
+import { functions, db } from '@/lib/firebase'
+import { doc, getDoc } from 'firebase/firestore'
 import { useAuthStore } from '@/lib/store/useAuthStore'
 import { getInboxTasks, deleteInboxTask, convertInboxTaskToTask } from '@/lib/inboxStorage'
 import { getOrCreateDefaultBoard, updateBoard, getUserBoards, setDefaultBoardId, getUserSettings, type SavedBoard } from '@/lib/boardStorage'
 import { GmailConnectButton } from '@/components/GmailConnectButton'
 import { AlertModal } from '@/components/Modal/AlertModal'
-import type { InboxTask, InboxQuadrant, Quadrant } from '@/lib/types'
+import type { InboxTask, InboxQuadrant, Quadrant, User } from '@/lib/types'
 import { isPro } from '@/lib/utils'
 import Link from 'next/link'
 
 export function InboxPage() {
-  const user = useAuthStore((state) => state.user)
+  const firebaseUser = useAuthStore((state) => state.user)
+  const [userData, setUserData] = useState<User | null>(null)
   const searchParams = useSearchParams()
   const router = useRouter()
   const [tasks, setTasks] = useState<InboxTask[]>([])
@@ -30,12 +32,34 @@ export function InboxPage() {
     type: 'info',
   })
 
+  // Firestoreからユーザーデータを取得
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!firebaseUser) {
+        setUserData(null)
+        return
+      }
+
+      try {
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid))
+        const data = userDoc.data() as User | undefined
+        if (data) {
+          setUserData(data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error)
+      }
+    }
+
+    fetchUserData()
+  }, [firebaseUser])
+
   // OAuth callbackを処理
   useEffect(() => {
     const code = searchParams.get('code')
     const state = searchParams.get('state')
 
-    if (code && user) {
+    if (code && firebaseUser) {
       // codeを使う前にURLから削除（1回しか使えないため）
       window.history.replaceState({}, '', '/inbox')
 
@@ -55,10 +79,10 @@ export function InboxPage() {
 
       saveToken()
     }
-  }, [searchParams, user])
+  }, [searchParams, firebaseUser])
 
   useEffect(() => {
-    if (!user) {
+    if (!firebaseUser) {
       setLoading(false)
       return
     }
@@ -66,9 +90,9 @@ export function InboxPage() {
     const fetchData = async () => {
       try {
         const [inboxTasks, userBoards, settings] = await Promise.all([
-          getInboxTasks(user.uid, 'INBOX'),
-          getUserBoards(user.uid),
-          getUserSettings(user.uid),
+          getInboxTasks(firebaseUser.uid, 'INBOX'),
+          getUserBoards(firebaseUser.uid),
+          getUserSettings(firebaseUser.uid),
         ])
         setTasks(inboxTasks)
         setBoards(userBoards)
@@ -81,13 +105,13 @@ export function InboxPage() {
     }
 
     fetchData()
-  }, [user])
+  }, [firebaseUser])
 
   const handleSetDefaultBoard = async (boardId: string) => {
-    if (!user) return
+    if (!firebaseUser) return
 
     try {
-      await setDefaultBoardId(user.uid, boardId)
+      await setDefaultBoardId(firebaseUser.uid, boardId)
       setDefaultBoardIdState(boardId)
     } catch (error) {
       console.error('Error setting default board:', error)
@@ -101,7 +125,7 @@ export function InboxPage() {
   }
 
   const handleOrganize = async () => {
-    if (!user) return
+    if (!firebaseUser) return
 
     setOrganizing(true)
     try {
@@ -119,7 +143,7 @@ export function InboxPage() {
       })
 
       // 結果を反映（Inboxリロード）
-      const inboxTasks = await getInboxTasks(user.uid, 'INBOX')
+      const inboxTasks = await getInboxTasks(firebaseUser.uid, 'INBOX')
       setTasks(inboxTasks)
 
       // 結果サマリを表示してボードに遷移
@@ -155,7 +179,7 @@ Q4（後回し）: ${counts.q4}件
   }
 
   const handleMoveToQuadrant = async (task: InboxTask, inboxQuadrant: InboxQuadrant) => {
-    if (!user) return
+    if (!firebaseUser) return
 
     try {
       // InboxQuadrant (Q1,Q2,Q3,Q4) を Quadrant (q1,q2,q3,q4) に変換
@@ -169,7 +193,7 @@ Q4（後回し）: ${counts.q4}件
       if (!quadrant) return
 
       // デフォルトボードを取得または作成
-      const { boardId, board } = await getOrCreateDefaultBoard(user.uid)
+      const { boardId, board } = await getOrCreateDefaultBoard(firebaseUser.uid)
 
       // InboxTask を Task に変換
       const newTask = convertInboxTaskToTask(task)
@@ -184,10 +208,10 @@ Q4（後回し）: ${counts.q4}件
       }
 
       // ボード更新
-      await updateBoard(user.uid, boardId, updatedBoard)
+      await updateBoard(firebaseUser.uid, boardId, updatedBoard)
 
       // InboxTask を削除
-      await deleteInboxTask(user.uid, task.id)
+      await deleteInboxTask(firebaseUser.uid, task.id)
 
       // ローカル状態から削除
       setTasks(tasks.filter((t) => t.id !== task.id))
@@ -202,7 +226,7 @@ Q4（後回し）: ${counts.q4}件
     }
   }
 
-  if (!user) {
+  if (!firebaseUser) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#fafafa]">
         <div className="text-center">
@@ -214,7 +238,7 @@ Q4（後回し）: ${counts.q4}件
   }
 
   // Freeプランの場合はProプラン案内を表示
-  if (!isPro(user)) {
+  if (!isPro(userData)) {
     return (
       <div className="min-h-screen bg-[#fafafa] p-6">
         <div className="max-w-3xl mx-auto">

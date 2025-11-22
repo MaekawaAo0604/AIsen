@@ -63,6 +63,11 @@ export interface User {
     lifetime: boolean
     proUntil: number | null
   }
+  gmailToken?: {
+    access_token: string
+    refresh_token: string
+    expiry_date: number
+  }
 }
 
 export interface Payment {
