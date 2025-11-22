@@ -41,6 +41,19 @@ export const organizeInboxTasks = functions
 
     const userId = context.auth.uid;
 
+    // Check if user has Pro plan
+    const userRef = db.collection("users").doc(userId);
+    const userDoc = await userRef.get();
+    const userData = userDoc.data();
+    const userPlan = userData?.plan || "free";
+
+    if (userPlan !== "pro") {
+      throw new functions.https.HttpsError(
+        "permission-denied",
+        "AI inbox organization is only available for Pro plan users"
+      );
+    }
+
     try {
       // Get user settings to find default board
       const userRef = db.collection("users").doc(userId);

@@ -1,6 +1,8 @@
 import { db } from '@/lib/firebase'
 import { collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, orderBy, Timestamp, updateDoc } from 'firebase/firestore'
-import type { Board } from '@/lib/types'
+import type { Board, User } from '@/lib/types'
+import { FREE_BOARD_LIMIT } from '@/lib/constants'
+import { getUserPlan } from '@/lib/utils'
 
 export interface SavedBoard {
   boardId: string
@@ -15,7 +17,24 @@ export interface UserSettings {
 }
 
 // ボードを保存
-export async function saveBoard(userId: string, boardId: string, board: Board): Promise<void> {
+export async function saveBoard(
+  userId: string,
+  boardId: string,
+  board: Board,
+  user?: User | null
+): Promise<void> {
+  // プラン制限チェック（新規作成時のみ）
+  const existingBoard = await getBoard(userId, boardId)
+  if (!existingBoard && user) {
+    const plan = getUserPlan(user)
+    if (plan === 'free') {
+      const userBoards = await getUserBoards(userId)
+      if (userBoards.length >= FREE_BOARD_LIMIT) {
+        throw new Error('BOARD_LIMIT_REACHED')
+      }
+    }
+  }
+
   const boardRef = doc(db, 'users', userId, 'boards', boardId)
 
   await setDoc(boardRef, {
@@ -145,7 +164,7 @@ export async function getOrCreateDefaultBoard(userId: string): Promise<{ boardId
     },
   }
 
-  await saveBoard(userId, newBoardId, newBoard)
+  await saveBoard(userId, newBoardId, newBoard, null) // Inbox用の自動作成なので制限チェックなし
 
   return {
     boardId: newBoardId,

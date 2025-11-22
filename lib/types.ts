@@ -57,6 +57,7 @@ export interface User {
   sub: string  // Cognito User ID
   email: string
   createdAt: number
+  plan?: 'free' | 'pro'  // プラン情報（未定義の場合はfree扱い）
   entitlements: {
     pro: boolean
     lifetime: boolean

@@ -50,6 +50,29 @@ export const QUADRANT_CONFIG = {
   },
 } as const
 
+// ==================== プラン制限 ====================
+
+/**
+ * Freeプランのボード作成上限
+ */
+export const FREE_BOARD_LIMIT = 2
+
+/**
+ * プラン定義
+ */
+export const PLAN_FEATURES = {
+  free: {
+    boardLimit: FREE_BOARD_LIMIT,
+    gmailSync: false,
+    inboxAI: false,
+  },
+  pro: {
+    boardLimit: Infinity,
+    gmailSync: true,
+    inboxAI: true,
+  },
+} as const
+
 /**
  * 4象限の配列
  */

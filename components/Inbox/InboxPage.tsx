@@ -10,6 +10,8 @@ import { getOrCreateDefaultBoard, updateBoard, getUserBoards, setDefaultBoardId,
 import { GmailConnectButton } from '@/components/GmailConnectButton'
 import { AlertModal } from '@/components/Modal/AlertModal'
 import type { InboxTask, InboxQuadrant, Quadrant } from '@/lib/types'
+import { isPro } from '@/lib/utils'
+import Link from 'next/link'
 
 export function InboxPage() {
   const user = useAuthStore((state) => state.user)
@@ -206,6 +208,87 @@ Q4（後回し）: ${counts.q4}件
         <div className="text-center">
           <h1 className="text-2xl font-bold text-[#37352f] mb-4">ログインが必要です</h1>
           <p className="text-[#787774]">Inbox 機能を使うにはログインしてください</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Freeプランの場合はProプラン案内を表示
+  if (!isPro(user)) {
+    return (
+      <div className="min-h-screen bg-[#fafafa] p-6">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 rounded-[16px] p-8 shadow-xl">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6">
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h1 className="text-3xl font-bold text-[#37352f] mb-3">
+                Inbox と AI 整理は Pro プラン専用です
+              </h1>
+              <p className="text-lg text-[#787774] leading-relaxed">
+                Pro プランでは、Gmail からタスク候補を自動で集め、<br />
+                ワンクリックで 4 象限（Q1〜Q4）に振り分けられます。
+              </p>
+            </div>
+
+            <div className="bg-white rounded-[12px] p-6 mb-6 space-y-4">
+              <h2 className="font-semibold text-[#37352f] mb-3 flex items-center gap-2">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Pro プランで使える機能
+              </h2>
+              <ul className="space-y-3 text-sm text-[#787774]">
+                <li className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <strong className="text-[#37352f]">Gmail 自動同期</strong>
+                    <p className="text-xs mt-1">15分ごとにメールからタスク候補を収集</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <strong className="text-[#37352f]">AI 一括整理</strong>
+                    <p className="text-xs mt-1">溜まったタスクを Q1〜Q4 に自動分類</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <strong className="text-[#37352f]">ボード数無制限</strong>
+                    <p className="text-xs mt-1">プロジェクトごとにボードを作成可能</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            <div className="bg-blue-600/10 rounded-[12px] p-4 mb-6">
+              <p className="text-sm text-blue-900">
+                💡 <strong>まずは無料でお試しください</strong><br />
+                基本的なボード機能（2枚まで）は無料で使えます。<br />
+                必要になったら Pro プランをご検討ください。
+              </p>
+            </div>
+
+            <div className="text-center">
+              <Link
+                href="/pricing"
+                className="inline-block px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-[12px] hover:shadow-xl hover:scale-105 transition-all duration-200"
+              >
+                料金プランを見る
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     )

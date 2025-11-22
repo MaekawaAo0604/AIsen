@@ -5,6 +5,8 @@ import { httpsCallable } from 'firebase/functions'
 import { doc, getDoc } from 'firebase/firestore'
 import { functions, db } from '@/lib/firebase'
 import { useAuthStore } from '@/lib/store/useAuthStore'
+import { isPro } from '@/lib/utils'
+import Link from 'next/link'
 
 export function GmailConnectButton() {
   const user = useAuthStore((state) => state.user)
@@ -38,6 +40,12 @@ export function GmailConnectButton() {
   const handleConnect = async () => {
     if (!user) {
       setError('ログインが必要です')
+      return
+    }
+
+    // Proプランチェック
+    if (!isPro(user)) {
+      setError('Gmail連携はProプラン専用です')
       return
     }
 
@@ -92,6 +100,24 @@ export function GmailConnectButton() {
         <p className="text-xs text-gray-500">
           15分ごとに自動的にメールが同期されます
         </p>
+      </div>
+    )
+  }
+
+  // Freeプランの場合は案内を表示
+  if (!isPro(user)) {
+    return (
+      <div className="space-y-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <h3 className="font-semibold text-blue-900">Gmail連携はProプラン専用です</h3>
+        <p className="text-sm text-blue-700">
+          メールからタスクを自動で収集して、AIで一括整理する機能はProプランで利用できます。
+        </p>
+        <Link
+          href="/pricing"
+          className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+        >
+          料金プランを見る
+        </Link>
       </div>
     )
   }

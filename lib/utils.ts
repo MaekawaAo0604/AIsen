@@ -60,3 +60,29 @@ export function isUrgent(dueDate?: Date | string | null): boolean {
   const hoursUntilDue = (due.getTime() - now.getTime()) / (1000 * 60 * 60)
   return hoursUntilDue > 0 && hoursUntilDue <= 48
 }
+
+// ==================== プラン判定 ====================
+
+import type { User } from './types'
+
+/**
+ * ユーザーのプランを取得（未定義の場合はfree）
+ */
+export function getUserPlan(user: User | null | undefined): 'free' | 'pro' {
+  if (!user) return 'free'
+  return user.plan || 'free'
+}
+
+/**
+ * Proプランかどうかを判定
+ */
+export function isPro(user: User | null | undefined): boolean {
+  return getUserPlan(user) === 'pro'
+}
+
+/**
+ * Freeプランかどうかを判定
+ */
+export function isFree(user: User | null | undefined): boolean {
+  return getUserPlan(user) === 'free'
+}
