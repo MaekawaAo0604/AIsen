@@ -35,6 +35,9 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "AIsen",
   },
+  verification: {
+    google: "O92XzST0TwFlbi_5j7Tjm5Tq2BPa2YLwaCKhvJd7ONc",
+  },
 };
 
 export default function RootLayout({
