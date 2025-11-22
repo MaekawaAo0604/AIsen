@@ -23,19 +23,10 @@ export function LandingPage() {
       {/* ヘッダー */}
       <header className="relative mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
         <div className="flex items-center gap-3">
-          {/* 2x2アイコン（AIsen × Virex） */}
-          <div className="flex items-center gap-2">
-            <div className="grid grid-cols-2 gap-[2px] w-6 h-6">
-              <div className="w-full h-full rounded-tl-sm bg-gradient-to-br from-lime-400 to-lime-500"></div>
-              <div className="w-full h-full rounded-tr-sm bg-gradient-to-br from-cyan-400 to-blue-500"></div>
-              <div className="w-full h-full rounded-bl-sm bg-gradient-to-br from-yellow-400 to-orange-500"></div>
-              <div className="w-full h-full rounded-br-sm bg-slate-700"></div>
-            </div>
-            <span className="rounded-md bg-gradient-to-r from-cyan-500 to-blue-600 px-3 py-1.5 text-sm font-bold text-white shadow-lg">
-              AIsen
-            </span>
-          </div>
-          <span className="text-sm text-slate-400">by Virex</span>
+          <span className="rounded-md bg-gradient-to-r from-cyan-500 to-blue-600 px-3 py-1.5 text-sm font-bold text-white shadow-lg">
+            AIsen
+          </span>
+          <span className="text-sm text-slate-400">Gmail × AI で自動整理</span>
         </div>
         <nav className="flex items-center gap-4 text-sm text-slate-300">
           <a href="#features" className="hover:text-white transition-colors">
@@ -59,7 +50,7 @@ export function LandingPage() {
         <div className="flex-1">
           {/* タグライン */}
           <div className="inline-flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1 text-[11px] text-slate-300 border border-slate-800">
-            <span className="h-1.5 w-1.5 rounded-full bg-lime-400 animate-pulse" />
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Gmail と AI で「今日やること」が5分で決まる
           </div>
 
@@ -103,7 +94,7 @@ export function LandingPage() {
           <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-2xl shadow-black/40 backdrop-blur">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-slate-400">
-                <span className="h-2 w-2 rounded-full bg-lime-400" />
+                <span className="h-2 w-2 rounded-full bg-emerald-400" />
                 今日の AIsen ボード
               </div>
               <span className="rounded-full bg-slate-800 px-3 py-1 text-xs text-slate-300">
@@ -115,9 +106,9 @@ export function LandingPage() {
               {[
                 {
                   title: 'Q1 緊急×重要',
-                  bg: 'bg-lime-900/30',
-                  border: 'border-lime-800',
-                  titleColor: 'text-lime-200',
+                  bg: 'bg-red-900/30',
+                  border: 'border-red-800',
+                  titleColor: 'text-red-200',
                   tasks: ['顧客A 見積り送付', 'バグ修正 PR レビュー']
                 },
                 {
@@ -261,21 +252,21 @@ export function LandingPage() {
             </div>
             <div className="space-y-4 text-sm text-slate-300">
               <div className="flex items-start gap-3">
-                <span className="text-lime-400">✓</span>
+                <span className="text-emerald-400">✓</span>
                 <div>
                   <strong className="text-slate-200">朝：/inbox を開く</strong>
                   <p className="text-xs text-slate-400 mt-1">Gmail からのタスク候補が自動で並んでいる</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <span className="text-lime-400">✓</span>
+                <span className="text-emerald-400">✓</span>
                 <div>
                   <strong className="text-slate-200">「AI で整理する」ボタン → 一括振り分け</strong>
                   <p className="text-xs text-slate-400 mt-1">Q1〜Q4 に自動分類。最終判断はあなたのまま</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <span className="text-lime-400">✓</span>
+                <span className="text-emerald-400">✓</span>
                 <div>
                   <strong className="text-slate-200">今日やることが 5 分で決まる</strong>
                   <p className="text-xs text-slate-400 mt-1">Q2 の時間をちゃんと確保できる</p>
@@ -348,9 +339,9 @@ export function LandingPage() {
           </p>
           <a
             href="/pricing"
-            className="inline-block rounded-lg border-2 border-slate-600 px-8 py-3 text-base font-semibold text-slate-100 hover:border-lime-500 hover:bg-slate-800/50 transition-all group"
+            className="inline-block rounded-lg border-2 border-slate-600 px-8 py-3 text-base font-semibold text-slate-100 hover:border-slate-400 hover:bg-slate-800/50 transition-all"
           >
-            <span className="group-hover:text-lime-300 transition-colors">料金プランを見る →</span>
+            料金プランを見る →
           </a>
         </div>
       </section>
