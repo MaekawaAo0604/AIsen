@@ -1,4 +1,5 @@
 import { LandingPage } from '@/components/Landing/LandingPage'
+import { RootRedirect } from './RootRedirect'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -30,5 +31,10 @@ export const metadata: Metadata = {
 }
 
 export default function Home() {
-  return <LandingPage />
+  return (
+    <>
+      <RootRedirect />
+      <LandingPage />
+    </>
+  )
 }

@@ -45,6 +45,8 @@ export interface Board {
   editKey: string
   createdAt: string   // ISO 8601 (Firestore用)
   updatedAt: string   // ISO 8601 (Firestore用)
+  ownerUid?: string | null  // 将来のユーザー紐付け用（現在は null）
+  isDemo?: boolean    // デモボードかどうか（/s/DEMO 用）
   tasks: {
     q1: Task[]
     q2: Task[]

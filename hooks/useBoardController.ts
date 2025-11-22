@@ -8,7 +8,7 @@ import { createBoard, getBoard } from '@/lib/firestore-helpers'
 import { getBoard as getUserBoard } from '@/lib/boardStorage'
 import { useAuthStore } from '@/lib/store/useAuthStore'
 
-const BOARD_ID_STORAGE_KEY = 'aisen:boardId'
+const BOARD_ID_STORAGE_KEY = 'aisen:lastBoardId'
 
 /**
  * ボードの初期化と同期を管理するコントローラーフック
