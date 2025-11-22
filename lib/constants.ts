@@ -58,10 +58,10 @@ export const QUADRANT_CONFIG = {
 export const FREE_BOARD_LIMIT = 2
 
 /**
- * AI ブレインストーミング回数制限（月あたり）
+ * AI ブレインストーミング回数制限（1日あたり）
  */
 export const BRAINSTORM_LIMITS = {
-  FREE: 5,   // Freeプラン: 月5回まで
+  FREE: 5,   // Freeプラン: 1日5回まで
   PRO: -1,   // Proプラン: 無制限 (-1 = unlimited)
 } as const
 

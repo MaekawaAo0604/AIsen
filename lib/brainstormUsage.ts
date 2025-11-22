@@ -8,19 +8,20 @@ import type { User } from './types'
  * 使用回数データ
  */
 export interface BrainstormUsage {
-  count: number        // 当月の使用回数
-  lastResetAt: string  // 最後にリセットした日時（YYYY-MM形式）
+  count: number        // 当日の使用回数
+  lastResetAt: string  // 最後にリセットした日時（YYYY-MM-DD形式）
   updatedAt: Date
 }
 
 /**
- * 今月の年月を YYYY-MM 形式で取得
+ * 今日の日付を YYYY-MM-DD 形式で取得
  */
-function getCurrentMonth(): string {
+function getCurrentDate(): string {
   const now = new Date()
   const year = now.getFullYear()
   const month = String(now.getMonth() + 1).padStart(2, '0')
-  return `${year}-${month}`
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 /**
@@ -30,18 +31,18 @@ export async function getBrainstormUsage(uid: string): Promise<BrainstormUsage> 
   const usageRef = doc(db, 'users', uid, 'usage', 'brainstorm')
   const usageSnap = await getDoc(usageRef)
 
-  const currentMonth = getCurrentMonth()
+  const currentDate = getCurrentDate()
 
   if (!usageSnap.exists()) {
     // 初回アクセス時はドキュメント作成
     const newUsage: BrainstormUsage = {
       count: 0,
-      lastResetAt: currentMonth,
+      lastResetAt: currentDate,
       updatedAt: new Date(),
     }
     await setDoc(usageRef, {
       count: 0,
-      lastResetAt: currentMonth,
+      lastResetAt: currentDate,
       updatedAt: Timestamp.now(),
     })
     return newUsage
@@ -50,20 +51,20 @@ export async function getBrainstormUsage(uid: string): Promise<BrainstormUsage> 
   const data = usageSnap.data()
   const usage: BrainstormUsage = {
     count: data.count || 0,
-    lastResetAt: data.lastResetAt || currentMonth,
+    lastResetAt: data.lastResetAt || currentDate,
     updatedAt: data.updatedAt?.toDate() || new Date(),
   }
 
-  // 月が変わっていればリセット
-  if (usage.lastResetAt !== currentMonth) {
+  // 日が変わっていればリセット
+  if (usage.lastResetAt !== currentDate) {
     const resetUsage: BrainstormUsage = {
       count: 0,
-      lastResetAt: currentMonth,
+      lastResetAt: currentDate,
       updatedAt: new Date(),
     }
     await updateDoc(usageRef, {
       count: 0,
-      lastResetAt: currentMonth,
+      lastResetAt: currentDate,
       updatedAt: Timestamp.now(),
     })
     return resetUsage
