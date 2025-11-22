@@ -1,7 +1,12 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import type { Quadrant } from '@/lib/types'
+import { useAuthStore } from '@/lib/store/useAuthStore'
+import { canUseBrainstorm, incrementBrainstormUsage, getBrainstormUsage } from '@/lib/brainstormUsage'
+import { doc, getDoc } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
+import type { Quadrant, User } from '@/lib/types'
+import Link from 'next/link'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -23,10 +28,12 @@ interface BrainstormChatProps {
 }
 
 export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormChatProps) {
+  const user = useAuthStore((state) => state.user)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isInitializing, setIsInitializing] = useState(true)
+  const [limitError, setLimitError] = useState<{ message: string; limit: number } | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -38,23 +45,69 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
   }, [messages])
 
   useEffect(() => {
-    // 初回メッセージを取得
+    // 初回メッセージを取得 + 制限チェック
     startBrainstorm()
   }, [])
 
   const startBrainstorm = async () => {
     setIsInitializing(true)
-    await sendMessage([])
-    setIsInitializing(false)
+
+    // 制限チェック（初回のみ）
+    if (!user) {
+      setLimitError({
+        message: 'ログインが必要です',
+        limit: 0,
+      })
+      setIsInitializing(false)
+      return
+    }
+
+    try {
+      // ユーザーデータ取得
+      const userDoc = await getDoc(doc(db, 'users', user.uid))
+      const userData = userDoc.exists() ? (userDoc.data() as User) : null
+
+      // 使用回数制限チェック
+      const { canUse, limit } = await canUseBrainstorm(user.uid, userData)
+
+      if (!canUse) {
+        setLimitError({
+          message: `今月の利用上限（${limit}回）に達しました。Proプランにアップグレードすると無制限で利用できます。`,
+          limit,
+        })
+        setIsInitializing(false)
+        return
+      }
+
+      // 使用回数をインクリメント
+      await incrementBrainstormUsage(user.uid)
+
+      // ブレインストーミング開始
+      await sendMessage([])
+    } catch (error) {
+      console.error('Brainstorm start error:', error)
+      setLimitError({
+        message: 'エラーが発生しました。もう一度お試しください。',
+        limit: 0,
+      })
+    } finally {
+      setIsInitializing(false)
+    }
   }
 
   const sendMessage = async (currentMessages: Message[]) => {
     setIsLoading(true)
 
     try {
+      if (!user) {
+        throw new Error('ログインが必要です')
+      }
+
       const response = await fetch('/api/ai/brainstorm', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           taskTitle,
           messages: currentMessages,
@@ -136,6 +189,39 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
     setInput('')
 
     await sendMessage(newMessages)
+  }
+
+  // 回数制限エラー表示
+  if (limitError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 px-6">
+        <div className="max-w-md text-center space-y-4">
+          <div className="w-16 h-16 mx-auto bg-amber-100 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h3 className="text-[18px] font-bold text-[#37352f]">今月の利用上限に達しました</h3>
+          <p className="text-[14px] text-[#787774] leading-relaxed">
+            {limitError.message}
+          </p>
+          <div className="pt-4 space-y-3">
+            <Link
+              href="/pricing"
+              className="block w-full px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white text-[14px] font-medium rounded-lg hover:from-sky-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg"
+            >
+              Pro プランにアップグレード
+            </Link>
+            <button
+              onClick={onCancel}
+              className="block w-full px-6 py-3 text-[14px] font-medium text-[#787774] hover:text-[#37352f] transition-colors"
+            >
+              閉じる
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (isInitializing) {
