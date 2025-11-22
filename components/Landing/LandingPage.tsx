@@ -23,10 +23,19 @@ export function LandingPage() {
       {/* ヘッダー */}
       <header className="relative mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
         <div className="flex items-center gap-3">
-          <span className="rounded-md bg-gradient-to-r from-cyan-500 to-blue-600 px-3 py-1.5 text-sm font-bold text-white shadow-lg">
-            AIsen
-          </span>
-          <span className="text-sm text-slate-400">Gmail × AI で自動整理</span>
+          {/* 2x2アイコン（AIsen × Virex） */}
+          <div className="flex items-center gap-2">
+            <div className="grid grid-cols-2 gap-[2px] w-6 h-6">
+              <div className="w-full h-full rounded-tl-sm bg-gradient-to-br from-lime-400 to-lime-500"></div>
+              <div className="w-full h-full rounded-tr-sm bg-gradient-to-br from-cyan-400 to-blue-500"></div>
+              <div className="w-full h-full rounded-bl-sm bg-gradient-to-br from-yellow-400 to-orange-500"></div>
+              <div className="w-full h-full rounded-br-sm bg-slate-700"></div>
+            </div>
+            <span className="rounded-md bg-gradient-to-r from-cyan-500 to-blue-600 px-3 py-1.5 text-sm font-bold text-white shadow-lg">
+              AIsen
+            </span>
+          </div>
+          <span className="text-sm text-slate-400">by Virex</span>
         </div>
         <nav className="flex items-center gap-4 text-sm text-slate-300">
           <a href="#features" className="hover:text-white transition-colors">
@@ -47,37 +56,35 @@ export function LandingPage() {
       {/* ヒーローセクション */}
       <section className="relative mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 pb-24 pt-16 md:flex-row md:items-center md:gap-16">
         {/* 左カラム：コピー */}
-        <div className="flex-1 space-y-8">
-          <div className="inline-flex items-center gap-2 rounded-full bg-slate-900/70 px-4 py-2 text-xs text-slate-300 border border-slate-800">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="flex-1">
+          {/* タグライン */}
+          <div className="inline-flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1 text-[11px] text-slate-300 border border-slate-800">
+            <span className="h-1.5 w-1.5 rounded-full bg-lime-400 animate-pulse" />
             Gmail と AI で「今日やること」が5分で決まる
           </div>
 
-          <h1 className="text-balance text-5xl font-bold leading-tight text-slate-50 md:text-6xl lg:text-7xl">
-            メールとタスクの
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500">
-              「ごちゃごちゃ」を、
-            </span>
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500">
-              朝5分で終わらせる。
+          {/* H1 */}
+          <h1 className="mt-4 text-balance text-4xl md:text-5xl font-semibold leading-tight text-slate-50">
+            メールとタスクを、
+            <span className="block bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent">
+              朝5分で AI が仕分ける。
             </span>
           </h1>
 
-          <p className="max-w-xl text-pretty text-base leading-relaxed text-slate-300 md:text-lg">
-            AIsen は、<strong className="text-white">Gmail からタスク候補を自動収集</strong>して、
-            アイゼンハワー・マトリクスに<strong className="text-white">AI が一括整理</strong>。
-            <br />
-            「今日なにからやるか」の悩みをなくすツールです。
+          {/* 説明文 */}
+          <p className="mt-6 max-w-xl text-sm md:text-base text-slate-300 leading-relaxed">
+            AIsen は、Gmail からタスク候補を集めて、<br />
+            アイゼンハワー・マトリクスに AI が一括で整理するタスク管理ツールです。<br />
+            朝いちの「今日なにからやるか」を決める時間を短くします。
           </p>
 
-          <div className="flex flex-wrap items-center gap-4">
+          {/* CTA */}
+          <div className="mt-6 flex flex-wrap items-center gap-4">
             <a
               href="/b/new"
-              className="rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 px-8 py-4 text-base font-bold text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
+              className="rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 px-8 py-4 text-base font-bold text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all hover:from-cyan-400 hover:to-blue-500"
             >
-              無料で始める →
+              無料で始める
             </a>
             <a
               href="/s/DEMO"
@@ -86,8 +93,8 @@ export function LandingPage() {
               デモを見る
             </a>
           </div>
-          <p className="text-xs text-slate-400">
-            ✓ 登録不要　✓ クレジットカード不要　✓ ブラウザだけで試せます
+          <p className="mt-3 text-xs text-slate-400">
+            登録不要・クレジットカード不要・ブラウザだけで使えます
           </p>
         </div>
 
@@ -96,33 +103,57 @@ export function LandingPage() {
           <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-2xl shadow-black/40 backdrop-blur">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-slate-400">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                <span className="h-2 w-2 rounded-full bg-lime-400" />
                 今日の AIsen ボード
               </div>
               <span className="rounded-full bg-slate-800 px-3 py-1 text-xs text-slate-300">
-                12 タスク整理済み
+                8 タスク整理済み
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               {[
-                { title: 'Q1 緊急×重要', bg: 'bg-red-900/30', border: 'border-red-800', count: 3 },
-                { title: 'Q2 重要', bg: 'bg-blue-900/30', border: 'border-blue-800', count: 5 },
-                { title: 'Q3 緊急だけ', bg: 'bg-yellow-900/30', border: 'border-yellow-800', count: 2 },
-                { title: 'Q4 その他', bg: 'bg-slate-800/30', border: 'border-slate-700', count: 2 },
+                {
+                  title: 'Q1 緊急×重要',
+                  bg: 'bg-lime-900/30',
+                  border: 'border-lime-800',
+                  titleColor: 'text-lime-200',
+                  tasks: ['顧客A 見積り送付', 'バグ修正 PR レビュー']
+                },
+                {
+                  title: 'Q2 重要',
+                  bg: 'bg-blue-900/30',
+                  border: 'border-blue-800',
+                  titleColor: 'text-blue-200',
+                  tasks: ['週次レビュー準備', '新機能設計書']
+                },
+                {
+                  title: 'Q3 緊急だけ',
+                  bg: 'bg-yellow-900/30',
+                  border: 'border-yellow-800',
+                  titleColor: 'text-yellow-200',
+                  tasks: ['定例MTG資料']
+                },
+                {
+                  title: 'Q4 その他',
+                  bg: 'bg-slate-800/30',
+                  border: 'border-slate-700',
+                  titleColor: 'text-slate-300',
+                  tasks: ['技術記事を読む']
+                },
               ].map((q) => (
                 <div
                   key={q.title}
                   className={`space-y-2 rounded-xl border ${q.border} ${q.bg} p-3 backdrop-blur`}
                 >
-                  <div className="text-xs font-semibold text-slate-200 flex items-center justify-between">
+                  <div className={`text-xs font-semibold ${q.titleColor} flex items-center justify-between`}>
                     <span>{q.title}</span>
-                    <span className="text-slate-400">{q.count}</span>
+                    <span className="text-slate-400">{q.tasks.length}</span>
                   </div>
                   <div className="space-y-1.5">
-                    {Array.from({ length: Math.min(q.count, 2) }).map((_, i) => (
+                    {q.tasks.slice(0, 2).map((task, i) => (
                       <div key={i} className="rounded-md bg-slate-800/80 px-2 py-2 text-[11px] text-slate-100">
-                        {i === 0 ? '顧客A 見積り送付' : 'チーム MTG 準備'}
+                        {task}
                       </div>
                     ))}
                   </div>
@@ -230,21 +261,21 @@ export function LandingPage() {
             </div>
             <div className="space-y-4 text-sm text-slate-300">
               <div className="flex items-start gap-3">
-                <span className="text-emerald-400">✓</span>
+                <span className="text-lime-400">✓</span>
                 <div>
                   <strong className="text-slate-200">朝：/inbox を開く</strong>
                   <p className="text-xs text-slate-400 mt-1">Gmail からのタスク候補が自動で並んでいる</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <span className="text-emerald-400">✓</span>
+                <span className="text-lime-400">✓</span>
                 <div>
                   <strong className="text-slate-200">「AI で整理する」ボタン → 一括振り分け</strong>
                   <p className="text-xs text-slate-400 mt-1">Q1〜Q4 に自動分類。最終判断はあなたのまま</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <span className="text-emerald-400">✓</span>
+                <span className="text-lime-400">✓</span>
                 <div>
                   <strong className="text-slate-200">今日やることが 5 分で決まる</strong>
                   <p className="text-xs text-slate-400 mt-1">Q2 の時間をちゃんと確保できる</p>
@@ -292,8 +323,8 @@ export function LandingPage() {
               <div className="flex items-center justify-between mb-4">
                 <span className="text-4xl">{feature.icon}</span>
                 <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                  feature.badge === 'Pro' 
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white' 
+                  feature.badge === 'Pro'
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white'
                     : 'bg-slate-800 text-slate-300 border border-slate-700'
                 }`}>
                   {feature.badge}
@@ -317,9 +348,9 @@ export function LandingPage() {
           </p>
           <a
             href="/pricing"
-            className="inline-block rounded-lg border-2 border-slate-600 px-8 py-3 text-base font-semibold text-slate-100 hover:border-slate-400 hover:bg-slate-800/50 transition-all"
+            className="inline-block rounded-lg border-2 border-slate-600 px-8 py-3 text-base font-semibold text-slate-100 hover:border-lime-500 hover:bg-slate-800/50 transition-all group"
           >
-            料金プランを見る →
+            <span className="group-hover:text-lime-300 transition-colors">料金プランを見る →</span>
           </a>
         </div>
       </section>
@@ -328,7 +359,7 @@ export function LandingPage() {
       <section className="relative mx-auto w-full max-w-6xl px-6 py-24">
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-600 via-blue-600 to-violet-700 p-16 text-center shadow-2xl">
           <div className="absolute inset-0 bg-grid-white opacity-10"></div>
-          
+
           <div className="relative z-10">
             <h2 className="text-4xl font-bold text-white md:text-5xl mb-6">
               まずは、今日のタスクを
