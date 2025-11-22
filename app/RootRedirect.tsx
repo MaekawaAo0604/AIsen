@@ -2,22 +2,34 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/lib/store/useAuthStore'
 
 const BOARD_ID_STORAGE_KEY = 'aisen:lastBoardId'
 
 export function RootRedirect() {
   const router = useRouter()
+  const user = useAuthStore((state) => state.user)
+  const isLoading = useAuthStore((state) => state.isLoading)
 
   useEffect(() => {
-    // localStorage から最後に開いたボードIDを取得
-    const lastBoardId = localStorage.getItem(BOARD_ID_STORAGE_KEY)
+    // Auth状態が確定するまで待機
+    if (isLoading) return
 
-    if (lastBoardId) {
-      // 最後のボードにリダイレクト
-      router.replace(`/b/${lastBoardId}`)
+    // ログイン済みの場合 → /boards に遷移
+    if (user) {
+      router.replace('/boards')
+      return
     }
-    // lastBoardIdがない場合は何もしない（LPを表示）
-  }, [router])
+
+    // 非ログイン + lastBoardIdがある場合 → /b/[id] に遷移
+    const lastBoardId = localStorage.getItem(BOARD_ID_STORAGE_KEY)
+    if (lastBoardId) {
+      router.replace(`/b/${lastBoardId}`)
+      return
+    }
+
+    // 非ログイン + lastBoardIdなし → LPを表示（何もしない）
+  }, [user, isLoading, router])
 
   return null
 }
