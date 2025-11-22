@@ -20,6 +20,13 @@ export const metadata: Metadata = {
   title: "AIsen - アイゼンハワー・マトリクス タスク管理",
   description: "AIによるタスク優先度付けと4象限管理",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: '/apple-icon.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
