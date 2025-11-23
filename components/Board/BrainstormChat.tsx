@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useAuthStore } from '@/lib/store/useAuthStore'
 import { useBrainstormUsageStore } from '@/lib/store/useBrainstormUsageStore'
 import { incrementBrainstormUsage } from '@/lib/brainstormUsage'
@@ -354,8 +355,12 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
         </button>
       </div>
 
-      {/* ログインモーダル */}
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+      {/* ログインモーダル（Portal経由でbody直下に配置） */}
+      {typeof window !== 'undefined' &&
+        createPortal(
+          <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />,
+          document.body
+        )}
     </div>
   )
 }
