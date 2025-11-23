@@ -5,6 +5,7 @@ import { useAuthStore } from '@/lib/store/useAuthStore'
 import { useBrainstormUsageStore } from '@/lib/store/useBrainstormUsageStore'
 import { incrementBrainstormUsage } from '@/lib/brainstormUsage'
 import type { Quadrant } from '@/lib/types'
+import { LoginModal } from '@/components/Auth/LoginModal'
 import Link from 'next/link'
 
 interface Message {
@@ -34,6 +35,7 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
   const [isLoading, setIsLoading] = useState(false)
   const [isInitializing, setIsInitializing] = useState(true)
   const [limitError, setLimitError] = useState<{ message: string; limit: number } | null>(null)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -209,12 +211,12 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
               {limitError.message}
             </p>
             <div className="pt-4 space-y-3">
-              <Link
-                href="/boards"
+              <button
+                onClick={() => setIsLoginModalOpen(true)}
                 className="block w-full px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white text-[14px] font-medium rounded-lg hover:from-sky-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg"
               >
                 ログインして使ってみる
-              </Link>
+              </button>
               <button
                 onClick={onCancel}
                 className="block w-full px-6 py-3 text-[14px] font-medium text-[#787774] hover:text-[#37352f] transition-colors"
@@ -351,6 +353,9 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
           キャンセル
         </button>
       </div>
+
+      {/* ログインモーダル */}
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
     </div>
   )
 }
