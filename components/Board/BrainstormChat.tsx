@@ -69,12 +69,15 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
       const userIsPro = isPro(userData)
 
       // 使用回数制限チェック
-      const { canUse, limit, remaining } = await canUseBrainstorm(user.uid, userData)
+      const { canUse, limit, remaining, usedCount } = await canUseBrainstorm(user.uid, userData)
+
+      console.log('🔍 Brainstorm Usage Check:', { canUse, limit, remaining, usedCount, userIsPro })
 
       // 使用状況を保存（UI表示用）
       setUsageInfo({ remaining, limit, userIsPro })
 
       if (!canUse) {
+        console.log('❌ Brainstorm limit exceeded:', { limit, usedCount })
         setLimitError({
           message: `Freeプランでは、AIブレインストーミングを1日${limit}回まで無料でお使いいただけます。\nまた明日、${limit}回分の無料枠が自動的に復活します。\n毎日回数を気にせず使いたい場合は、AIsen Pro へのアップグレードをご検討ください。`,
           limit,
