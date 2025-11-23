@@ -210,7 +210,7 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
             </p>
             <div className="pt-4 space-y-3">
               <Link
-                href="/login"
+                href="/boards"
                 className="block w-full px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white text-[14px] font-medium rounded-lg hover:from-sky-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg"
               >
                 ログインして使ってみる
