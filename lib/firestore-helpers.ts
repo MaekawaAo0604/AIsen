@@ -22,8 +22,10 @@ import type { Board, Task, User, Quadrant } from './types'
 export async function createBoard(board: Omit<Board, 'id'>): Promise<string> {
   const boardId = crypto.randomUUID()
   const boardRef = doc(db, 'boards', boardId)
+  const batch = writeBatch(db)
 
-  await setDoc(boardRef, {
+  // ボードメタデータをbatchに追加
+  batch.set(boardRef, {
     ...board,
     id: boardId,
     createdAt: Timestamp.now(),
@@ -32,7 +34,6 @@ export async function createBoard(board: Omit<Board, 'id'>): Promise<string> {
 
   // サンプルタスクを自動投入（ログインユーザーの新規ボード作成時のみ）
   if (board.ownerUid) {
-    const batch = writeBatch(db)
 
     const sampleTasks: Array<{ quadrant: Quadrant; task: Omit<Task, 'id'> }> = [
       {
@@ -86,9 +87,10 @@ export async function createBoard(board: Omit<Board, 'id'>): Promise<string> {
         quadrant,
       })
     })
-
-    await batch.commit()
   }
+
+  // batch commit（ボード作成とサンプルタスク作成を一度に実行）
+  await batch.commit()
 
   return boardId
 }
