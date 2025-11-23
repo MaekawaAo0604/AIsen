@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useNotifications } from '@/hooks/useNotifications'
 import { getScheduledNotifications } from '@/lib/notificationScheduler'
 
@@ -48,6 +49,17 @@ export function NotificationSettings() {
     <div className="space-y-6">
       {/* ヘッダー */}
       <div>
+        <div className="flex items-center gap-3 mb-4">
+          <Link
+            href="/boards"
+            className="flex items-center gap-1 text-[14px] text-[#787774] hover:text-[#37352f] transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            マイボードに戻る
+          </Link>
+        </div>
         <h2 className="text-[20px] sm:text-[24px] font-bold text-[#1a1816]">通知設定</h2>
         <p className="mt-2 text-[13px] sm:text-[14px] text-[#787774]">
           タスクの期限が近づいたときや、毎朝のタスク一覧をプッシュ通知で受け取れます。

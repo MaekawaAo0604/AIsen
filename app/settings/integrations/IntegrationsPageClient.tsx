@@ -63,6 +63,17 @@ export function IntegrationsPageClient() {
       <div className="max-w-[900px] mx-auto">
         {/* Header */}
         <div className="mb-8 sm:mb-12">
+          <div className="flex items-center gap-3 mb-4">
+            <Link
+              href="/boards"
+              className="flex items-center gap-1 text-[14px] text-[#787774] hover:text-[#37352f] transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              マイボードに戻る
+            </Link>
+          </div>
           <h1 className="text-[28px] sm:text-[36px] font-bold text-[#37352f] mb-2">
             連携設定
           </h1>
