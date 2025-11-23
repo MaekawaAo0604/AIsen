@@ -18,10 +18,13 @@ export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getA
 
 // Firebase Authentication
 export const auth = getAuth(app)
+
+// 通常のGoogleログイン用Provider (スコープなし)
 export const googleProvider = new GoogleAuthProvider()
 
-// Gmail OAuth用にスコープを追加
-googleProvider.addScope('https://www.googleapis.com/auth/gmail.readonly')
+// Gmail連携専用Provider (Gmail読み取りスコープ付き)
+export const googleProviderWithGmail = new GoogleAuthProvider()
+googleProviderWithGmail.addScope('https://www.googleapis.com/auth/gmail.readonly')
 
 // Firestore
 export const db = getFirestore(app)
