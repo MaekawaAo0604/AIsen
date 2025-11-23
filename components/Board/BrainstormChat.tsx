@@ -24,12 +24,14 @@ interface BrainstormChatProps {
   taskTitle: string;
   onComplete: (result: BrainstormResult) => void;
   onCancel: () => void;
+  onLoginRequest?: () => void;
 }
 
 export function BrainstormChat({
   taskTitle,
   onComplete,
   onCancel,
+  onLoginRequest,
 }: BrainstormChatProps) {
   const user = useAuthStore((state) => state.user);
   const { canUse, remaining, limit, userIsPro, decrementRemaining } =
