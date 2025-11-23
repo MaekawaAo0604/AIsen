@@ -8,6 +8,7 @@ import {
   sendPasswordResetEmail,
 } from 'firebase/auth'
 import { auth, googleProvider } from '@/lib/firebase'
+import { getAuthErrorMessage } from '@/lib/authErrors'
 
 interface LoginModalProps {
   isOpen: boolean
@@ -30,9 +31,11 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     try {
       await signInWithPopup(auth, googleProvider)
       onClose()
+      // ログイン成功時のみフォームをクリア
+      setEmail('')
+      setPassword('')
     } catch (err: unknown) {
-      const error = err as { message?: string }
-      setError(error.message || 'Googleログインに失敗しました')
+      setError(getAuthErrorMessage(err))
     } finally {
       setIsLoading(false)
     }
@@ -45,9 +48,12 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     try {
       await signInWithEmailAndPassword(auth, email, password)
       onClose()
+      // ログイン成功時のみフォームをクリア
+      setEmail('')
+      setPassword('')
     } catch (err: unknown) {
-      const error = err as { message?: string }
-      setError(error.message || 'ログインに失敗しました')
+      setError(getAuthErrorMessage(err))
+      // エラー時はフォーム入力を保持（ユーザーが修正しやすいように）
     } finally {
       setIsLoading(false)
     }
@@ -60,9 +66,12 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     try {
       await createUserWithEmailAndPassword(auth, email, password)
       onClose()
+      // アカウント作成成功時のみフォームをクリア
+      setEmail('')
+      setPassword('')
     } catch (err: unknown) {
-      const error = err as { message?: string }
-      setError(error.message || 'アカウント作成に失敗しました')
+      setError(getAuthErrorMessage(err))
+      // エラー時はフォーム入力を保持（ユーザーが修正しやすいように）
     } finally {
       setIsLoading(false)
     }
@@ -76,8 +85,8 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       await sendPasswordResetEmail(auth, email)
       setResetEmailSent(true)
     } catch (err: unknown) {
-      const error = err as { message?: string }
-      setError(error.message || 'パスワードリセットメールの送信に失敗しました')
+      setError(getAuthErrorMessage(err))
+      // エラー時はメールアドレスを保持
     } finally {
       setIsLoading(false)
     }
@@ -240,15 +249,37 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
               {/* Toggle Mode */}
               <div className="mt-4 text-center">
-                <button
-                  onClick={() => {
-                    setMode(mode === 'login' ? 'signup' : 'login')
-                    setError('')
-                  }}
-                  className="text-[13px] text-[#787774] hover:text-[#37352f] transition-colors"
-                >
-                  {mode === 'login' ? 'アカウントを作成' : 'すでにアカウントをお持ちの方'}
-                </button>
+                {mode === 'login' ? (
+                  <div className="space-y-2">
+                    <p className="text-[13px] text-[#9b9a97]">
+                      まだアカウントをお持ちでない方
+                    </p>
+                    <button
+                      onClick={() => {
+                        setMode('signup')
+                        setError('')
+                      }}
+                      className="text-[14px] font-medium text-[#2383e2] hover:text-[#1a73d1] transition-colors underline"
+                    >
+                      新規登録はこちら
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-[13px] text-[#9b9a97]">
+                      すでにアカウントをお持ちの方
+                    </p>
+                    <button
+                      onClick={() => {
+                        setMode('login')
+                        setError('')
+                      }}
+                      className="text-[14px] font-medium text-[#2383e2] hover:text-[#1a73d1] transition-colors underline"
+                    >
+                      ログインはこちら
+                    </button>
+                  </div>
+                )}
               </div>
             </>
           )}
