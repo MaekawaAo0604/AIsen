@@ -54,6 +54,14 @@ export function BrainstormChat({
     scrollToBottom();
   }, [messages]);
 
+  // ユーザーがログインしたら使用回数を再取得
+  useEffect(() => {
+    if (user && limitError && limitError.limit === 0) {
+      // ログイン前のエラーだった場合、ブレインストームを再開
+      startBrainstorm();
+    }
+  }, [user]);
+
   useEffect(() => {
     startBrainstorm();
   }, []);
