@@ -93,9 +93,9 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/20" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
 
       {/* Modal */}
       <div className="relative bg-white rounded-[3px] shadow-2xl w-full max-w-md mx-4 border border-[#e9e9e7]">
