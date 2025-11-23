@@ -23,15 +23,6 @@ export async function createBoard(board: Omit<Board, 'id'>): Promise<string> {
   const boardId = crypto.randomUUID()
   const boardRef = doc(db, 'boards', boardId)
 
-  // 初回ボードかチェック（ownerUidがある場合のみ）
-  let isFirstBoard = false
-  if (board.ownerUid) {
-    const boardsRef = collection(db, 'boards')
-    const q = query(boardsRef, where('ownerUid', '==', board.ownerUid))
-    const existingBoards = await getDocs(q)
-    isFirstBoard = existingBoards.empty
-  }
-
   await setDoc(boardRef, {
     ...board,
     id: boardId,
@@ -39,8 +30,8 @@ export async function createBoard(board: Omit<Board, 'id'>): Promise<string> {
     updatedAt: Timestamp.now(),
   })
 
-  // 初回ボードの場合、サンプルタスクを自動投入
-  if (isFirstBoard) {
+  // サンプルタスクを自動投入（ログインユーザーの新規ボード作成時のみ）
+  if (board.ownerUid) {
     const batch = writeBatch(db)
 
     const sampleTasks: Array<{ quadrant: Quadrant; task: Omit<Task, 'id'> }> = [

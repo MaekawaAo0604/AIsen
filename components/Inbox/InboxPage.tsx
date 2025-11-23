@@ -226,22 +226,26 @@ Q4（後回し）: ${counts.q4}件
     }
   }
 
-  if (!firebaseUser) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fafafa]">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-[#37352f] mb-4">ログインが必要です</h1>
-          <p className="text-[#787774]">Inbox 機能を使うにはログインしてください</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Freeプランの場合はProプラン案内を表示
-  if (!isPro(userData)) {
+  // ログインしていない、またはFreeプランの場合はProプラン案内を表示
+  if (!firebaseUser || !isPro(userData)) {
     return (
       <div className="min-h-screen bg-[#fafafa] p-6">
         <div className="max-w-3xl mx-auto">
+          {/* 戻るボタン */}
+          {firebaseUser && (
+            <div className="mb-4">
+              <Link
+                href="/boards"
+                className="inline-flex items-center gap-1 text-[14px] text-[#787774] hover:text-[#37352f] transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                マイボードに戻る
+              </Link>
+            </div>
+          )}
+
           <div className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 rounded-[16px] p-8 shadow-xl">
             <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6">
