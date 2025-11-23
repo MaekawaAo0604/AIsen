@@ -23,6 +23,8 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [resetEmailSent, setResetEmailSent] = useState(false)
 
+  console.log('LoginModal rendered, isOpen:', isOpen)
+
   if (!isOpen) return null
 
   const handleGoogleLogin = async () => {

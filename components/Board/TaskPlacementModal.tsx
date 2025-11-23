@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useAuthStore } from '@/lib/store/useAuthStore'
 import { useBrainstormUsageStore } from '@/lib/store/useBrainstormUsageStore'
 import type { Quadrant } from '@/lib/types'
 import { BrainstormChat } from './BrainstormChat'
+import { LoginModal } from '@/components/Auth/LoginModal'
 
 interface TaskPlacementModalProps {
   isOpen: boolean
@@ -21,6 +23,7 @@ export function TaskPlacementModal({ isOpen, taskTitle: initialTaskTitle, onClos
   const [dueDate, setDueDate] = useState('')
   const [selectedQuadrant, setSelectedQuadrant] = useState<Quadrant | null>(null)
   const [isBrainstorming, setIsBrainstorming] = useState(false)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
 
   // モーダルが開いたときにusageを取得
   useEffect(() => {
@@ -121,6 +124,7 @@ export function TaskPlacementModal({ isOpen, taskTitle: initialTaskTitle, onClos
               taskTitle={taskTitle}
               onComplete={handleBrainstormComplete}
               onCancel={() => setIsBrainstorming(false)}
+              onLoginRequest={() => setIsLoginModalOpen(true)}
             />
           ) : (
             <>
@@ -237,6 +241,16 @@ export function TaskPlacementModal({ isOpen, taskTitle: initialTaskTitle, onClos
           </div>
         )}
       </div>
+
+      {/* ログインモーダル（Portal経由でbody直下に配置） */}
+      {typeof window !== 'undefined' &&
+        createPortal(
+          <LoginModal
+            isOpen={isLoginModalOpen}
+            onClose={() => setIsLoginModalOpen(false)}
+          />,
+          document.body
+        )}
     </div>
   )
 }

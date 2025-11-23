@@ -1,65 +1,72 @@
-'use client'
+"use client";
 
-import { useState, useRef, useEffect } from 'react'
-import { useAuthStore } from '@/lib/store/useAuthStore'
-import { useBrainstormUsageStore } from '@/lib/store/useBrainstormUsageStore'
-import { incrementBrainstormUsage } from '@/lib/brainstormUsage'
-import type { Quadrant } from '@/lib/types'
-import { LoginModal } from '@/components/Auth/LoginModal'
-import Link from 'next/link'
+import { useState, useRef, useEffect } from "react";
+import { useAuthStore } from "@/lib/store/useAuthStore";
+import { useBrainstormUsageStore } from "@/lib/store/useBrainstormUsageStore";
+import { incrementBrainstormUsage } from "@/lib/brainstormUsage";
+import type { Quadrant } from "@/lib/types";
+import Link from "next/link";
 
 interface Message {
-  role: 'user' | 'assistant'
-  content: string
+  role: "user" | "assistant";
+  content: string;
 }
 
 interface BrainstormResult {
-  quadrant: Quadrant
-  priority: number
-  reason: string
-  importance: number
-  urgency: number
+  quadrant: Quadrant;
+  priority: number;
+  reason: string;
+  importance: number;
+  urgency: number;
 }
 
 interface BrainstormChatProps {
-  taskTitle: string
-  onComplete: (result: BrainstormResult) => void
-  onCancel: () => void
+  taskTitle: string;
+  onComplete: (result: BrainstormResult) => void;
+  onCancel: () => void;
 }
 
-export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormChatProps) {
-  const user = useAuthStore((state) => state.user)
-  const { canUse, remaining, limit, userIsPro, decrementRemaining } = useBrainstormUsageStore()
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [isInitializing, setIsInitializing] = useState(true)
-  const [limitError, setLimitError] = useState<{ message: string; limit: number } | null>(null)
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+export function BrainstormChat({
+  taskTitle,
+  onComplete,
+  onCancel,
+}: BrainstormChatProps) {
+  const user = useAuthStore((state) => state.user);
+  const { canUse, remaining, limit, userIsPro, decrementRemaining } =
+    useBrainstormUsageStore();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [limitError, setLimitError] = useState<{
+    message: string;
+    limit: number;
+  } | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
-    startBrainstorm()
-  }, [])
+    startBrainstorm();
+  }, []);
 
   const startBrainstorm = async () => {
-    setIsInitializing(true)
+    setIsInitializing(true);
 
     if (!user) {
       setLimitError({
-        message: 'AIブレインストーミング機能をお使いいただくには、ログインが必要です。\n\nログインすると、Freeプランでも1日3回まで無料でAIがタスクの優先順位を整理してくれます。',
+        message:
+          "AIブレインストーミング機能をお使いいただくには、ログインが必要です。\n\nログインすると、Freeプランでも1日5回まで無料でAIがタスクの優先順位を整理してくれます。",
         limit: 0,
-      })
-      setIsInitializing(false)
-      return
+      });
+      setIsInitializing(false);
+      return;
     }
 
     try {
@@ -68,84 +75,93 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
         setLimitError({
           message: `Freeプランでは、AIブレインストーミングを1日${limit}回まで無料でお使いいただけます。\nまた明日、${limit}回分の無料枠が自動的に復活します。\n毎日回数を気にせず使いたい場合は、AIsen Pro へのアップグレードをご検討ください。`,
           limit,
-        })
-        setIsInitializing(false)
-        return
+        });
+        setIsInitializing(false);
+        return;
       }
 
       // 使用回数をインクリメント
-      await incrementBrainstormUsage(user.uid)
+      await incrementBrainstormUsage(user.uid);
 
       // storeの残り回数を更新
-      decrementRemaining()
+      decrementRemaining();
 
       // ブレインストーミング開始
-      await sendMessage([])
+      await sendMessage([]);
     } catch (error) {
-      console.error('Brainstorm start error:', error)
+      console.error("Brainstorm start error:", error);
       setLimitError({
-        message: 'エラーが発生しました。もう一度お試しください。',
+        message: "エラーが発生しました。もう一度お試しください。",
         limit: 0,
-      })
+      });
     } finally {
-      setIsInitializing(false)
+      setIsInitializing(false);
     }
-  }
+  };
 
   const sendMessage = async (currentMessages: Message[]) => {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       if (!user) {
-        throw new Error('ログインが必要です')
+        throw new Error("ログインが必要です");
       }
 
-      const response = await fetch('/api/ai/brainstorm', {
-        method: 'POST',
+      const response = await fetch("/api/ai/brainstorm", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           taskTitle,
           messages: currentMessages,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error('AIとの通信に失敗しました。少し時間をおいて再度お試しください。')
+        throw new Error(
+          "AIとの通信に失敗しました。少し時間をおいて再度お試しください。"
+        );
       }
 
-      const reader = response.body?.getReader()
-      if (!reader) throw new Error('No reader')
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No reader");
 
-      const decoder = new TextDecoder()
-      let assistantMessage = ''
+      const decoder = new TextDecoder();
+      let assistantMessage = "";
 
       while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
+        const { done, value } = await reader.read();
+        if (done) break;
 
-        const chunk = decoder.decode(value)
-        const lines = chunk.split('\n')
+        const chunk = decoder.decode(value);
+        const lines = chunk.split("\n");
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6)
-            if (data === '[DONE]') continue
+          if (line.startsWith("data: ")) {
+            const data = line.slice(6);
+            if (data === "[DONE]") continue;
 
             try {
-              const parsed = JSON.parse(data)
+              const parsed = JSON.parse(data);
               if (parsed.text) {
-                assistantMessage += parsed.text
+                assistantMessage += parsed.text;
                 setMessages((prev) => {
-                  const newMessages = [...prev]
-                  if (newMessages.length > 0 && newMessages[newMessages.length - 1].role === 'assistant') {
-                    newMessages[newMessages.length - 1].content = assistantMessage
+                  const newMessages = [...prev];
+                  if (
+                    newMessages.length > 0 &&
+                    newMessages[newMessages.length - 1].role === "assistant"
+                  ) {
+                    newMessages[newMessages.length - 1].content =
+                      assistantMessage;
                   } else {
-                    newMessages.push({ role: 'assistant', content: assistantMessage })
+                    newMessages.push({
+                      role: "assistant",
+                      content: assistantMessage,
+                    });
                   }
-                  return newMessages
-                })
+                  return newMessages;
+                });
               }
             } catch (e) {
               // Parse error - skip
@@ -155,44 +171,50 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
       }
 
       // CONCLUSIONチェック
-      const conclusionMatch = assistantMessage.match(/CONCLUSION:\s*(\{[\s\S]*?\})/i)
+      const conclusionMatch = assistantMessage.match(
+        /CONCLUSION:\s*(\{[\s\S]*?\})/i
+      );
       if (conclusionMatch) {
         try {
-          const result = JSON.parse(conclusionMatch[1]) as BrainstormResult
+          const result = JSON.parse(conclusionMatch[1]) as BrainstormResult;
           // CONCLUSION部分を削除して表示
-          const cleanMessage = assistantMessage.replace(/CONCLUSION:[\s\S]*$/i, '').trim()
+          const cleanMessage = assistantMessage
+            .replace(/CONCLUSION:[\s\S]*$/i, "")
+            .trim();
           setMessages((prev) => {
-            const newMessages = [...prev]
-            newMessages[newMessages.length - 1].content = cleanMessage
-            return newMessages
-          })
-          setTimeout(() => onComplete(result), 500)
+            const newMessages = [...prev];
+            newMessages[newMessages.length - 1].content = cleanMessage;
+            return newMessages;
+          });
+          setTimeout(() => onComplete(result), 500);
         } catch (e) {
-          console.error('Failed to parse conclusion:', e)
+          console.error("Failed to parse conclusion:", e);
         }
       }
     } catch (error: any) {
-      console.error('Brainstorm error:', error)
+      console.error("Brainstorm error:", error);
       setLimitError({
-        message: error.message || 'AIとの通信に失敗しました。少し時間をおいて再度お試しください。',
+        message:
+          error.message ||
+          "AIとの通信に失敗しました。少し時間をおいて再度お試しください。",
         limit: 0,
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || isLoading) return
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
 
-    const userMessage: Message = { role: 'user', content: input.trim() }
-    const newMessages = [...messages, userMessage]
-    setMessages(newMessages)
-    setInput('')
+    const userMessage: Message = { role: "user", content: input.trim() };
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
+    setInput("");
 
-    await sendMessage(newMessages)
-  }
+    await sendMessage(newMessages);
+  };
 
   // 回数制限エラー表示
   if (limitError) {
@@ -202,17 +224,29 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
         <div className="flex flex-col items-center justify-center py-12 px-6">
           <div className="max-w-md text-center space-y-4">
             <div className="w-16 h-16 mx-auto bg-sky-100 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              <svg
+                className="w-8 h-8 text-sky-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
               </svg>
             </div>
-            <h3 className="text-[18px] font-bold text-[#37352f]">AIブレインストーミング機能</h3>
+            <h3 className="text-[18px] font-bold text-[#37352f]">
+              AIブレインストーミング機能
+            </h3>
             <p className="text-[14px] text-[#787774] leading-relaxed whitespace-pre-line">
               {limitError.message}
             </p>
             <div className="pt-4 space-y-3">
               <button
-                onClick={() => setIsLoginModalOpen(true)}
+                onClick={() => onLoginRequest?.()}
                 className="block w-full px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white text-[14px] font-medium rounded-lg hover:from-sky-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg"
               >
                 ログインして使ってみる
@@ -226,7 +260,7 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
             </div>
           </div>
         </div>
-      )
+      );
     }
 
     // 回数制限到達（ログイン済み）
@@ -234,11 +268,23 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
       <div className="flex flex-col items-center justify-center py-12 px-6">
         <div className="max-w-md text-center space-y-4">
           <div className="w-16 h-16 mx-auto bg-amber-100 rounded-full flex items-center justify-center">
-            <svg className="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <svg
+              className="w-8 h-8 text-amber-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
             </svg>
           </div>
-          <h3 className="text-[18px] font-bold text-[#37352f]">今日はAIブレインストーミングの無料分を使い切りました</h3>
+          <h3 className="text-[18px] font-bold text-[#37352f]">
+            今日はAIブレインストーミングの無料分を使い切りました
+          </h3>
           <p className="text-[14px] text-[#787774] leading-relaxed whitespace-pre-line">
             {limitError.message}
           </p>
@@ -258,14 +304,19 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (isInitializing) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="flex items-center gap-2 text-[#787774]">
-          <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-5 h-5 animate-spin"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -276,7 +327,7 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
           <span className="text-[14px]">AIと接続中...</span>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -287,8 +338,18 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
         {!userIsPro && (
           <div className="flex items-center justify-center mb-4">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-sky-50 border border-sky-200 rounded-lg text-sky-700">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <span className="text-[12px] font-medium">
                 今日の残り: {remaining} / {limit}
@@ -300,16 +361,20 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex ${
+              message.role === "user" ? "justify-end" : "justify-start"
+            }`}
           >
             <div
               className={`max-w-[80%] rounded-[8px] px-4 py-2.5 ${
-                message.role === 'user'
-                  ? 'bg-[#2383e2] text-white'
-                  : 'bg-[#f7f6f3] text-[#37352f] border border-[#e9e9e7]'
+                message.role === "user"
+                  ? "bg-[#2383e2] text-white"
+                  : "bg-[#f7f6f3] text-[#37352f] border border-[#e9e9e7]"
               }`}
             >
-              <p className="text-[14px] leading-[1.6] whitespace-pre-wrap">{message.content}</p>
+              <p className="text-[14px] leading-[1.6] whitespace-pre-wrap">
+                {message.content}
+              </p>
             </div>
           </div>
         ))}
@@ -317,9 +382,18 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
           <div className="flex justify-start">
             <div className="bg-[#f7f6f3] border border-[#e9e9e7] rounded-[8px] px-4 py-2.5">
               <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 bg-[#9b9a97] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 bg-[#9b9a97] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-[#9b9a97] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div
+                  className="w-2 h-2 bg-[#9b9a97] rounded-full animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                />
+                <div
+                  className="w-2 h-2 bg-[#9b9a97] rounded-full animate-bounce"
+                  style={{ animationDelay: "150ms" }}
+                />
+                <div
+                  className="w-2 h-2 bg-[#9b9a97] rounded-full animate-bounce"
+                  style={{ animationDelay: "300ms" }}
+                />
               </div>
             </div>
           </div>
@@ -355,7 +429,5 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
       </div>
 
       {/* ログインモーダル - Portalを使わずに直接配置 */}
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
-    </div>
-  )
+  );
 }
