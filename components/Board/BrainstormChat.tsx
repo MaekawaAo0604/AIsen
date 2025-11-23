@@ -56,13 +56,10 @@ export function BrainstormChat({
 
   // ユーザーがログインしたら使用回数を再取得
   useEffect(() => {
-    console.log('User changed:', user?.uid, 'limitError:', limitError);
     if (user && limitError && limitError.limit === 0) {
-      console.log('Fetching usage after login...');
       // ログイン前のエラーだった場合、エラーをクリアして使用回数を取得してブレインストームを再開
       setLimitError(null);
       fetchUsage(user.uid).then(() => {
-        console.log('Usage fetched, canUse:', canUse, 'remaining:', remaining);
         startBrainstorm();
       });
     }
