@@ -34,7 +34,7 @@ export function BrainstormChat({
   onLoginRequest,
 }: BrainstormChatProps) {
   const user = useAuthStore((state) => state.user);
-  const { canUse, remaining, limit, userIsPro, decrementRemaining } =
+  const { canUse, remaining, limit, userIsPro, decrementRemaining, fetchUsage } =
     useBrainstormUsageStore();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -57,8 +57,10 @@ export function BrainstormChat({
   // ユーザーがログインしたら使用回数を再取得
   useEffect(() => {
     if (user && limitError && limitError.limit === 0) {
-      // ログイン前のエラーだった場合、ブレインストームを再開
-      startBrainstorm();
+      // ログイン前のエラーだった場合、使用回数を取得してブレインストームを再開
+      fetchUsage(user.uid).then(() => {
+        startBrainstorm();
+      });
     }
   }, [user]);
 
