@@ -2,6 +2,8 @@
 
 import { useBoardStore } from '@/stores/useBoardStore'
 import { Quadrant } from './Quadrant'
+import { OnboardingGuide } from './OnboardingGuide'
+import { GmailSuggestionCard } from './GmailSuggestionCard'
 
 const quadrantConfig = {
   q1: { title: '緊急 × 重要', description: '今すぐやる' },
@@ -15,6 +17,12 @@ export function BoardCanvas() {
 
   return (
     <div className="mx-auto max-w-7xl px-0 sm:px-0 lg:px-0 py-4 sm:py-8">
+      {/* オンボーディングガイド */}
+      <OnboardingGuide />
+
+      {/* Gmail連携提案カード */}
+      <GmailSuggestionCard />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <Quadrant
           quadrant="q1"

@@ -23,12 +23,81 @@ export async function createBoard(board: Omit<Board, 'id'>): Promise<string> {
   const boardId = crypto.randomUUID()
   const boardRef = doc(db, 'boards', boardId)
 
+  // 初回ボードかチェック（ownerUidがある場合のみ）
+  let isFirstBoard = false
+  if (board.ownerUid) {
+    const boardsRef = collection(db, 'boards')
+    const q = query(boardsRef, where('ownerUid', '==', board.ownerUid))
+    const existingBoards = await getDocs(q)
+    isFirstBoard = existingBoards.empty
+  }
+
   await setDoc(boardRef, {
     ...board,
     id: boardId,
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
   })
+
+  // 初回ボードの場合、サンプルタスクを自動投入
+  if (isFirstBoard) {
+    const batch = writeBatch(db)
+
+    const sampleTasks: Array<{ quadrant: Quadrant; task: Omit<Task, 'id'> }> = [
+      {
+        quadrant: 'q1',
+        task: {
+          title: '今日中に返信するメール',
+          notes: '',
+          due: null,
+          completed: false,
+          createdAt: new Date().toISOString(),
+        },
+      },
+      {
+        quadrant: 'q2',
+        task: {
+          title: '今週中に進めたい資料作成',
+          notes: '',
+          due: null,
+          completed: false,
+          createdAt: new Date().toISOString(),
+        },
+      },
+      {
+        quadrant: 'q3',
+        task: {
+          title: 'いつか着手したい学習テーマ',
+          notes: '',
+          due: null,
+          completed: false,
+          createdAt: new Date().toISOString(),
+        },
+      },
+      {
+        quadrant: 'q4',
+        task: {
+          title: 'やらないと決めたこと',
+          notes: '',
+          due: null,
+          completed: false,
+          createdAt: new Date().toISOString(),
+        },
+      },
+    ]
+
+    sampleTasks.forEach(({ quadrant, task }) => {
+      const taskId = crypto.randomUUID()
+      const taskRef = doc(db, 'boards', boardId, 'tasks', taskId)
+      batch.set(taskRef, {
+        ...task,
+        id: taskId,
+        quadrant,
+      })
+    })
+
+    await batch.commit()
+  }
 
   return boardId
 }
