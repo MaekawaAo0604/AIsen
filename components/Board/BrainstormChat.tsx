@@ -53,7 +53,7 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
 
     if (!user) {
       setLimitError({
-        message: 'ログインが必要です',
+        message: 'AIブレインストーミング機能をお使いいただくには、ログインが必要です。\n\nログインすると、Freeプランでも1日3回まで無料でAIがタスクの優先順位を整理してくれます。',
         limit: 0,
       })
       setIsInitializing(false)
@@ -194,6 +194,40 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
 
   // 回数制限エラー表示
   if (limitError) {
+    // ログインしていない場合
+    if (!user) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 px-6">
+          <div className="max-w-md text-center space-y-4">
+            <div className="w-16 h-16 mx-auto bg-sky-100 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h3 className="text-[18px] font-bold text-[#37352f]">AIブレインストーミング機能</h3>
+            <p className="text-[14px] text-[#787774] leading-relaxed whitespace-pre-line">
+              {limitError.message}
+            </p>
+            <div className="pt-4 space-y-3">
+              <Link
+                href="/login"
+                className="block w-full px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white text-[14px] font-medium rounded-lg hover:from-sky-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg"
+              >
+                ログインして使ってみる
+              </Link>
+              <button
+                onClick={onCancel}
+                className="block w-full px-6 py-3 text-[14px] font-medium text-[#787774] hover:text-[#37352f] transition-colors"
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // 回数制限到達（ログイン済み）
     return (
       <div className="flex flex-col items-center justify-center py-12 px-6">
         <div className="max-w-md text-center space-y-4">
