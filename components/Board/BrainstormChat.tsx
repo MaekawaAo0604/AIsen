@@ -428,6 +428,5 @@ export function BrainstormChat({
         </button>
       </div>
 
-      {/* ログインモーダル - Portalを使わずに直接配置 */}
   );
 }
