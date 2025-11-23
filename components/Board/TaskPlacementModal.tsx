@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useAuthStore } from '@/lib/store/useAuthStore'
+import { useBrainstormUsageStore } from '@/lib/store/useBrainstormUsageStore'
 import type { Quadrant } from '@/lib/types'
 import { BrainstormChat } from './BrainstormChat'
 
@@ -12,11 +14,20 @@ interface TaskPlacementModalProps {
 }
 
 export function TaskPlacementModal({ isOpen, taskTitle: initialTaskTitle, onClose, onPlace }: TaskPlacementModalProps) {
+  const user = useAuthStore((state) => state.user)
+  const { remaining, limit, userIsPro, isLoading, fetchUsage } = useBrainstormUsageStore()
   const [taskTitle, setTaskTitle] = useState(initialTaskTitle || '')
   const [subtasks, setSubtasks] = useState('')
   const [dueDate, setDueDate] = useState('')
   const [selectedQuadrant, setSelectedQuadrant] = useState<Quadrant | null>(null)
   const [isBrainstorming, setIsBrainstorming] = useState(false)
+
+  // モーダルが開いたときにusageを取得
+  useEffect(() => {
+    if (isOpen && user) {
+      fetchUsage(user.uid)
+    }
+  }, [isOpen, user, fetchUsage])
 
   if (!isOpen) return null
 
@@ -172,7 +183,21 @@ export function TaskPlacementModal({ isOpen, taskTitle: initialTaskTitle, onClos
               </div>
 
               {/* AI Brainstorm Section */}
-              <div className="p-4 bg-[#fafafa] rounded-[3px] border border-[#e9e9e7]">
+              <div className="p-4 bg-[#fafafa] rounded-[3px] border border-[#e9e9e7] space-y-3">
+                {/* 残り回数表示（Freeユーザーのみ） */}
+                {!userIsPro && (
+                  <div className="flex items-center justify-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-sky-50 border border-sky-200 rounded-lg text-sky-700">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-[12px] font-medium">
+                        {isLoading ? '読み込み中...' : `今日の残り: ${remaining === -1 ? 'ー' : remaining} / ${limit}`}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <button
                   onClick={() => setIsBrainstorming(true)}
                   disabled={!taskTitle.trim()}

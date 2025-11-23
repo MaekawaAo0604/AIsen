@@ -2,11 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useAuthStore } from '@/lib/store/useAuthStore'
-import { canUseBrainstorm, incrementBrainstormUsage } from '@/lib/brainstormUsage'
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
-import { isPro } from '@/lib/utils'
-import type { Quadrant, User } from '@/lib/types'
+import { useBrainstormUsageStore } from '@/lib/store/useBrainstormUsageStore'
+import { incrementBrainstormUsage } from '@/lib/brainstormUsage'
+import type { Quadrant } from '@/lib/types'
 import Link from 'next/link'
 
 interface Message {
@@ -30,12 +28,12 @@ interface BrainstormChatProps {
 
 export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormChatProps) {
   const user = useAuthStore((state) => state.user)
+  const { canUse, remaining, limit, userIsPro, decrementRemaining } = useBrainstormUsageStore()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isInitializing, setIsInitializing] = useState(true)
   const [limitError, setLimitError] = useState<{ message: string; limit: number } | null>(null)
-  const [usageInfo, setUsageInfo] = useState<{ remaining: number; limit: number; userIsPro: boolean } | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -63,21 +61,8 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
     }
 
     try {
-      // ユーザーデータ取得
-      const userDoc = await getDoc(doc(db, 'users', user.uid))
-      const userData = userDoc.exists() ? (userDoc.data() as User) : null
-      const userIsPro = isPro(userData)
-
-      // 使用回数制限チェック
-      const { canUse, limit, remaining, usedCount } = await canUseBrainstorm(user.uid, userData)
-
-      console.log('🔍 Brainstorm Usage Check:', { canUse, limit, remaining, usedCount, userIsPro })
-
-      // 使用状況を保存（UI表示用）
-      setUsageInfo({ remaining, limit, userIsPro })
-
+      // 使用回数制限チェック（storeから取得）
       if (!canUse) {
-        console.log('❌ Brainstorm limit exceeded:', { limit, usedCount })
         setLimitError({
           message: `Freeプランでは、AIブレインストーミングを1日${limit}回まで無料でお使いいただけます。\nまた明日、${limit}回分の無料枠が自動的に復活します。\n毎日回数を気にせず使いたい場合は、AIsen Pro へのアップグレードをご検討ください。`,
           limit,
@@ -89,8 +74,8 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
       // 使用回数をインクリメント
       await incrementBrainstormUsage(user.uid)
 
-      // インクリメント後の remaining を更新
-      setUsageInfo({ remaining: remaining - 1, limit, userIsPro })
+      // storeの残り回数を更新
+      decrementRemaining()
 
       // ブレインストーミング開始
       await sendMessage([])
@@ -263,14 +248,14 @@ export function BrainstormChat({ taskTitle, onComplete, onCancel }: BrainstormCh
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
         {/* 残り回数表示（Freeユーザーのみ） */}
-        {usageInfo && !usageInfo.userIsPro && (
+        {!userIsPro && (
           <div className="flex items-center justify-center mb-4">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-sky-50 border border-sky-200 rounded-lg text-sky-700">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span className="text-[12px] font-medium">
-                今日の残り: {usageInfo.remaining} / {usageInfo.limit}
+                今日の残り: {remaining} / {limit}
               </span>
             </div>
           </div>
