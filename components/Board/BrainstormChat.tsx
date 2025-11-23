@@ -427,6 +427,6 @@ export function BrainstormChat({
           キャンセル
         </button>
       </div>
-
+    </div>
   );
 }
