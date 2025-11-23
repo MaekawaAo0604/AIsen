@@ -86,8 +86,8 @@ export async function getUserBoards(userId: string): Promise<SavedBoard[]> {
     return {
       boardId: doc.id,
       title: data.title,
-      createdAt: data.createdAt.toDate(),
-      updatedAt: data.updatedAt.toDate(),
+      createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+      updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt),
       board: data.board,
     }
   })
