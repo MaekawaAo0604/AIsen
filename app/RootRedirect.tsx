@@ -1,14 +1,13 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store/useAuthStore'
 
 const BOARD_ID_STORAGE_KEY = 'aisen:lastBoardId'
 
 export function RootRedirect() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const user = useAuthStore((state) => state.user)
   const isLoading = useAuthStore((state) => state.isLoading)
 
@@ -29,7 +28,7 @@ export function RootRedirect() {
     }
 
     // その他の場合（ログイン中、または非ログイン+lastBoardIdなし）はLPを表示（何もしない）
-  }, [user, isLoading, router, searchParams])
+  }, [user, isLoading, router])
 
   return null
 }
