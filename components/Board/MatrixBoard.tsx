@@ -5,6 +5,7 @@ import { useBoardStore } from '@/stores/useBoardStore'
 import type { Task, Quadrant as QuadrantType } from '@/lib/types'
 import type { TasksByQuadrant } from '@/lib/demo-data'
 import { Quadrant } from './Quadrant'
+import { TaskCard } from './TaskCard'
 import { QUADRANT_CONFIG, QUADRANTS } from '@/lib/constants'
 import { useState } from 'react'
 
@@ -19,7 +20,7 @@ export function MatrixBoard({ readOnly = false, initialTasks }: MatrixBoardProps
   const tasks = readOnly && initialTasks ? initialTasks : storeTasks
 
   const moveTask = useBoardStore((state) => state.moveTask)
-  const [activeTask, setActiveTask] = useState<Task | null>(null)
+  const [activeTask, setActiveTask] = useState<{ task: Task; quadrant: QuadrantType } | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -33,7 +34,7 @@ export function MatrixBoard({ readOnly = false, initialTasks }: MatrixBoardProps
     const { active } = event
     const quadrant = active.data.current.quadrant as QuadrantType
     const task = tasks[quadrant].find((t) => t.id === active.id)
-    if (task) setActiveTask(task)
+    if (task) setActiveTask({ task, quadrant })
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -56,21 +57,26 @@ export function MatrixBoard({ readOnly = false, initialTasks }: MatrixBoardProps
 
   // read-onlyの場合はD&Dコンテキストを無効化
   const BoardContent = () => (
-    <div className="relative w-full h-[500px] sm:h-[600px] md:h-[700px] bg-white rounded-[3px] border border-[#e9e9e7] overflow-hidden">
-      {/* Y軸ラベル（左側） */}
-        <div className="absolute left-0 top-0 bottom-0 w-10 sm:w-12 md:w-16 flex items-center justify-center bg-[#fafafa] border-r border-[#e9e9e7]">
-          <div className="transform -rotate-90 whitespace-nowrap text-[10px] sm:text-[11px] md:text-[12px] font-medium text-[#787774] tracking-wide">
+    <div className="relative w-full bg-slate-50 rounded-lg p-4 md:p-6">
+      {/* PC: 軸ラベル */}
+      <div className="hidden lg:block">
+        {/* Y軸ラベル（左側） */}
+        <div className="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center">
+          <div className="transform -rotate-90 whitespace-nowrap text-xs font-medium text-slate-500 tracking-wide">
             重要度
           </div>
         </div>
 
         {/* X軸ラベル（下部） */}
-        <div className="absolute left-10 sm:left-12 md:left-16 right-0 bottom-0 h-8 sm:h-10 md:h-12 flex items-center justify-center bg-[#fafafa] border-t border-[#e9e9e7]">
-          <div className="text-[10px] sm:text-[11px] md:text-[12px] font-medium text-[#787774] tracking-wide">緊急度</div>
+        <div className="absolute left-12 right-0 bottom-0 h-10 flex items-center justify-center">
+          <div className="text-xs font-medium text-slate-500 tracking-wide">緊急度</div>
         </div>
+      </div>
 
-        {/* メイングリッド */}
-        <div className="absolute left-10 sm:left-12 md:left-16 right-0 top-0 bottom-8 sm:bottom-10 md:bottom-12 grid grid-cols-2 grid-rows-2 gap-[1px] bg-[#e9e9e7]">
+      {/* メイングリッド */}
+      <div className="lg:ml-12 lg:mb-10">
+        {/* PC: 2x2 グリッド / SP: 縦並び */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
           {QUADRANTS.map((quadrant) => {
             const config = QUADRANT_CONFIG[quadrant]
             return (
@@ -89,44 +95,25 @@ export function MatrixBoard({ readOnly = false, initialTasks }: MatrixBoardProps
             )
           })}
         </div>
-
-        {/* 軸ラベル */}
-        <div className="absolute left-0.5 sm:left-1 md:left-2 top-8 sm:top-10 md:top-12 text-[9px] sm:text-[10px] md:text-[11px] font-medium text-[#9b9a97]">高</div>
-        <div className="absolute left-0.5 sm:left-1 md:left-2 bottom-12 sm:bottom-14 md:bottom-16 text-[9px] sm:text-[10px] md:text-[11px] font-medium text-[#9b9a97]">低</div>
-        <div className="absolute left-12 sm:left-16 md:left-20 bottom-0.5 sm:bottom-1 md:bottom-2 text-[9px] sm:text-[10px] md:text-[11px] font-medium text-[#9b9a97]">高</div>
-        <div className="absolute right-2 sm:right-3 md:right-4 bottom-0.5 sm:bottom-1 md:bottom-2 text-[9px] sm:text-[10px] md:text-[11px] font-medium text-[#9b9a97]">低</div>
+      </div>
     </div>
   )
 
-  // read-onlyの場合はD&Dなしで表示
-  if (readOnly) {
-    return <BoardContent />
-  }
-
-  return (
+  return readOnly ? (
+    <BoardContent />
+  ) : (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <BoardContent />
       <DragOverlay>
-        {activeTask ? (
-          <div className="bg-white p-3 shadow-2xl border-2 border-[#2383e2] rounded-[3px] cursor-grabbing opacity-90 scale-105 transition-transform">
-            <div className="flex items-start gap-2">
-              <div className="w-4 h-4 rounded-[3px] border-2 border-[#9b9a97]" />
-              <div className="flex-1">
-                <p className="text-[14px] text-[#37352f] font-medium">{activeTask.title}</p>
-                {activeTask.due && (
-                  <p className="text-[11px] text-[#9b9a97] mt-1">
-                    📅 {new Date(activeTask.due).toLocaleDateString('ja-JP')}
-                  </p>
-                )}
-              </div>
-              {activeTask.priority !== undefined && (
-                <span className="inline-flex items-center justify-center w-8 h-5 text-[10px] font-semibold rounded-[3px] bg-[#2563eb] text-white">
-                  {activeTask.priority}
-                </span>
-              )}
-            </div>
+        {activeTask && (
+          <div className="opacity-80 rotate-3 scale-105">
+            <TaskCard
+              task={activeTask.task}
+              quadrant={activeTask.quadrant}
+              readOnly={true}
+            />
           </div>
-        ) : null}
+        )}
       </DragOverlay>
     </DndContext>
   )
