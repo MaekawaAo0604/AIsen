@@ -29,5 +29,5 @@ googleProviderWithGmail.addScope('https://www.googleapis.com/auth/gmail.readonly
 // Firestore
 export const db = getFirestore(app)
 
-// Cloud Functions
-export const functions = getFunctions(app)
+// Cloud Functions (us-central1リージョンを明示的に指定)
+export const functions = getFunctions(app, 'us-central1')
