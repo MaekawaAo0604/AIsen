@@ -103,9 +103,9 @@ export function PricingPage() {
           </h1>
 
           <p className="mt-8 text-lg leading-relaxed text-slate-600 max-w-3xl mx-auto">
-            Gmail連携・AI整理まではPro。
-            <br className="hidden sm:block" />
             まずはブラウザだけで4象限を試せます。
+            <br className="hidden sm:block" />
+            Gmail連携とAIによる一括整理は、Pro プランで利用できます。
           </p>
 
           <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -165,9 +165,9 @@ export function PricingPage() {
                 ))}
               </ul>
 
-              <div className="mt-8 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-800">
-                  <strong>Gmail連携・AI整理は使えません</strong>
+              <div className="mt-8 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  Gmail連携やAI整理が不要なら、シンプルな4象限ボードとしてこのプランだけでも十分使えます。
                 </p>
               </div>
 
@@ -202,7 +202,7 @@ export function PricingPage() {
                 価格は現在調整中
               </p>
               <p className="mt-4 text-slate-600 leading-relaxed">
-                メール・予定から全部4象限にまとめたい人向け
+                Gmail連携とAIによるメール・タスク整理は、この Pro プラン専用の機能です。
               </p>
 
               <ul className="mt-10 space-y-4">
