@@ -116,23 +116,35 @@ export const organizeInboxTasks = functions
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         tasks.map(async (task: any) => {
           try {
-            const prompt = `あなたはタスク管理のエキスパートです。
-以下のメールをアイゼンハワー・マトリクスに基づいて、4つの象限に分類してください。
+            const prompt = `以下のタスクをアイゼンハワー・マトリクスに基づいて、4つの象限に分類してください。
 
-メール情報:
+タスク情報:
 件名: ${task.title}
-内容: ${task.description || ""}
+内容: ${task.description || "（内容なし）"}
 
-4つの象限:
-- Q1: 重要かつ緊急 (今すぐやる)
-- Q2: 重要だが緊急ではない (計画してやる)
-- Q3: 緊急だが重要ではない (誰かに任せる)
-- Q4: 重要でも緊急でもない (やらない)
+分類基準:
+【Q1: 重要かつ緊急】今日〜明日の締切、緊急対応が必要な問題、重要な意思決定
+例: 顧客クレーム対応、今日締切の提案書、システム障害対応
 
-以下のJSON形式で回答してください:
+【Q2: 重要だが緊急ではない】長期的に価値がある計画・準備・学習、戦略的な仕事
+例: 週次レビュー、新機能の設計、スキルアップ学習、人間関係構築
+
+【Q3: 緊急だが重要ではない】他人の都合による割り込み、定例報告、単純な依頼
+例: 情報共有MTG、定例報告書、他部署の軽微な問い合わせ
+
+【Q4: 重要でも緊急でもない】時間を浪費する活動、優先度の低い雑務
+例: 後で読む記事、興味本位の調査、必須ではない見栄えの改善
+
+判定のポイント:
+- 「重要」= 長期的な目標達成や本質的な価値創造に貢献するか
+- 「緊急」= 明確な期限や即座の対応が求められているか
+- 迷ったら Q2（計画的に取り組む）を選ぶこと
+- 単なる情報共有やFYIは Q3 または Q4
+
+JSON形式で回答:
 {
   "quadrant": "Q1" | "Q2" | "Q3" | "Q4",
-  "reason": "判定理由の説明（簡潔に）"
+  "reason": "判定理由（1文で）"
 }`;
 
             const completion = await getOpenAI().chat.completions.create({
@@ -140,7 +152,10 @@ export const organizeInboxTasks = functions
               messages: [
                 {
                   role: "system",
-                  content: "あなたはタスク管理のエキスパートです。アイゼンハワー・マトリクスに基づいてメールを分類します。",
+                  content:
+                    "あなたはタスク管理のエキスパートです。" +
+                    "アイゼンハワー・マトリクスに基づいてタスクを4象限に分類します。" +
+                    "Q2（重要だが緊急ではない）を積極的に選び、長期的価値を重視してください。",
                 },
                 {
                   role: "user",
@@ -148,7 +163,7 @@ export const organizeInboxTasks = functions
                 },
               ],
               response_format: {type: "json_object"},
-              temperature: 0.7,
+              temperature: 0.5,
             });
 
             const result = JSON.parse(

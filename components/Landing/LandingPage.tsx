@@ -64,7 +64,7 @@ export function LandingPage() {
 
           {/* H1 */}
           <h1 className="mt-4 text-balance text-4xl md:text-5xl font-semibold leading-tight text-slate-900">
-            朝いちの「今日なにからやるか」を、
+            朝イチの「今日なにからやるか」を、
             <span className="block text-blue-600">
               AI に丸投げできるタスクボード。
             </span>
