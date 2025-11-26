@@ -86,31 +86,30 @@ export function Header({ onMenuClick }: HeaderProps = {}) {
 
   return (
     <>
-      <header className="border-b border-gray-200 bg-white">
+      <header className="border-b border-slate-200 bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
           <div className="flex h-14 sm:h-16 items-center justify-between gap-2">
-            <div className="flex items-center gap-2 sm:gap-6 min-w-0 flex-1">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
               {/* Mobile menu button */}
               <button
                 onClick={onMenuClick}
-                className="sm:hidden p-2 -ml-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                className="sm:hidden p-2 -ml-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
                 aria-label="メニューを開く"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
-              <h1 className="text-lg sm:text-2xl font-bold text-gray-900">AIsen</h1>
-              {isBoardSaved && (
-                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
-                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-[15px] font-medium text-gray-700 truncate">
-                    {boardState.title}
-                  </span>
-                </div>
-              )}
+              
+              {/* Logo & Board Name */}
+              <div className="flex flex-col min-w-0">
+                <a href="/" className="text-lg sm:text-xl font-bold text-slate-900 hover:text-slate-700 transition-colors">
+                  AIsen
+                </a>
+                {isBoardSaved && (
+                  <p className="text-xs text-slate-500 truncate hidden sm:block">{boardState.title}</p>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
@@ -136,7 +135,7 @@ export function Header({ onMenuClick }: HeaderProps = {}) {
               {/* 共有ボタン */}
               <button
                 onClick={() => setIsShareModalOpen(true)}
-                className="flex items-center gap-1.5 sm:gap-2 h-8 sm:h-9 px-2.5 sm:px-4 text-[13px] sm:text-[14px] font-medium text-white bg-[#2383e2] rounded-[6px] hover:bg-[#1a73d1] transition-colors"
+                className="flex items-center gap-1.5 sm:gap-2 h-8 sm:h-9 px-2.5 sm:px-4 text-[13px] sm:text-[14px] font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-all"
               >
                 <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
