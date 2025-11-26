@@ -1,5 +1,6 @@
 'use client'
 
+import { createPortal } from 'react-dom'
 import type { Task } from '@/lib/types'
 
 interface TaskDetailModalProps {
@@ -11,7 +12,7 @@ interface TaskDetailModalProps {
 export function TaskDetailModal({ isOpen, task, onClose }: TaskDetailModalProps) {
   if (!isOpen || !task) return null
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/20" onClick={onClose} />
@@ -28,14 +29,14 @@ export function TaskDetailModal({ isOpen, task, onClose }: TaskDetailModalProps)
               {task.priority !== undefined && (
                 <div className="mt-2 flex items-center gap-2">
                   <span
-                    className={`inline-flex items-center justify-center px-2 py-1 text-[11px] font-semibold rounded-[3px] ${
+                    className={`inline-flex items-center justify-center px-2 py-1 text-[11px] font-semibold rounded-md border ${
                       task.priority >= 80
-                        ? 'bg-[#dc2626] text-white'
+                        ? 'bg-orange-50 text-orange-700 border-orange-200'
                         : task.priority >= 60
-                        ? 'bg-[#f59e0b] text-white'
+                        ? 'bg-amber-50 text-amber-700 border-amber-200'
                         : task.priority >= 40
-                        ? 'bg-[#2563eb] text-white'
-                        : 'bg-[#6b7280] text-white'
+                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                        : 'bg-slate-100 text-slate-600 border-slate-200'
                     }`}
                   >
                     優先度: {task.priority}
@@ -127,6 +128,7 @@ export function TaskDetailModal({ isOpen, task, onClose }: TaskDetailModalProps)
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
