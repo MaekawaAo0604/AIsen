@@ -69,8 +69,8 @@ export async function getBoard(userId: string, boardId: string): Promise<SavedBo
   return {
     boardId,
     title: data.title,
-    createdAt: data.createdAt.toDate(),
-    updatedAt: data.updatedAt.toDate(),
+    createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
+    updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt),
     board: data.board,
   }
 }
