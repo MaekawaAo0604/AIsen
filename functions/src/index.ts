@@ -29,7 +29,7 @@ function getOpenAI(): OpenAI {
  * and move them to the default board
  */
 export const organizeInboxTasks = functions
-  .runWith({timeoutSeconds: 540, memory: "1GB"})
+  .runWith({timeoutSeconds: 540, memory: "2GB"})
   .https.onCall(async (data, context) => {
     // Authenticate user
     if (!context.auth) {
@@ -174,7 +174,15 @@ export const organizeInboxTasks = functions
       );
 
       // Move tasks to board and delete from inbox
-      const batch = db.batch();
+      // Group tasks by quadrant to minimize Firestore updates
+      const tasksByQuadrant: Record<string, any[]> = {
+        q1: [...(boardData?.q1 || [])],
+        q2: [...(boardData?.q2 || [])],
+        q3: [...(boardData?.q3 || [])],
+        q4: [...(boardData?.q4 || [])],
+      };
+
+      const tasksToDelete: string[] = [];
 
       organizedTasks.forEach(({taskId, task, quadrant, reason}) => {
         // Create task object for board
@@ -190,17 +198,25 @@ export const organizeInboxTasks = functions
           },
         };
 
-        // Add task to appropriate quadrant in board
-        const currentQuadrantTasks = boardData?.[quadrant] || [];
-        currentQuadrantTasks.push(newTask);
+        // Add task to appropriate quadrant
+        tasksByQuadrant[quadrant].push(newTask);
+        tasksToDelete.push(taskId);
+      });
 
-        // Update board with new task
-        batch.update(boardRef, {
-          [quadrant]: currentQuadrantTasks,
-          updatedAt: new Date().toISOString(),
-        });
+      // Single batch with board update + all inbox deletions
+      const batch = db.batch();
 
-        // Delete task from inbox
+      // Update board once with all new tasks
+      batch.update(boardRef, {
+        q1: tasksByQuadrant.q1,
+        q2: tasksByQuadrant.q2,
+        q3: tasksByQuadrant.q3,
+        q4: tasksByQuadrant.q4,
+        updatedAt: new Date().toISOString(),
+      });
+
+      // Delete all inbox tasks
+      tasksToDelete.forEach((taskId) => {
         const inboxTaskRef = inboxTasksRef.doc(taskId);
         batch.delete(inboxTaskRef);
       });
