@@ -75,7 +75,7 @@ export function PricingPage() {
   const currentPlan = userData ? (userData.plan || 'free') : 'free'
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-slate-50">
       <PublicHeader />
 
       {/* ログインユーザー向け: 戻るボタン */}
@@ -83,7 +83,7 @@ export function PricingPage() {
         <div className="px-6 pt-6 mx-auto max-w-7xl">
           <Link
             href="/boards"
-            className="inline-flex items-center gap-1 text-[14px] text-[#666666] hover:text-[#1a1a1a] transition-colors"
+            className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -96,13 +96,13 @@ export function PricingPage() {
       {/* ヒーローセクション */}
       <section className="relative px-6 py-20 mx-auto max-w-7xl sm:py-32">
         <div className="relative text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-[#1a1a1a] sm:text-5xl lg:text-6xl leading-tight">
+          <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl leading-tight">
             個人は無料ではじめて、
             <br />
             仕事で効かせたい人だけProへ
           </h1>
 
-          <p className="mt-8 text-lg leading-relaxed text-[#666666] max-w-3xl mx-auto">
+          <p className="mt-8 text-lg leading-relaxed text-slate-600 max-w-3xl mx-auto">
             Gmail連携・AI整理まではPro。
             <br className="hidden sm:block" />
             まずはブラウザだけで4象限を試せます。
@@ -112,7 +112,7 @@ export function PricingPage() {
             <Link
               href="/b/new"
               onClick={() => handleCTAClick('free', 'start')}
-              className="px-8 py-4 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
+              className="px-8 py-4 text-base font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:shadow-md active:scale-[0.98] transition-all duration-150"
             >
               無料で始める
             </Link>
@@ -121,7 +121,7 @@ export function PricingPage() {
                 handleCTAClick('pro', 'view')
                 document.getElementById('plans')?.scrollIntoView({ behavior: 'smooth' })
               }}
-              className="px-8 py-4 text-base font-semibold text-[#1a1a1a] bg-white border border-[#d0d0d0] rounded-xl hover:border-[#1a1a1a] transition-all duration-200"
+              className="px-8 py-4 text-base font-semibold text-slate-700 bg-white border border-slate-300 rounded-full hover:border-slate-400 hover:bg-slate-50 active:scale-[0.98] transition-all duration-150"
             >
               Proの機能を見る
             </button>
@@ -130,22 +130,22 @@ export function PricingPage() {
       </section>
 
       {/* プランカードセクション */}
-      <section id="plans" className="px-6 py-20 mx-auto max-w-7xl bg-gray-50">
+      <section id="plans" className="px-6 py-20 mx-auto max-w-7xl">
         <div className="max-w-5xl mx-auto">
           <div className="grid gap-8 md:grid-cols-2">
             {/* Free */}
-            <div className="relative p-8 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-300">
+            <div className="relative p-8 bg-white rounded-2xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-150">
               {currentPlan === 'free' && firebaseUser && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-600 text-white text-sm font-semibold rounded-full">
                   現在のプラン
                 </div>
               )}
-              <h3 className="text-2xl font-bold text-[#1a1a1a]">Free</h3>
+              <h3 className="text-2xl font-bold text-slate-900">Free</h3>
               <div className="mt-6">
-                <span className="text-5xl font-bold text-[#1a1a1a]">¥0</span>
-                <span className="text-[#666666]"> / 月</span>
+                <span className="text-5xl font-bold text-slate-900">¥0</span>
+                <span className="text-slate-600"> / 月</span>
               </div>
-              <p className="mt-4 text-[#666666] leading-relaxed">
+              <p className="mt-4 text-slate-600 leading-relaxed">
                 個人のタスク整理を、まずは無料で
               </p>
 
@@ -160,7 +160,7 @@ export function PricingPage() {
                     <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-[#1a1a1a]">{feature}</span>
+                    <span className="text-slate-900">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -174,19 +174,19 @@ export function PricingPage() {
               <Link
                 href="/b/new"
                 onClick={() => handleCTAClick('free', 'start')}
-                className="block mt-8 w-full px-6 py-3 text-center font-semibold text-[#1a1a1a] bg-white border border-gray-300 rounded-xl hover:border-[#1a1a1a] transition-all duration-200"
+                className="block mt-8 w-full px-6 py-3 text-center font-semibold text-slate-900 bg-white border border-gray-300 rounded-xl hover:border-[#1a1a1a] transition-all duration-200"
               >
                 無料で使ってみる
               </Link>
 
-              <p className="mt-4 text-sm text-[#666666] text-center">
+              <p className="mt-4 text-sm text-slate-600 text-center">
                 クレジットカード不要
               </p>
             </div>
 
             {/* Pro */}
-            <div className="relative p-8 bg-white rounded-xl shadow-sm border-2 border-blue-600 hover:shadow-md transition-all duration-300">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold rounded-full">
+            <div className="relative p-8 bg-white rounded-2xl border-2 border-blue-500 hover:shadow-md transition-all duration-150">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-600 text-white text-sm font-semibold rounded-full">
                 おすすめ
               </div>
               {currentPlan === 'pro' && firebaseUser && (
@@ -194,14 +194,14 @@ export function PricingPage() {
                   現在のプラン
                 </div>
               )}
-              <h3 className="text-2xl font-bold text-[#1a1a1a]">Pro</h3>
+              <h3 className="text-2xl font-bold text-slate-900">Pro</h3>
               <div className="mt-6">
-                <span className="text-5xl font-bold text-[#1a1a1a]">ベータ版</span>
+                <span className="text-5xl font-bold text-slate-900">ベータ版</span>
               </div>
-              <p className="mt-2 text-sm text-[#666666]">
+              <p className="mt-2 text-sm text-slate-600">
                 価格は現在調整中
               </p>
-              <p className="mt-4 text-[#666666] leading-relaxed">
+              <p className="mt-4 text-slate-600 leading-relaxed">
                 メール・予定から全部4象限にまとめたい人向け
               </p>
 
@@ -218,33 +218,33 @@ export function PricingPage() {
                     <svg className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-[#1a1a1a]">{feature}</span>
+                    <span className="text-slate-900">{feature}</span>
                   </li>
                 ))}
               </ul>
 
               <button
                 onClick={() => handleCTAClick('pro', 'waitlist')}
-                className="block mt-8 w-full px-6 py-3 text-center font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
+                className="block mt-8 w-full px-6 py-3 text-center font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:shadow-md active:scale-[0.98] transition-all duration-150"
               >
                 Proの提供開始を通知してほしい
               </button>
 
-              <p className="mt-4 text-sm text-[#666666] text-center">
+              <p className="mt-4 text-sm text-slate-600 text-center">
                 ※個人利用向け。まずはFreeで試してから検討してください
               </p>
             </div>
           </div>
 
           {/* Team プラン案内（将来用） */}
-          <div className="mt-12 p-8 bg-white rounded-xl shadow-sm border border-gray-200 text-center">
-            <h3 className="text-xl font-bold text-[#1a1a1a] mb-2">Team プラン</h3>
-            <p className="text-[#666666] mb-6 leading-relaxed">
+          <div className="mt-12 p-8 bg-white rounded-2xl border border-slate-200 text-center">
+            <h3 className="text-xl font-bold text-slate-900 mb-2">Team プラン</h3>
+            <p className="text-slate-600 mb-6 leading-relaxed">
               チームの「重要と緊急」を揃えたい人向け - 近日公開予定
             </p>
             <button
               onClick={() => handleCTAClick('team', 'interest')}
-              className="px-6 py-2 text-sm font-semibold text-[#1a1a1a] bg-white border border-gray-300 rounded-lg hover:border-[#1a1a1a] transition-all duration-200"
+              className="px-6 py-2 text-sm font-semibold text-slate-900 bg-white border border-gray-300 rounded-lg hover:border-[#1a1a1a] transition-all duration-200"
             >
               興味がある
             </button>
@@ -255,24 +255,24 @@ export function PricingPage() {
       {/* 機能比較表セクション */}
       <section ref={compareRef} className="px-6 py-20 mx-auto max-w-7xl bg-white">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-[#1a1a1a] sm:text-4xl">
+          <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">
             機能比較
           </h2>
-          <p className="mt-4 text-lg text-[#666666]">
+          <p className="mt-4 text-lg text-slate-600">
             何が無料で、何でお金取るのか
           </p>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full bg-white border border-gray-200 rounded-xl overflow-hidden">
+          <table className="w-full bg-white border border-slate-200 rounded-2xl overflow-hidden">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#1a1a1a]">機能</th>
-                <th className="px-6 py-4 text-center text-sm font-semibold text-[#1a1a1a]">Free</th>
-                <th className="px-6 py-4 text-center text-sm font-semibold text-[#1a1a1a]">Pro</th>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">機能</th>
+                <th className="px-6 py-4 text-center text-sm font-semibold text-slate-900">Free</th>
+                <th className="px-6 py-4 text-center text-sm font-semibold text-slate-900">Pro</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-slate-200">
               {[
                 { feature: 'ボード数', free: '2枚まで', pro: '無制限' },
                 { feature: 'Quick Add（ルールベース）', free: '✔', pro: '✔' },
@@ -282,10 +282,10 @@ export function PricingPage() {
                 { feature: '週次サマリ', free: '—', pro: '予定' },
                 { feature: 'データエクスポート', free: '—', pro: '✔' },
               ].map((row) => (
-                <tr key={row.feature} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-[#1a1a1a] font-medium">{row.feature}</td>
-                  <td className="px-6 py-4 text-sm text-[#666666] text-center">{row.free}</td>
-                  <td className="px-6 py-4 text-sm text-[#666666] text-center">{row.pro}</td>
+                <tr key={row.feature} className="hover:bg-slate-50 transition-colors duration-150">
+                  <td className="px-6 py-4 text-sm text-slate-900 font-medium">{row.feature}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600 text-center">{row.free}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600 text-center">{row.pro}</td>
                 </tr>
               ))}
             </tbody>
@@ -294,9 +294,9 @@ export function PricingPage() {
       </section>
 
       {/* FAQセクション */}
-      <section className="px-6 py-20 mx-auto max-w-4xl bg-gray-50">
+      <section className="px-6 py-20 mx-auto max-w-4xl">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-[#1a1a1a] sm:text-4xl">
+          <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">
             よくある質問
           </h2>
         </div>
@@ -320,11 +320,11 @@ export function PricingPage() {
               a: 'タスクデータはFirebase（Google Cloud Platform）の日本リージョンに保存されます。セキュリティとプライバシーを最優先に設計しています。',
             },
           ].map((faq) => (
-            <div key={faq.q} className="p-6 bg-white border border-gray-200 rounded-xl hover:border-gray-300 transition-all duration-200">
-              <h3 className="text-lg font-semibold text-[#1a1a1a] mb-3">
+            <div key={faq.q} className="p-6 bg-white border border-slate-200 rounded-xl hover:border-slate-300 hover:shadow-sm transition-all duration-150">
+              <h3 className="text-lg font-semibold text-slate-900 mb-3">
                 {faq.q}
               </h3>
-              <p className="text-[#666666] leading-relaxed">
+              <p className="text-slate-600 leading-relaxed">
                 {faq.a}
               </p>
             </div>
@@ -335,7 +335,7 @@ export function PricingPage() {
       {/* 最終CTAセクション */}
       <section className="relative px-6 py-20 mx-auto max-w-7xl bg-white">
         <div className="relative text-center">
-          <h2 className="text-3xl font-bold text-[#1a1a1a] sm:text-4xl leading-tight">
+          <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl leading-tight">
             まずは、今日のタスクを
             <br />
             4象限に並べてみてください
@@ -345,14 +345,14 @@ export function PricingPage() {
             <Link
               href="/b/new"
               onClick={() => handleCTAClick('free', 'start')}
-              className="px-10 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
+              className="px-10 py-4 text-lg font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:shadow-md active:scale-[0.98] transition-all duration-150"
             >
               無料で始める
             </Link>
             <Link
               href="/s/DEMO"
               onClick={() => handleCTAClick('free', 'demo')}
-              className="px-10 py-4 text-lg font-semibold text-[#1a1a1a] bg-white border border-gray-300 rounded-xl hover:border-[#1a1a1a] transition-all duration-200"
+              className="px-10 py-4 text-lg font-semibold text-slate-900 bg-white border border-gray-300 rounded-xl hover:border-[#1a1a1a] transition-all duration-200"
             >
               デモボードをもう一度見る
             </Link>

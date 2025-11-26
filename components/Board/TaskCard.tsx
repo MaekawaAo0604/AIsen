@@ -126,11 +126,11 @@ export function TaskCard({ task, quadrant, readOnly = false, onQuadrantChange }:
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         style={{ transform: `translateX(${swipeOffset}px)` }}
-        className={`group relative bg-white rounded-[3px] border border-[#e9e9e7] hover:bg-[#f7f6f3] transition-all cursor-grab active:cursor-grabbing ${
-          isDragging ? 'opacity-50 shadow-lg' : 'opacity-100'
-        } ${task.completed ? 'opacity-60' : ''} ${swipeOffset !== 0 ? 'transition-none' : 'transition-transform duration-200'}`}
+        className={`group relative bg-white rounded-xl border border-slate-100 shadow-none hover:bg-slate-50 hover:shadow-sm transition-all duration-150 cursor-grab active:cursor-grabbing ${
+          isDragging ? 'opacity-50 shadow-lg scale-105' : 'opacity-100'
+        } ${task.completed ? 'opacity-60' : ''} ${swipeOffset !== 0 ? 'transition-none' : 'transition-all duration-150'}`}
       >
-      <div className="flex items-start justify-between gap-2 sm:gap-2 px-3 sm:px-3 py-3 sm:py-2.5">
+      <div className="flex items-start justify-between gap-3 sm:gap-3 px-3 sm:px-4 py-3 sm:py-3.5">
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-1.5 sm:gap-2">
             {/* チェックボックス（read-onlyの場合は無効化） */}
@@ -163,14 +163,14 @@ export function TaskCard({ task, quadrant, readOnly = false, onQuadrantChange }:
             </p>
             {task.priority !== undefined && (
               <span
-                className={`flex-shrink-0 inline-flex items-center justify-center w-7 h-4.5 sm:w-8 sm:h-5 text-[9px] sm:text-[10px] font-semibold rounded-[3px] ${
+                className={`flex-shrink-0 inline-flex items-center justify-center w-7 h-4.5 sm:w-8 sm:h-5 text-[9px] sm:text-[10px] font-semibold rounded-md border ${
                   task.priority >= 80
-                    ? 'bg-[#dc2626] text-white'
+                    ? 'bg-orange-50 text-orange-700 border-orange-200'
                     : task.priority >= 60
-                    ? 'bg-[#f59e0b] text-white'
+                    ? 'bg-amber-50 text-amber-700 border-amber-200'
                     : task.priority >= 40
-                    ? 'bg-[#2563eb] text-white'
-                    : 'bg-[#6b7280] text-white'
+                    ? 'bg-blue-50 text-blue-700 border-blue-200'
+                    : 'bg-slate-100 text-slate-600 border-slate-200'
                 }`}
                 title={task.aiReason || '優先度スコア'}
               >
