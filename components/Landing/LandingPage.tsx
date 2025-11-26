@@ -5,8 +5,11 @@ import { useEffect } from 'react'
 import { trackPageView } from '@/lib/analytics'
 import { PublicHeader } from '@/components/Layout/PublicHeader'
 import { Footer } from '@/components/Layout/Footer'
+import { useAuthStore } from '@/lib/store/useAuthStore'
 
 export function LandingPage() {
+  const user = useAuthStore((state) => state.user)
+
   useEffect(() => {
     trackPageView('/')
   }, [])
@@ -16,7 +19,7 @@ export function LandingPage() {
       {/* ヘッダー */}
       <header className="relative mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
         <div className="flex items-center gap-3">
-          <span className="rounded-md bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-1.5 text-sm font-bold text-white shadow-md">
+          <span className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-bold text-white">
             AIsen
           </span>
           <span className="text-sm text-slate-600">Gmail × AI で自動整理</span>
@@ -28,12 +31,21 @@ export function LandingPage() {
           <a href="/pricing" className="hover:text-slate-900 transition-colors">
             料金
           </a>
-          <a
-            href="/b/new"
-            className="rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-2 text-sm font-semibold text-white hover:from-sky-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg"
-          >
-            無料で始める
-          </a>
+          {user ? (
+            <a
+              href="/boards"
+              className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 hover:shadow-md active:scale-[0.98] transition-all duration-150"
+            >
+              マイボード
+            </a>
+          ) : (
+            <a
+              href="/b/new"
+              className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 hover:shadow-md active:scale-[0.98] transition-all duration-150"
+            >
+              無料で始める
+            </a>
+          )}
         </nav>
       </header>
 
@@ -42,7 +54,7 @@ export function LandingPage() {
         {/* 左カラム：コピー */}
         <div className="flex-1">
           {/* タグライン */}
-          <div className="inline-flex items-center gap-2 rounded-full bg-white border border-slate-200 px-3 py-1 text-[11px] text-slate-600 shadow-sm">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white border border-slate-200 px-3 py-1 text-[11px] text-slate-600">
             <span className="h-1.5 w-1.5 rounded-full bg-lime-500 animate-pulse" />
             Gmail と AI で「今日やること」が5分で決まる
           </div>
@@ -50,7 +62,7 @@ export function LandingPage() {
           {/* H1 */}
           <h1 className="mt-4 text-balance text-4xl md:text-5xl font-semibold leading-tight text-slate-900">
             メールとタスクを、
-            <span className="block bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
+            <span className="block text-blue-600">
               朝5分で AI が仕分ける。
             </span>
           </h1>
@@ -66,13 +78,13 @@ export function LandingPage() {
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <a
               href="/b/new"
-              className="rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 px-8 py-4 text-base font-bold text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all hover:from-sky-600 hover:to-blue-700"
+              className="rounded-full bg-blue-600 px-8 py-4 text-base font-bold text-white hover:bg-blue-700 hover:shadow-md active:scale-[0.98] transition-all duration-150"
             >
               無料で始める
             </a>
             <a
               href="/s/DEMO"
-              className="rounded-lg border-2 border-slate-300 px-8 py-4 text-base font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-100 transition-all"
+              className="rounded-full border border-slate-300 px-8 py-4 text-base font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50 active:scale-[0.98] transition-all duration-150"
             >
               デモを見る
             </a>
@@ -84,7 +96,7 @@ export function LandingPage() {
 
         {/* 右カラム：ボード風モック */}
         <div className="flex-1">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-slate-600">
                 <span className="h-2 w-2 rounded-full bg-lime-500" />
@@ -98,36 +110,48 @@ export function LandingPage() {
             <div className="grid grid-cols-2 gap-3 text-xs">
               {[
                 {
-                  title: 'Q1 緊急×重要',
+                  num: '1',
+                  label: 'Q1',
+                  title: '緊急×重要',
                   bg: 'bg-red-50',
                   border: 'border-red-200',
+                  badgeBg: 'bg-red-600',
                   titleColor: 'text-red-700',
                   taskBg: 'bg-white',
                   taskBorder: 'border-red-100',
                   tasks: ['顧客A 見積り送付', 'バグ修正 PR レビュー']
                 },
                 {
-                  title: 'Q2 重要',
+                  num: '2',
+                  label: 'Q2',
+                  title: '重要',
                   bg: 'bg-blue-50',
                   border: 'border-blue-200',
+                  badgeBg: 'bg-blue-600',
                   titleColor: 'text-blue-700',
                   taskBg: 'bg-white',
                   taskBorder: 'border-blue-100',
                   tasks: ['週次レビュー準備', '新機能設計書']
                 },
                 {
-                  title: 'Q3 緊急だけ',
+                  num: '3',
+                  label: 'Q3',
+                  title: '緊急だけ',
                   bg: 'bg-yellow-50',
                   border: 'border-yellow-200',
+                  badgeBg: 'bg-yellow-600',
                   titleColor: 'text-yellow-700',
                   taskBg: 'bg-white',
                   taskBorder: 'border-yellow-100',
                   tasks: ['定例MTG資料']
                 },
                 {
-                  title: 'Q4 その他',
+                  num: '4',
+                  label: 'Q4',
+                  title: 'その他',
                   bg: 'bg-slate-50',
                   border: 'border-slate-200',
+                  badgeBg: 'bg-slate-600',
                   titleColor: 'text-slate-600',
                   taskBg: 'bg-white',
                   taskBorder: 'border-slate-100',
@@ -135,12 +159,14 @@ export function LandingPage() {
                 },
               ].map((q) => (
                 <div
-                  key={q.title}
+                  key={q.label}
                   className={`space-y-2 rounded-xl border ${q.border} ${q.bg} p-3`}
                 >
-                  <div className={`text-xs font-semibold ${q.titleColor} flex items-center justify-between`}>
-                    <span>{q.title}</span>
-                    <span className="text-slate-400">{q.tasks.length}</span>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-xs font-semibold ${q.titleColor}`}>
+                      {q.title}
+                    </span>
+                    <span className="text-slate-400 text-[10px]">{q.tasks.length}</span>
                   </div>
                   <div className="space-y-1.5">
                     {q.tasks.slice(0, 2).map((task, i) => (
@@ -196,7 +222,7 @@ export function LandingPage() {
           ].map((item) => (
             <div
               key={item.title}
-              className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-all"
+              className="rounded-xl border border-slate-200 bg-white p-6 hover:border-slate-300 hover:shadow-md transition-all duration-150"
             >
               <div className="text-4xl mb-4">{item.icon}</div>
               <h3 className="text-lg font-bold text-slate-900 mb-2">{item.title}</h3>
@@ -217,8 +243,8 @@ export function LandingPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Before */}
-          <div className="rounded-xl border-2 border-red-200 bg-red-50/50 p-8">
-            <div className="inline-flex items-center gap-2 rounded-full bg-red-100 border border-red-200 px-3 py-1 text-xs text-red-700 mb-6">
+          <div className="rounded-xl border border-red-200 bg-red-50 p-8">
+            <div className="inline-flex items-center gap-2 rounded-full bg-red-50 border border-red-200 px-3 py-1 text-xs text-red-700 mb-6">
               😰 Before
             </div>
             <div className="space-y-4 text-sm text-slate-700">
@@ -247,8 +273,8 @@ export function LandingPage() {
           </div>
 
           {/* After */}
-          <div className="rounded-xl border-2 border-sky-200 bg-sky-50/50 p-8">
-            <div className="inline-flex items-center gap-2 rounded-full bg-sky-100 border border-sky-200 px-3 py-1 text-xs text-sky-700 mb-6">
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-8">
+            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs text-blue-700 mb-6">
               ✨ After（AIsen）
             </div>
             <div className="space-y-4 text-sm text-slate-700">
@@ -310,13 +336,13 @@ export function LandingPage() {
           ].map((feature) => (
             <div
               key={feature.title}
-              className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-all"
+              className="rounded-xl border border-slate-200 bg-white p-6 hover:border-slate-300 hover:shadow-md transition-all duration-150"
             >
               <div className="flex items-center justify-between mb-4">
                 <span className="text-4xl">{feature.icon}</span>
                 <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
                   feature.badge === 'Pro'
-                    ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white'
+                    ? 'bg-blue-600 text-white'
                     : 'bg-slate-100 text-slate-600 border border-slate-200'
                 }`}>
                   {feature.badge}
@@ -331,7 +357,7 @@ export function LandingPage() {
 
       {/* 料金への導線 */}
       <section className="relative mx-auto w-full max-w-4xl px-6 py-16">
-        <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-10 shadow-lg text-center">
+        <div className="rounded-2xl border border-slate-200 bg-white p-10 shadow-sm text-center">
           <h3 className="text-2xl font-bold text-slate-900 mb-4">
             個人利用は無料で始められます
           </h3>
@@ -340,7 +366,7 @@ export function LandingPage() {
           </p>
           <a
             href="/pricing"
-            className="inline-block rounded-lg border-2 border-slate-300 px-8 py-3 text-base font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-100 transition-all"
+            className="inline-block rounded-full border border-slate-300 px-8 py-3 text-base font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50 active:scale-[0.98] transition-all duration-150"
           >
             料金プランを見る →
           </a>
@@ -349,7 +375,7 @@ export function LandingPage() {
 
       {/* 最終CTA */}
       <section className="relative mx-auto w-full max-w-6xl px-6 py-24">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-500 via-blue-600 to-blue-700 p-16 text-center shadow-2xl">
+        <div className="relative overflow-hidden rounded-3xl bg-blue-600 p-16 text-center shadow-lg">
           <div className="absolute inset-0 bg-grid-white opacity-10"></div>
 
           <div className="relative z-10">
@@ -364,13 +390,13 @@ export function LandingPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <a
                 href="/b/new"
-                className="px-10 py-5 text-lg font-bold text-blue-600 bg-white rounded-lg hover:bg-gray-50 shadow-2xl hover:shadow-3xl hover:scale-105 transition-all"
+                className="px-10 py-5 text-lg font-bold text-blue-600 bg-white rounded-full hover:bg-slate-50 hover:shadow-md active:scale-[0.98] transition-all duration-150"
               >
                 無料で始める →
               </a>
               <a
                 href="/s/DEMO"
-                className="px-10 py-5 text-lg font-bold text-white border-2 border-white/40 rounded-lg hover:bg-white/10 transition-all"
+                className="px-10 py-5 text-lg font-bold text-white border border-white/30 rounded-full hover:bg-white/10 active:scale-[0.98] transition-all duration-150"
               >
                 デモを見る
               </a>
