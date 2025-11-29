@@ -1,14 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   signInWithPopup,
+  signInWithRedirect,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  getRedirectResult,
 } from 'firebase/auth'
 import { auth, googleProvider } from '@/lib/firebase'
 import { getAuthErrorMessage } from '@/lib/authErrors'
+
+// LINE内ブラウザかどうかを判定
+function isLineApp(): boolean {
+  if (typeof window === 'undefined') return false
+  const ua = window.navigator.userAgent.toLowerCase()
+  return ua.includes('line/')
+}
 
 interface LoginModalProps {
   isOpen: boolean
@@ -23,17 +32,42 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [resetEmailSent, setResetEmailSent] = useState(false)
 
+  // リダイレクト後の認証結果を処理
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth)
+        if (result) {
+          // リダイレクト認証が成功した場合
+          onClose()
+          setEmail('')
+          setPassword('')
+        }
+      } catch (err: unknown) {
+        setError(getAuthErrorMessage(err))
+      }
+    }
+
+    handleRedirectResult()
+  }, [onClose])
+
   if (!isOpen) return null
 
   const handleGoogleLogin = async () => {
     setIsLoading(true)
     setError('')
     try {
-      await signInWithPopup(auth, googleProvider)
-      onClose()
-      // ログイン成功時のみフォームをクリア
-      setEmail('')
-      setPassword('')
+      // LINE内ブラウザの場合はリダイレクトを使用
+      if (isLineApp()) {
+        await signInWithRedirect(auth, googleProvider)
+        // リダイレクトの場合、ここには到達しない（ページ遷移する）
+      } else {
+        // 通常のブラウザの場合はポップアップを使用
+        await signInWithPopup(auth, googleProvider)
+        onClose()
+        setEmail('')
+        setPassword('')
+      }
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err))
     } finally {
