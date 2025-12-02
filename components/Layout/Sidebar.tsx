@@ -9,6 +9,22 @@ import { signOut } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { LoginModal } from '@/components/Auth/LoginModal'
 import { getUserBoards, updateBoard, type SavedBoard } from '@/lib/boardStorage'
+import { SidebarMenuItem } from './SidebarMenuItem'
+import { SidebarUserButton } from './SidebarUserButton'
+import {
+  MenuIcon,
+  BoardIcon,
+  NotificationIcon,
+  InboxIcon,
+  PricingIcon,
+  UserIcon,
+  LoginIcon,
+  LogoutIcon,
+  PlusIcon,
+  CloseIcon,
+  CheckIcon,
+  EditIcon,
+} from './SidebarIcons'
 
 interface SidebarProps {
   isExpanded?: boolean
@@ -130,128 +146,39 @@ export function Sidebar({ isExpanded: externalIsExpanded, onToggle }: SidebarPro
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Menu Button */}
-        <button
-          className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f] cursor-default"
-        >
-          <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-          {(isHovered || isBoardListExpanded) && (
-            <span className="text-[14px] font-medium whitespace-nowrap">メニュー</span>
-          )}
-        </button>
-
-        {/* Board Icon */}
-        <button
+        <SidebarMenuItem icon={<MenuIcon />} label="メニュー" isExpanded={isHovered || isBoardListExpanded} />
+        <SidebarMenuItem
+          icon={<BoardIcon />}
+          label="ボード"
           onClick={handleToggle}
-          className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
-        >
-          <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-          {(isHovered || isBoardListExpanded) && (
-            <span className="text-[14px] font-medium whitespace-nowrap">ボード</span>
-          )}
-        </button>
-
-        {/* Notification Settings Icon */}
-        <button
+          isExpanded={isHovered || isBoardListExpanded}
+          isActive={isBoardListExpanded}
+        />
+        <SidebarMenuItem
+          icon={<NotificationIcon />}
+          label="通知設定"
           onClick={() => router.push('/settings')}
-          className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
-        >
-          <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-            />
-          </svg>
-          {(isHovered || isBoardListExpanded) && (
-            <span className="text-[14px] font-medium whitespace-nowrap">通知設定</span>
-          )}
-        </button>
-
-        {/* Inbox Icon */}
-        <button
+          isExpanded={isHovered || isBoardListExpanded}
+        />
+        <SidebarMenuItem
+          icon={<InboxIcon />}
+          label="Inbox"
           onClick={() => router.push('/inbox')}
-          className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
-        >
-          <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-            />
-          </svg>
-          {(isHovered || isBoardListExpanded) && (
-            <span className="text-[14px] font-medium whitespace-nowrap">Inbox</span>
-          )}
-        </button>
-
-        {/* Pricing Icon */}
-        <button
+          isExpanded={isHovered || isBoardListExpanded}
+        />
+        <SidebarMenuItem
+          icon={<PricingIcon />}
+          label="料金プラン"
           onClick={() => router.push('/pricing')}
-          className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
-        >
-          <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          {(isHovered || isBoardListExpanded) && (
-            <span className="text-[14px] font-medium whitespace-nowrap">料金プラン</span>
-          )}
-        </button>
+          isExpanded={isHovered || isBoardListExpanded}
+        />
 
-        {/* Login/User Icon */}
-        {user ? (
-          <button
-            onClick={() => setIsLogoutModalOpen(true)}
-            className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
-          >
-            <div className="w-6 h-6 flex-shrink-0 rounded-full bg-[#2383e2] flex items-center justify-center text-white text-[12px] font-medium">
-              {user.displayName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
-            </div>
-            {(isHovered || isBoardListExpanded) && (
-              <span className="text-[14px] font-medium whitespace-nowrap truncate max-w-[120px]">
-                {user.displayName || user.email}
-              </span>
-            )}
-          </button>
-        ) : (
-          <button
-            onClick={() => setIsLoginModalOpen(true)}
-            className="flex items-center gap-3 px-3 py-2 mx-2 rounded-lg hover:bg-[#f7f6f3] transition-colors text-[#37352f]"
-          >
-            <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
-              />
-            </svg>
-            {(isHovered || isBoardListExpanded) && (
-              <span className="text-[14px] font-medium whitespace-nowrap">ログイン</span>
-            )}
-          </button>
-        )}
+        <SidebarUserButton
+          user={user}
+          onLoginClick={() => setIsLoginModalOpen(true)}
+          onUserClick={() => setIsLogoutModalOpen(true)}
+          isExpanded={isHovered || isBoardListExpanded}
+        />
       </div>
 
       {/* Mobile Sidebar - Shown when hamburger is clicked */}
