@@ -14,32 +14,20 @@ AIsenは、タスクを重要度と緊急度で自動分類する4象限マト�
 
 ### ⚠️ コミット前のテスト実行 (REQUIRED)
 
-コンポーネントやロジックに変更を加えた際は、**必ずコミット前にテストを実行**してください：
+コンポーネントやロジックに変更を加えた際は、**必ずコミット前に全テストを実行**してください：
 
 ```bash
-# 関連するテストファイルを実行
-npx playwright test tests/e2e/[関連ファイル].spec.ts --reporter=list
-
-# 例: TaskCardを変更した場合
-npx playwright test tests/e2e/task-creation.spec.ts --reporter=list
-npx playwright test tests/e2e/demo-board.spec.ts --reporter=list
-
-# すべてのテストを実行（推奨）
+# すべてのテストを実行（必須）
 npx playwright test --reporter=list
+
+# または簡潔な出力で
+npx playwright test
 ```
 
-### テスト対象とテストファイルの対応表
-
-| 変更対象 | 実行すべきテスト |
-|---------|----------------|
-| `components/Board/TaskCard.tsx` | `task-creation.spec.ts`, `demo-board.spec.ts`, `task-display.spec.ts` |
-| `components/Board/Quadrant.tsx` | `task-creation.spec.ts`, `drag-and-drop.spec.ts` |
-| `components/Board/BoardCanvas.tsx` | `board-creation.spec.ts`, `demo-board.spec.ts` |
-| `components/Auth/LoginModal.tsx` | `navigation.spec.ts` |
-| `app/page.tsx` (LP) | `landing-page.spec.ts` |
-| `app/b/[boardId]/page.tsx` | `board-creation.spec.ts`, `navigation.spec.ts` |
-| `app/s/[shareId]/page.tsx` | `board-sharing.spec.ts`, `demo-board.spec.ts` |
-| タスク関連ロジック全般 | すべてのテスト推奨 |
+**理由**:
+- コンポーネント間の依存関係が複雑なため、一部の変更が予期しない箇所に影響する可能性がある
+- 全テスト実行でも数秒〜10秒程度で完了する（現在30テスト）
+- 部分的なテストだけでは見逃しが発生するリスクがある
 
 ### テストが失敗した場合
 
