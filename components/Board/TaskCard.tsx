@@ -121,6 +121,7 @@ export function TaskCard({ task, quadrant, readOnly = false, onQuadrantChange }:
         ref={setNodeRef}
         {...listeners}
         {...attributes}
+        data-testid="task-card"
         onClick={handleCardClick}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

@@ -28,6 +28,7 @@ export function Quadrant({ quadrant, title, description, tasks, colorClass, bgCl
   return (
     <div
       ref={setNodeRef}
+      data-quadrant={quadrant.toUpperCase()}
       className={`rounded-2xl bg-white border border-slate-200 shadow-md p-4 md:p-5 overflow-y-auto relative flex flex-col transition-all duration-150 hover:shadow-lg hover:-translate-y-0.5 ${
         isOver ? 'ring-2 ring-blue-400 ring-opacity-50 bg-blue-50' : ''
       }`}
