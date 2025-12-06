@@ -21,6 +21,7 @@ const stripePromise = loadStripe(
 export function PricingPage() {
   const firebaseUser = useAuthStore((state) => state.user)
   const [userData, setUserData] = useState<User | null>(null)
+  const [isLoadingUserData, setIsLoadingUserData] = useState(false)
   const [hasScrolledToCompare, setHasScrolledToCompare] = useState(false)
   const compareRef = useRef<HTMLDivElement>(null)
 
@@ -34,9 +35,11 @@ export function PricingPage() {
     const fetchUserData = async () => {
       if (!firebaseUser) {
         setUserData(null)
+        setIsLoadingUserData(false)
         return
       }
 
+      setIsLoadingUserData(true)
       try {
         const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid))
         const data = userDoc.data() as User | undefined
@@ -45,6 +48,8 @@ export function PricingPage() {
         }
       } catch (error) {
         console.error('Failed to fetch user data:', error)
+      } finally {
+        setIsLoadingUserData(false)
       }
     }
 
@@ -78,9 +83,14 @@ export function PricingPage() {
 
   // Stripe Checkoutへリダイレクト
   const handleUpgradeToPro = async () => {
-    if (!firebaseUser || !userData) {
+    if (!firebaseUser) {
       // 未ログインの場合はログインページへ
       window.location.href = '/b/new'
+      return
+    }
+
+    // ユーザーデータ読み込み中の場合は待機
+    if (isLoadingUserData) {
       return
     }
 
@@ -268,9 +278,10 @@ export function PricingPage() {
                     handleCTAClick('pro', 'upgrade')
                     handleUpgradeToPro()
                   }}
-                  className="block mt-8 w-full px-6 py-3 text-center font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:shadow-md active:scale-[0.98] transition-all duration-150"
+                  disabled={isLoadingUserData}
+                  className="block mt-8 w-full px-6 py-3 text-center font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:shadow-md active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Proにアップグレード
+                  {isLoadingUserData ? '読み込み中...' : 'Proにアップグレード'}
                 </button>
               )}
 
