@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
         const subscription = (await stripe.subscriptions.retrieve(
           session.subscription as string
-        )) as Stripe.Subscription
+        )) as any
 
         // Firestoreのユーザー情報を更新
         await updateDoc(doc(db, 'users', userId), {
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       }
 
       case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription
+        const subscription = event.data.object as any
         const userId = subscription.metadata?.userId
 
         if (!userId) {
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       }
 
       case 'customer.subscription.deleted': {
-        const subscription = event.data.object as Stripe.Subscription
+        const subscription = event.data.object as any
         const userId = subscription.metadata?.userId
 
         if (!userId) {
@@ -99,10 +99,10 @@ export async function POST(req: NextRequest) {
       }
 
       case 'invoice.payment_failed': {
-        const invoice = event.data.object as Stripe.Invoice
+        const invoice = event.data.object as any
         const subscription = (await stripe.subscriptions.retrieve(
           invoice.subscription as string
-        )) as Stripe.Subscription
+        )) as any
         const userId = subscription.metadata?.userId
 
         if (!userId) {
