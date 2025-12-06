@@ -10,8 +10,13 @@ import { Footer } from '@/components/Layout/Footer'
 import { db } from '@/lib/firebase'
 import { doc, getDoc } from 'firebase/firestore'
 import type { User } from '@/lib/types'
+import { loadStripe } from '@stripe/stripe-js'
 
 type Plan = 'free' | 'pro' | 'team'
+
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+)
 
 export function PricingPage() {
   const firebaseUser = useAuthStore((state) => state.user)
@@ -69,6 +74,35 @@ export function PricingPage() {
 
   const handleCTAClick = (plan: string, action: string) => {
     posthog.capture('pricing_click_cta', { plan, action })
+  }
+
+  // Stripe Checkoutへリダイレクト
+  const handleUpgradeToPro = async () => {
+    if (!firebaseUser || !userData) {
+      // 未ログインの場合はログインページへ
+      window.location.href = '/b/new'
+      return
+    }
+
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
+          userId: firebaseUser.uid,
+          userEmail: firebaseUser.email,
+        }),
+      })
+
+      const { url } = await response.json()
+      if (url) {
+        window.location.href = url
+      }
+    } catch (error) {
+      console.error('Failed to create checkout session:', error)
+      alert('エラーが発生しました。もう一度お試しください。')
+    }
   }
 
   // ユーザーの現在プラン
@@ -196,11 +230,9 @@ export function PricingPage() {
               )}
               <h3 className="text-2xl font-bold text-slate-900">Pro</h3>
               <div className="mt-6">
-                <span className="text-5xl font-bold text-slate-900">ベータ版</span>
+                <span className="text-5xl font-bold text-slate-900">¥500</span>
+                <span className="text-slate-600"> / 月</span>
               </div>
-              <p className="mt-2 text-sm text-slate-600">
-                価格は現在調整中
-              </p>
               <p className="mt-4 text-slate-600 leading-relaxed">
                 Gmail連携とAIによるメール・タスク整理は、この Pro プラン専用の機能です。
               </p>
@@ -223,12 +255,24 @@ export function PricingPage() {
                 ))}
               </ul>
 
-              <button
-                onClick={() => handleCTAClick('pro', 'waitlist')}
-                className="block mt-8 w-full px-6 py-3 text-center font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:shadow-md active:scale-[0.98] transition-all duration-150"
-              >
-                Proの提供開始を通知してほしい
-              </button>
+              {currentPlan === 'pro' ? (
+                <button
+                  disabled
+                  className="block mt-8 w-full px-6 py-3 text-center font-semibold text-slate-400 bg-slate-100 rounded-full cursor-not-allowed"
+                >
+                  契約中
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    handleCTAClick('pro', 'upgrade')
+                    handleUpgradeToPro()
+                  }}
+                  className="block mt-8 w-full px-6 py-3 text-center font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:shadow-md active:scale-[0.98] transition-all duration-150"
+                >
+                  Proにアップグレード
+                </button>
+              )}
 
               <p className="mt-4 text-sm text-slate-600 text-center">
                 ※個人利用向け。まずはFreeで試してから検討してください
@@ -236,18 +280,19 @@ export function PricingPage() {
             </div>
           </div>
 
-          {/* Team プラン案内（将来用） */}
+          {/* 企業用プラン案内 */}
           <div className="mt-12 p-8 bg-white rounded-2xl border border-slate-200 text-center">
-            <h3 className="text-xl font-bold text-slate-900 mb-2">Team プラン</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-2">企業用プラン</h3>
             <p className="text-slate-600 mb-6 leading-relaxed">
-              チームの「重要と緊急」を揃えたい人向け - 近日公開予定
+              複数チームでの導入や、カスタマイズが必要な企業様向け
             </p>
-            <button
-              onClick={() => handleCTAClick('team', 'interest')}
-              className="px-6 py-2 text-sm font-semibold text-slate-900 bg-white border border-gray-300 rounded-lg hover:border-[#1a1a1a] transition-all duration-200"
+            <Link
+              href="/enterprise"
+              onClick={() => handleCTAClick('enterprise', 'details')}
+              className="inline-block px-6 py-2 text-sm font-semibold text-slate-900 bg-white border border-gray-300 rounded-lg hover:border-[#1a1a1a] transition-all duration-200"
             >
-              興味がある
-            </button>
+              詳細はこちら
+            </Link>
           </div>
         </div>
       </section>
