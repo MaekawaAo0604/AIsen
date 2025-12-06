@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
-import { db } from '@/lib/firebase'
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { adminDb } from '@/lib/firebase-admin'
+import { FieldValue } from 'firebase-admin/firestore'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-11-17.clover',
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
         })
 
         // Firestoreのユーザー情報を更新
-        await updateDoc(doc(db, 'users', userId), {
+        await adminDb.collection('users').doc(userId).update({
           plan: 'pro',
           stripeCustomerId: session.customer as string,
           stripeSubscriptionId: session.subscription as string,
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
           subscriptionCurrentPeriodEnd: subscription.current_period_end
             ? new Date(subscription.current_period_end * 1000)
             : new Date(),
-          updatedAt: serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
         })
 
         console.log(`✅ User ${userId} upgraded to Pro in Firestore`)
@@ -77,12 +77,12 @@ export async function POST(req: NextRequest) {
         }
 
         // サブスクリプションステータスを更新
-        await updateDoc(doc(db, 'users', userId), {
+        await adminDb.collection('users').doc(userId).update({
           subscriptionStatus: subscription.status,
           subscriptionCurrentPeriodEnd: subscription.current_period_end
             ? new Date(subscription.current_period_end * 1000)
             : new Date(),
-          updatedAt: serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
         })
 
         console.log(`✅ Subscription updated for user ${userId}`)
@@ -99,13 +99,13 @@ export async function POST(req: NextRequest) {
         }
 
         // Freeプランにダウングレード
-        await updateDoc(doc(db, 'users', userId), {
+        await adminDb.collection('users').doc(userId).update({
           plan: 'free',
           subscriptionStatus: 'canceled',
           subscriptionCurrentPeriodEnd: subscription.current_period_end
             ? new Date(subscription.current_period_end * 1000)
             : new Date(),
-          updatedAt: serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
         })
 
         console.log(`✅ User ${userId} downgraded to Free`)
@@ -125,9 +125,9 @@ export async function POST(req: NextRequest) {
         }
 
         // 支払い失敗を記録
-        await updateDoc(doc(db, 'users', userId), {
+        await adminDb.collection('users').doc(userId).update({
           subscriptionStatus: 'past_due',
-          updatedAt: serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
         })
 
         console.log(`⚠️ Payment failed for user ${userId}`)
