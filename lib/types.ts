@@ -70,6 +70,14 @@ export interface User {
     refresh_token: string
     expiry_date: number
   }
+  // Stripe関連
+  stripeCustomerId?: string
+  stripeSubscriptionId?: string
+  subscriptionStatus?: string
+  subscriptionCurrentPeriodEnd?: {
+    seconds: number
+    nanoseconds: number
+  }
 }
 
 export interface Payment {
