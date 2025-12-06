@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
           break
         }
 
-        const subscription = await stripe.subscriptions.retrieve(
+        const subscriptionData = await stripe.subscriptions.retrieve(
           session.subscription as string
         )
 
@@ -42,10 +42,10 @@ export async function POST(req: NextRequest) {
           plan: 'pro',
           stripeCustomerId: session.customer as string,
           stripeSubscriptionId: session.subscription as string,
-          subscriptionStatus: subscription.status,
-          subscriptionCurrentPeriodEnd: new Date(
-            subscription.current_period_end * 1000
-          ),
+          subscriptionStatus: subscriptionData.status,
+          subscriptionCurrentPeriodEnd: subscriptionData.current_period_end
+            ? new Date(subscriptionData.current_period_end * 1000)
+            : new Date(),
           updatedAt: serverTimestamp(),
         })
 
@@ -54,8 +54,8 @@ export async function POST(req: NextRequest) {
       }
 
       case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription
-        const userId = subscription.metadata?.userId
+        const subscriptionData = event.data.object as Stripe.Subscription
+        const userId = subscriptionData.metadata?.userId
 
         if (!userId) {
           console.error('No userId in subscription metadata')
@@ -64,10 +64,10 @@ export async function POST(req: NextRequest) {
 
         // サブスクリプションステータスを更新
         await updateDoc(doc(db, 'users', userId), {
-          subscriptionStatus: subscription.status,
-          subscriptionCurrentPeriodEnd: new Date(
-            subscription.current_period_end * 1000
-          ),
+          subscriptionStatus: subscriptionData.status,
+          subscriptionCurrentPeriodEnd: subscriptionData.current_period_end
+            ? new Date(subscriptionData.current_period_end * 1000)
+            : new Date(),
           updatedAt: serverTimestamp(),
         })
 
@@ -76,8 +76,8 @@ export async function POST(req: NextRequest) {
       }
 
       case 'customer.subscription.deleted': {
-        const subscription = event.data.object as Stripe.Subscription
-        const userId = subscription.metadata?.userId
+        const subscriptionData = event.data.object as Stripe.Subscription
+        const userId = subscriptionData.metadata?.userId
 
         if (!userId) {
           console.error('No userId in subscription metadata')
@@ -88,9 +88,9 @@ export async function POST(req: NextRequest) {
         await updateDoc(doc(db, 'users', userId), {
           plan: 'free',
           subscriptionStatus: 'canceled',
-          subscriptionCurrentPeriodEnd: new Date(
-            subscription.current_period_end * 1000
-          ),
+          subscriptionCurrentPeriodEnd: subscriptionData.current_period_end
+            ? new Date(subscriptionData.current_period_end * 1000)
+            : new Date(),
           updatedAt: serverTimestamp(),
         })
 
@@ -100,10 +100,10 @@ export async function POST(req: NextRequest) {
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice
-        const subscription = await stripe.subscriptions.retrieve(
+        const subscriptionData = await stripe.subscriptions.retrieve(
           invoice.subscription as string
         )
-        const userId = subscription.metadata?.userId
+        const userId = subscriptionData.metadata?.userId
 
         if (!userId) {
           console.error('No userId in subscription metadata')
