@@ -1,14 +1,16 @@
 # AIsen プロジェクト - Claude 指示書
 
 ## プロジェクト概要
-AIsenは、タスクを重要度と緊急度で自動分類する4象限マトリクスタスク管理アプリケーションです。
+
+AIsen は、タスクを重要度と緊急度で自動分類する 4 象限マトリクスタスク管理アプリケーションです。
 
 ## 技術スタック
+
 - **フロントエンド**: Next.js 15 (App Router), React, TypeScript, Tailwind CSS 4
 - **状態管理**: Zustand
 - **バックエンド**: Firebase (Firestore, Authentication, Cloud Functions)
-- **UI操作**: dnd-kit (ドラッグ&ドロップ)
-- **テスト**: Playwright (E2Eテスト)
+- **UI 操作**: dnd-kit (ドラッグ&ドロップ)
+- **テスト**: Playwright (E2E テスト)
 
 ## コード変更時の必須ルール
 
@@ -25,14 +27,15 @@ npx playwright test
 ```
 
 **理由**:
+
 - コンポーネント間の依存関係が複雑なため、一部の変更が予期しない箇所に影響する可能性がある
-- 全テスト実行でも数秒〜10秒程度で完了する（現在30テスト）
+- 全テスト実行でも数秒〜10 秒程度で完了する（現在 30 テスト）
 - 部分的なテストだけでは見逃しが発生するリスクがある
 
 ### テストが失敗した場合
 
-1. **エラーメッセージを確認**: Playwrightは詳細なエラー情報とスクリーンショットを提供します
-2. **レポートを確認**: `http://localhost:9323` でHTMLレポートが自動起動します
+1. **エラーメッセージを確認**: Playwright は詳細なエラー情報とスクリーンショットを提供します
+2. **レポートを確認**: `http://localhost:9323` で HTML レポートが自動起動します
 3. **修正してから再テスト**: テストが通るまで修正とテストを繰り返します
 4. **コミット**: すべてのテストが成功してから `git commit`
 
@@ -85,7 +88,7 @@ git commit -m "いろいろ直した"
 3. **テスト再実行**: 同じテストが通ることを確認（機能は変わらない）
 4. **コミット**: テスト成功後にコミット
 
-## E2Eテストの実行方法
+## E2E テストの実行方法
 
 ### 基本コマンド
 
@@ -117,41 +120,41 @@ npx playwright show-report
 
 ### dnd-kit (ドラッグ&ドロップ)
 
-- **PointerEvents必須**: dnd-kitは通常のマウスイベントではなくPointerEventsを使用
-- **テストの制約**: Playwrightの標準 `dragTo()` では動作しない可能性あり
+- **PointerEvents 必須**: dnd-kit は通常のマウスイベントではなく PointerEvents を使用
+- **テストの制約**: Playwright の標準 `dragTo()` では動作しない可能性あり
 - **詳細**: `tests/e2e/DRAG_DROP_TESTS_README.md` 参照
 
-### Firebase設定
+### Firebase 設定
 
-- **ローカル開発**: Firebase Emulatorは使用せず、開発環境のFirebaseを使用
-- **環境変数**: `.env.local` に認証情報を設定（gitignore済み）
+- **ローカル開発**: Firebase Emulator は使用せず、開発環境の Firebase を使用
+- **環境変数**: `.env.local` に認証情報を設定（gitignore 済み）
 
 ### Tailwind CSS 4
 
-- **PostCSS設定**: `@tailwindcss/postcss` を使用（v4対応）
+- **PostCSS 設定**: `@tailwindcss/postcss` を使用（v4 対応）
 - **キャッシュ削除**: スタイルが反映されない場合は `rm -rf .next && npm run dev`
 
-### read-onlyボード (`/s/DEMO`)
+### read-only ボード (`/s/DEMO`)
 
-- **デモボード**: `/s/DEMO` は9件の固定タスクを持つread-onlyボード
+- **デモボード**: `/s/DEMO` は 9 件の固定タスクを持つ read-only ボード
 - **制約**: タスクの追加・削除・編集は不可、詳細表示は可能
 
 ## テストカバレッジ
 
-現在のE2Eテスト実装状況（2025-12-02時点）:
+現在の E2E テスト実装状況（2025-12-02 時点）:
 
-- ✅ ランディングページ: 24テスト（100%成功）
-- ✅ デモボード: 6テスト（100%成功）
-- ✅ ボード作成: 2テスト
-- ✅ タスク作成: 5テスト
-- ✅ タスク表示: 3テスト
-- ✅ タスク削除: 2テスト
-- ✅ タスク完了: 3テスト
-- ⚠️ ドラッグ&ドロップ: 4テスト（dnd-kit互換性問題あり）
-- ✅ Quick Add: 5テスト
-- ✅ ボード共有: 5テスト
-- ✅ ナビゲーション: 6テスト
-- ✅ レスポンシブ: 3テスト
+- ✅ ランディングページ: 24 テスト（100%成功）
+- ✅ デモボード: 6 テスト（100%成功）
+- ✅ ボード作成: 2 テスト
+- ✅ タスク作成: 5 テスト
+- ✅ タスク表示: 3 テスト
+- ✅ タスク削除: 2 テスト
+- ✅ タスク完了: 3 テスト
+- ⚠️ ドラッグ&ドロップ: 4 テスト（dnd-kit 互換性問題あり）
+- ✅ Quick Add: 5 テスト
+- ✅ ボード共有: 5 テスト
+- ✅ ナビゲーション: 6 テスト
+- ✅ レスポンシブ: 3 テスト
 
 詳細: `tests/e2e/TEST_SUMMARY.md`
 
@@ -164,12 +167,13 @@ npx playwright show-report
 **原因**: セレクタが複数の要素にマッチしている
 
 **解決**: `.first()` または `.nth(index)` で特定の要素を選択
+
 ```typescript
 // Before
-await page.getByRole('link', { name: /無料で始める/i })
+await page.getByRole("link", { name: /無料で始める/i });
 
 // After
-await page.getByRole('link', { name: /無料で始める/i }).first()
+await page.getByRole("link", { name: /無料で始める/i }).first();
 ```
 
 ### Timeout on networkidle
@@ -179,12 +183,13 @@ await page.getByRole('link', { name: /無料で始める/i }).first()
 **原因**: ページがネットワークアイドル状態にならない
 
 **解決**: `'networkidle'` を `'domcontentloaded'` に変更
+
 ```typescript
 // Before
-await page.waitForLoadState('networkidle')
+await page.waitForLoadState("networkidle");
 
 // After
-await page.waitForLoadState('domcontentloaded')
+await page.waitForLoadState("domcontentloaded");
 ```
 
 ### data-testid not found
@@ -194,13 +199,14 @@ await page.waitForLoadState('domcontentloaded')
 **原因**: コンポーネントに `data-testid` 属性がない
 
 **解決**: コンポーネントに属性を追加
+
 ```tsx
 <div data-testid="task-card" className="...">
 ```
 
 ## 参考リンク
 
-- [Playwright公式ドキュメント](https://playwright.dev/)
-- [Next.js 15ドキュメント](https://nextjs.org/docs)
-- [Firebase公式ドキュメント](https://firebase.google.com/docs)
-- [dnd-kit公式ドキュメント](https://docs.dndkit.com/)
+- [Playwright 公式ドキュメント](https://playwright.dev/)
+- [Next.js 15 ドキュメント](https://nextjs.org/docs)
+- [Firebase 公式ドキュメント](https://firebase.google.com/docs)
+- [dnd-kit 公式ドキュメント](https://docs.dndkit.com/)
