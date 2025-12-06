@@ -60,6 +60,7 @@ export interface User {
   email: string
   createdAt: number
   plan?: 'free' | 'pro'  // プラン情報（未定義の場合はfree扱い）
+  isAdmin?: boolean  // 管理者権限
   entitlements: {
     pro: boolean
     lifetime: boolean

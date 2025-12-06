@@ -34,12 +34,12 @@ export function EnterprisePage() {
           </p>
 
           <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
-              href="mailto:contact@aisen.app?subject=企業用プランについて"
+            <Link
+              href="/contact"
               className="px-8 py-4 text-base font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:shadow-md active:scale-[0.98] transition-all duration-150"
             >
               お問い合わせ
-            </a>
+            </Link>
             <Link
               href="/pricing"
               className="px-8 py-4 text-base font-semibold text-slate-700 bg-white border border-slate-300 rounded-full hover:border-slate-400 hover:bg-slate-50 active:scale-[0.98] transition-all duration-150"
@@ -209,12 +209,12 @@ export function EnterprisePage() {
           </div>
 
           <div className="text-center">
-            <a
-              href="mailto:contact@aisen.app?subject=企業用プランについて"
+            <Link
+              href="/contact"
               className="inline-block px-8 py-4 text-base font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:shadow-md active:scale-[0.98] transition-all duration-150"
             >
               まずは相談する
-            </a>
+            </Link>
             <p className="mt-4 text-sm text-slate-500">
               お気軽にお問い合わせください
             </p>
@@ -270,12 +270,12 @@ export function EnterprisePage() {
           </h2>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
-              href="mailto:contact@aisen.app?subject=企業用プランについて"
+            <Link
+              href="/contact"
               className="px-10 py-4 text-lg font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:shadow-md active:scale-[0.98] transition-all duration-150"
             >
               お問い合わせ
-            </a>
+            </Link>
             <Link
               href="/s/DEMO"
               className="px-10 py-4 text-lg font-semibold text-slate-900 bg-white border border-gray-300 rounded-xl hover:border-[#1a1a1a] transition-all duration-200"
