@@ -136,11 +136,22 @@ export function TaskPlacementModal({ isOpen, taskTitle: initialTaskTitle, onClos
                 <input
                   type="text"
                   value={taskTitle}
-                  onChange={(e) => setTaskTitle(e.target.value)}
+                  onChange={(e) => {
+                    setTaskTitle(e.target.value)
+                  }}
                   placeholder="例: プロジェクトの提案書を作成"
-                  className="w-full h-9 px-3 text-[14px] text-[#37352f] placeholder:text-[#9b9a97] bg-[#ffffff] border border-[#e9e9e7] rounded-[3px] hover:bg-[#f7f6f3] focus:outline-none focus:bg-[#ffffff] focus:border-[#2383e2] transition-colors"
+                  className={`w-full h-9 px-3 text-[14px] text-[#37352f] placeholder:text-[#9b9a97] bg-[#ffffff] border rounded-[3px] hover:bg-[#f7f6f3] focus:outline-none focus:bg-[#ffffff] transition-colors ${
+                    !taskTitle.trim()
+                      ? 'border-red-500 focus:border-red-500'
+                      : 'border-[#e9e9e7] focus:border-[#2383e2]'
+                  }`}
                   autoFocus
                 />
+                {!taskTitle.trim() && (
+                  <p className="mt-1 text-[12px] text-red-600 font-medium">
+                    タスク名を入力してください
+                  </p>
+                )}
               </div>
 
               {/* サブタスク入力フィールド */}
