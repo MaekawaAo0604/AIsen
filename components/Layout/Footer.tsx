@@ -14,20 +14,15 @@ export function Footer() {
           <Link href="/pricing" className="text-[#787774] hover:text-[#37352f] transition-colors">
             料金プラン
           </Link>
+          <Link href="/contact" className="text-[#787774] hover:text-[#37352f] transition-colors">
+            お問い合わせ
+          </Link>
           <Link href="/privacy" className="text-[#787774] hover:text-[#37352f] transition-colors">
             プライバシーポリシー
           </Link>
           <Link href="/terms" className="text-[#787774] hover:text-[#37352f] transition-colors">
             利用規約
           </Link>
-          <a
-            href="https://github.com/MaekawaAo0604/AIsen"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[#787774] hover:text-[#37352f] transition-colors"
-          >
-            GitHub
-          </a>
         </div>
       </div>
     </footer>

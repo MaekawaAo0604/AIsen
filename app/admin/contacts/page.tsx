@@ -4,9 +4,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { db } from '@/lib/firebase'
 import { collection, query, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore'
-import { useAuthStore } from '@/lib/store/useAuthStore'
-import type { User } from '@/lib/types'
-import { doc as firestoreDoc, getDoc } from 'firebase/firestore'
 
 interface Contact {
   id: string
@@ -21,41 +18,25 @@ interface Contact {
 
 export default function AdminContactsPage() {
   const router = useRouter()
-  const firebaseUser = useAuthStore((state) => state.user)
-  const [userData, setUserData] = useState<User | null>(null)
   const [contacts, setContacts] = useState<Contact[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
-  // ユーザーデータ取得と管理者権限チェック
+  // 管理者認証チェック
   useEffect(() => {
-    if (!firebaseUser) {
-      router.push('/')
+    const adminAuth = sessionStorage.getItem('isAdmin')
+    if (adminAuth !== 'true') {
+      router.push('/admin/login')
       return
     }
-
-    const fetchUserData = async () => {
-      const userDoc = await getDoc(firestoreDoc(db, 'users', firebaseUser.uid))
-      if (userDoc.exists()) {
-        const data = userDoc.data() as User
-        setUserData(data)
-
-        // 管理者権限チェック
-        if (!data.isAdmin) {
-          router.push('/')
-        }
-      } else {
-        router.push('/')
-      }
-      setIsLoading(false)
-    }
-
-    fetchUserData()
-  }, [firebaseUser, router])
+    setIsAdmin(true)
+    setIsLoading(false)
+  }, [router])
 
   // お問い合わせデータの取得
   useEffect(() => {
-    if (!userData?.isAdmin) return
+    if (!isAdmin) return
 
     const q = query(collection(db, 'contacts'), orderBy('createdAt', 'desc'))
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -89,7 +70,7 @@ export default function AdminContactsPage() {
     )
   }
 
-  if (!userData?.isAdmin) {
+  if (!isAdmin) {
     return null
   }
 
