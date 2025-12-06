@@ -17,8 +17,9 @@ export async function POST(req: NextRequest) {
 
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+    console.log('✅ Webhook event received:', event.type, 'ID:', event.id)
   } catch (err) {
-    console.error('Webhook signature verification failed:', err)
+    console.error('❌ Webhook signature verification failed:', err)
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
@@ -28,14 +29,27 @@ export async function POST(req: NextRequest) {
         const session = event.data.object as Stripe.Checkout.Session
         const userId = session.metadata?.userId
 
+        console.log('📦 Checkout session completed:', {
+          sessionId: session.id,
+          userId,
+          customerId: session.customer,
+          subscriptionId: session.subscription,
+        })
+
         if (!userId) {
-          console.error('No userId in session metadata')
+          console.error('❌ No userId in session metadata')
           break
         }
 
         const subscription = (await stripe.subscriptions.retrieve(
           session.subscription as string
         )) as any
+
+        console.log('💳 Subscription retrieved:', {
+          subscriptionId: subscription.id,
+          status: subscription.status,
+          currentPeriodEnd: subscription.current_period_end,
+        })
 
         // Firestoreのユーザー情報を更新
         await updateDoc(doc(db, 'users', userId), {
@@ -49,7 +63,7 @@ export async function POST(req: NextRequest) {
           updatedAt: serverTimestamp(),
         })
 
-        console.log(`✅ User ${userId} upgraded to Pro`)
+        console.log(`✅ User ${userId} upgraded to Pro in Firestore`)
         break
       }
 
