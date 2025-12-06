@@ -48,7 +48,7 @@ export default function AdminContactsPage() {
     })
 
     return () => unsubscribe()
-  }, [userData])
+  }, [isAdmin])
 
   const handleMarkAsRead = async (contactId: string) => {
     await updateDoc(doc(db, 'contacts', contactId), {
