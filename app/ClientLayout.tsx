@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { Header } from '@/components/Layout/Header'
 import { Sidebar } from '@/components/Layout/Sidebar'
 import { QuickAddModal } from '@/components/Board/QuickAddModal'
+import { MaintenancePage } from '@/components/Maintenance/MaintenancePage'
 import { initAnalytics } from '@/lib/analytics'
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -12,6 +13,9 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   const isPublicPage = pathname === '/' || pathname === '/pricing'
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false)
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
+
+  // メンテナンスモードチェック
+  const isMaintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true'
 
   // PostHog初期化
   useEffect(() => {
@@ -57,6 +61,11 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isQuickAddOpen])
+
+  // メンテナンスモード
+  if (isMaintenanceMode) {
+    return <MaintenancePage />
+  }
 
   // パブリックページ（LP・料金ページ）ではSidebar/Headerなしで表示
   if (isPublicPage) {

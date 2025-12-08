@@ -17,7 +17,7 @@ export default function AdminLoginPage() {
 
     // 管理者認証情報（環境変数から取得）
     const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@aisen.app'
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
+    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'aisen2025admin'
 
     if (email === adminEmail && password === adminPassword) {
       // 認証成功 - sessionStorageに保存
