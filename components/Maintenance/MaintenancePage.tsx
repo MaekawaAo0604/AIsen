@@ -33,14 +33,14 @@ export function MaintenancePage() {
         </div>
 
         <div className="p-6 bg-white rounded-lg shadow-sm border border-slate-200">
-          <p className="text-sm text-slate-600">
-            お急ぎの方は、以下までお問い合わせください：
+          <p className="text-sm text-slate-600 mb-4">
+            お急ぎの方は、お問い合わせフォームからご連絡ください
           </p>
           <a
-            href="mailto:support@aisen.app"
-            className="mt-3 inline-block text-blue-600 hover:underline font-medium"
+            href="/contact"
+            className="inline-block px-6 py-3 text-white bg-blue-600 rounded-lg font-medium hover:bg-blue-700 hover:shadow-md transition-all duration-150"
           >
-            support@aisen.app
+            お問い合わせフォーム
           </a>
         </div>
 

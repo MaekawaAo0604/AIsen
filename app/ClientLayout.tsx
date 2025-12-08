@@ -62,8 +62,8 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isQuickAddOpen])
 
-  // メンテナンスモード
-  if (isMaintenanceMode) {
+  // メンテナンスモード（お問い合わせページは除く）
+  if (isMaintenanceMode && pathname !== '/contact') {
     return <MaintenancePage />
   }
 
