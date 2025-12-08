@@ -31,6 +31,8 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [resetEmailSent, setResetEmailSent] = useState(false)
+  const [showConsent, setShowConsent] = useState(false)
+  const [hasAgreedToEmail, setHasAgreedToEmail] = useState(false)
 
   // リダイレクト後の認証結果を処理
   useEffect(() => {
@@ -39,9 +41,14 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         const result = await getRedirectResult(auth)
         if (result) {
           // リダイレクト認証が成功した場合
-          onClose()
+          setMode('login')
           setEmail('')
           setPassword('')
+          setError('')
+          setResetEmailSent(false)
+          setShowConsent(false)
+          setHasAgreedToEmail(false)
+          onClose()
         }
       } catch (err: unknown) {
         setError(getAuthErrorMessage(err))
@@ -50,6 +57,18 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
     handleRedirectResult()
   }, [onClose])
+
+  // モーダルを閉じる際に状態をリセット
+  const handleClose = () => {
+    setMode('login')
+    setEmail('')
+    setPassword('')
+    setError('')
+    setResetEmailSent(false)
+    setShowConsent(false)
+    setHasAgreedToEmail(false)
+    onClose()
+  }
 
   if (!isOpen) return null
 
@@ -64,9 +83,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
       } else {
         // 通常のブラウザの場合はポップアップを使用
         await signInWithPopup(auth, googleProvider)
-        onClose()
-        setEmail('')
-        setPassword('')
+        handleClose()
       }
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err))
@@ -81,10 +98,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setError('')
     try {
       await signInWithEmailAndPassword(auth, email, password)
-      onClose()
-      // ログイン成功時のみフォームをクリア
-      setEmail('')
-      setPassword('')
+      handleClose()
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err))
       // エラー時はフォーム入力を保持（ユーザーが修正しやすいように）
@@ -99,10 +113,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setError('')
     try {
       await createUserWithEmailAndPassword(auth, email, password)
-      onClose()
-      // アカウント作成成功時のみフォームをクリア
-      setEmail('')
-      setPassword('')
+      handleClose()
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err))
       // エラー時はフォーム入力を保持（ユーザーが修正しやすいように）
@@ -129,16 +140,17 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/30" onClick={handleClose} />
 
       {/* Modal */}
       <div className="relative bg-white rounded-[3px] shadow-2xl w-full max-w-md mx-4 border border-[#e9e9e7]">
         {/* Header */}
         <div className="px-6 py-4 border-b border-[#e9e9e7]">
           <h2 className="text-[16px] font-semibold text-[#37352f]">
-            {mode === 'login' && 'ログイン'}
-            {mode === 'signup' && 'アカウント作成'}
-            {mode === 'reset' && 'パスワードリセット'}
+            {showConsent && 'メールアドレスの利用について'}
+            {!showConsent && mode === 'login' && 'ログイン'}
+            {!showConsent && mode === 'signup' && 'アカウント作成'}
+            {!showConsent && mode === 'reset' && 'パスワードリセット'}
           </h2>
         </div>
 
@@ -194,6 +206,54 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 ログインに戻る
               </button>
             </form>
+          ) : showConsent ? (
+            // 同意確認画面
+            <div className="space-y-4">
+              <p className="text-[14px] text-[#37352f]">
+                アカウント作成にあたり、以下の内容をご確認ください。
+              </p>
+
+              <label className="flex items-start gap-3 p-3 border border-[#e9e9e7] rounded-[6px] cursor-pointer hover:bg-[#f7f6f3] transition-colors">
+                <input
+                  type="checkbox"
+                  checked={hasAgreedToEmail}
+                  onChange={(e) => setHasAgreedToEmail(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 text-[#2383e2] border-[#e9e9e7] rounded focus:ring-[#2383e2]"
+                />
+                <div className="flex-1">
+                  <p className="text-[13px] text-[#37352f] leading-relaxed">
+                    メールアドレスは、以下の目的でのみ使用します：
+                  </p>
+                  <ul className="mt-2 text-[12px] text-[#787774] space-y-1">
+                    <li>・アカウント認証</li>
+                    <li>・サービスに関する重要なお知らせ</li>
+                  </ul>
+                </div>
+              </label>
+
+              <button
+                onClick={() => {
+                  setShowConsent(false)
+                  setMode('signup')
+                }}
+                disabled={!hasAgreedToEmail}
+                className="w-full h-9 px-4 text-[14px] font-medium text-white bg-[#2383e2] rounded-[3px] hover:bg-[#1a73d1] active:bg-[#155cb3] disabled:bg-[#e9e9e7] disabled:text-[#9b9a97] disabled:cursor-not-allowed transition-colors"
+              >
+                同意して続ける
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowConsent(false)
+                  setHasAgreedToEmail(false)
+                  setMode('login')
+                }}
+                className="w-full text-[13px] text-[#787774] hover:text-[#37352f] transition-colors"
+              >
+                戻る
+              </button>
+            </div>
           ) : (
             <>
               {/* Google Login */}
@@ -290,7 +350,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     </p>
                     <button
                       onClick={() => {
-                        setMode('signup')
+                        setShowConsent(true)
                         setError('')
                       }}
                       className="text-[14px] font-medium text-[#2383e2] hover:text-[#1a73d1] transition-colors underline"
@@ -322,7 +382,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         {/* Footer */}
         <div className="px-6 py-4 border-t border-[#e9e9e7] flex justify-end">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="h-9 px-4 text-[14px] font-medium text-[#37352f] bg-white border border-[#e9e9e7] rounded-[3px] hover:bg-[#f7f6f3] transition-colors"
           >
             キャンセル
