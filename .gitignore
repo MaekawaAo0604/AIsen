@@ -47,3 +47,4 @@ firebase-debug.log
 # Firebase Functions
 functions/node_modules/
 functions/lib/
+.env*.local
