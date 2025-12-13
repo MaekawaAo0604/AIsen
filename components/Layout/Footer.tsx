@@ -10,7 +10,7 @@ export function Footer() {
           </div>
           <div className="text-sm text-[#9b9a97]">© 2025 All rights reserved.</div>
         </div>
-        <div className="flex gap-8 text-sm">
+        <div className="flex flex-wrap gap-x-8 gap-y-4 text-sm justify-center sm:justify-end">
           <Link href="/pricing" className="text-[#787774] hover:text-[#37352f] transition-colors">
             料金プラン
           </Link>
@@ -22,6 +22,12 @@ export function Footer() {
           </Link>
           <Link href="/terms" className="text-[#787774] hover:text-[#37352f] transition-colors">
             利用規約
+          </Link>
+          <Link href="/tokusho" className="text-[#787774] hover:text-[#37352f] transition-colors">
+            特定商取引法表記
+          </Link>
+          <Link href="/external-transmission" className="text-[#787774] hover:text-[#37352f] transition-colors">
+            Cookie等の利用
           </Link>
         </div>
       </div>
