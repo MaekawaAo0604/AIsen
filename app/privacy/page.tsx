@@ -26,7 +26,7 @@ export default function PrivacyPage() {
         <div className="space-y-8 text-[#1a1a1a]">
           <section>
             <p className="text-gray-700">
-              ［事業者名］（以下「当社」）は、「AIsen」（以下「本サービス」）におけるユーザー情報の取扱いを以下のとおり定めます。
+              伊野瀬出（以下「当社」）は、「AIsen」（以下「本サービス」）におけるユーザー情報の取扱いを以下のとおり定めます。
             </p>
           </section>
 
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
             <h2 className="text-2xl font-bold mb-4">第1条（事業者情報）</h2>
             <div className="text-gray-700 space-y-2">
               <p>
-                <strong>事業者名：</strong>［法人名 / 個人事業主氏名］
+                <strong>事業者名：</strong>伊野瀬出
               </p>
               <p>
                 <strong>所在地：</strong>［住所］

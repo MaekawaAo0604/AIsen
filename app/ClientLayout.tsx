@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { Header } from '@/components/Layout/Header'
 import { Sidebar } from '@/components/Layout/Sidebar'
+import { Footer } from '@/components/Layout/Footer'
 import { QuickAddModal } from '@/components/Board/QuickAddModal'
 import { MaintenancePage } from '@/components/Maintenance/MaintenancePage'
 import { initAnalytics } from '@/lib/analytics'
@@ -62,8 +63,8 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isQuickAddOpen])
 
-  // メンテナンスモード（お問い合わせページは除く）
-  if (isMaintenanceMode && pathname !== '/contact') {
+  // メンテナンスモード（お問い合わせページとadminページは除く）
+  if (isMaintenanceMode && pathname !== '/contact' && !pathname.startsWith('/admin')) {
     return <MaintenancePage />
   }
 
@@ -78,9 +79,10 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
         isExpanded={isSidebarExpanded}
         onToggle={() => setIsSidebarExpanded(!isSidebarExpanded)}
       />
-      <div className="ml-0 sm:ml-16 transition-all duration-300">
+      <div className="ml-0 sm:ml-16 transition-all duration-300 min-h-screen flex flex-col">
         <Header onMenuClick={() => setIsSidebarExpanded(true)} />
-        <main>{children}</main>
+        <main className="flex-1">{children}</main>
+        <Footer />
       </div>
 
       {/* Quick Add Modal */}

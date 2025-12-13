@@ -26,12 +26,12 @@ export default function TokushoPage() {
         <div className="space-y-6 text-[#1a1a1a]">
           <section>
             <h2 className="text-xl font-bold mb-2">販売事業者名</h2>
-            <p className="text-gray-700">［法人名 / 個人事業主氏名］</p>
+            <p className="text-gray-700">伊野瀬出</p>
           </section>
 
           <section>
             <h2 className="text-xl font-bold mb-2">運営責任者</h2>
-            <p className="text-gray-700">［氏名］</p>
+            <p className="text-gray-700">伊野瀬出</p>
           </section>
 
           <section>
@@ -51,7 +51,7 @@ export default function TokushoPage() {
 
           <section>
             <h2 className="text-xl font-bold mb-2">サイトURL</h2>
-            <p className="text-gray-700">https://aisen-mvp.web.app</p>
+            <p className="text-gray-700">https://aisen.virex-ai.jp</p>
           </section>
 
           <section>

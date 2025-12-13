@@ -26,7 +26,7 @@ export default function TermsPage() {
         <div className="space-y-8 text-[#1a1a1a]">
           <section>
             <p className="text-gray-700">
-              本規約は、［事業者名］（以下「当社」）が提供する「AIsen」（以下「本サービス」）の利用条件を定めるものです。
+              本規約は、伊野瀬出（以下「当社」）が提供する「AIsen」（以下「本サービス」）の利用条件を定めるものです。
             </p>
           </section>
 
