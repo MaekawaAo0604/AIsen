@@ -102,6 +102,18 @@ service cloud.firestore {
     }
 
     // ========================================
+    // Contacts Collection (お問い合わせフォーム)
+    // ========================================
+
+    match /contacts/{contactId} {
+      // 誰でも作成可能（未認証ユーザーを含む）
+      allow create: if true;
+
+      // 読み取り・更新・削除は不可（管理画面はFirebase Adminで実装）
+      allow read, update, delete: if false;
+    }
+
+    // ========================================
     // Default Deny
     // ========================================
 
