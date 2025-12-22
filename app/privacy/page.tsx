@@ -34,14 +34,10 @@ export default function PrivacyPage() {
             <h2 className="text-2xl font-bold mb-4">第1条（事業者情報）</h2>
             <div className="text-gray-700 space-y-2">
               <p>
-                <strong>事業者名：</strong>Virex
+                <strong>事業者名：</strong>伊野瀬 出 / Virex
               </p>
               <p>
-                <strong>所在地：</strong>［住所］
-              </p>
-              <p>
-                <strong>連絡先：</strong>［メールアドレス /
-                お問い合わせフォームURL］
+                <strong>連絡先：</strong>inose.virex@gmail.com
               </p>
             </div>
           </section>
