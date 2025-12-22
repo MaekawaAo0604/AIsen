@@ -1,19 +1,19 @@
 export const metadata = {
-  title: '利用規約 - AIsen',
-  description: 'AIsenの利用規約ページ',
+  title: "利用規約 - AIsen",
+  description: "AIsenの利用規約ページ",
   openGraph: {
-    title: '利用規約 - AIsen',
-    description: 'AIsenの利用規約ページ',
+    title: "利用規約 - AIsen",
+    description: "AIsenの利用規約ページ",
     images: [
       {
-        url: '/api/og?title=利用規約',
+        url: "/api/og?title=利用規約",
         width: 1200,
         height: 630,
-        alt: 'AIsen 利用規約',
+        alt: "AIsen 利用規約",
       },
     ],
   },
-}
+};
 
 export default function TermsPage() {
   return (
@@ -26,7 +26,7 @@ export default function TermsPage() {
         <div className="space-y-8 text-[#1a1a1a]">
           <section>
             <p className="text-gray-700">
-              本規約は、伊野瀬出（以下「当社」）が提供する「AIsen」（以下「本サービス」）の利用条件を定めるものです。
+              本規約は、Virex（以下「当社」）が提供する「AIsen」（以下「本サービス」）の利用条件を定めるものです。
             </p>
           </section>
 
@@ -63,9 +63,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">
-              第3条（アカウント登録）
-            </h2>
+            <h2 className="text-2xl font-bold mb-4">第3条（アカウント登録）</h2>
             <div className="text-gray-700 space-y-2">
               <p>
                 1.
@@ -95,14 +93,20 @@ export default function TermsPage() {
                   本サービスの運営を妨害するおそれのある行為（過度な負荷をかける行為を含む）
                 </li>
                 <li>他のユーザーに対する迷惑行為</li>
-                <li>当社、他のユーザー、または第三者の知的財産権を侵害する行為</li>
+                <li>
+                  当社、他のユーザー、または第三者の知的財産権を侵害する行為
+                </li>
                 <li>本サービスのネットワークまたはシステムへの不正アクセス</li>
                 <li>本サービスの脆弱性を探索、試行または利用する行為</li>
-                <li>リバースエンジニアリング、逆コンパイル、逆アセンブル等の行為</li>
+                <li>
+                  リバースエンジニアリング、逆コンパイル、逆アセンブル等の行為
+                </li>
                 <li>
                   他のユーザーのアカウント情報を不正に取得、使用または開示する行為
                 </li>
-                <li>当社の事前の書面による承諾なく本サービスを商用利用する行為</li>
+                <li>
+                  当社の事前の書面による承諾なく本サービスを商用利用する行為
+                </li>
                 <li>その他、当社が不適切と判断する行為</li>
               </ul>
             </div>
@@ -188,9 +192,7 @@ export default function TermsPage() {
                 <li>
                   本サービスに係るコンピューターシステムの点検または保守作業を定期的または緊急に行う場合
                 </li>
-                <li>
-                  コンピューター、通信回線等が事故により停止した場合
-                </li>
+                <li>コンピューター、通信回線等が事故により停止した場合</li>
                 <li>
                   地震、落雷、火災、風水害、停電、天災地変などの不可抗力により本サービスの運営ができなくなった場合
                 </li>
@@ -218,9 +220,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">
-              第8条（知的財産権）
-            </h2>
+            <h2 className="text-2xl font-bold mb-4">第8条（知的財産権）</h2>
             <div className="text-gray-700 space-y-2">
               <p>
                 1.
@@ -271,5 +271,5 @@ export default function TermsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
