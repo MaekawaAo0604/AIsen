@@ -1,19 +1,19 @@
 export const metadata = {
-  title: '特定商取引法に基づく表記 - AIsen',
-  description: 'AIsenの特定商取引法に基づく表記ページ',
+  title: "特定商取引法に基づく表記 - AIsen",
+  description: "AIsenの特定商取引法に基づく表記ページ",
   openGraph: {
-    title: '特定商取引法に基づく表記 - AIsen',
-    description: 'AIsenの特定商取引法に基づく表記ページ',
+    title: "特定商取引法に基づく表記 - AIsen",
+    description: "AIsenの特定商取引法に基づく表記ページ",
     images: [
       {
-        url: '/api/og?title=特定商取引法に基づく表記',
+        url: "/api/og?title=特定商取引法に基づく表記",
         width: 1200,
         height: 630,
-        alt: 'AIsen 特定商取引法に基づく表記',
+        alt: "AIsen 特定商取引法に基づく表記",
       },
     ],
   },
-}
+};
 
 export default function TokushoPage() {
   return (
@@ -58,7 +58,7 @@ export default function TokushoPage() {
             <h2 className="text-xl font-bold mb-2">販売価格</h2>
             <div className="text-gray-700">
               <p>・無料プラン: 0円</p>
-              <p>・Proプラン: 月額980円（税込）/ 年額9,800円（税込）</p>
+              <p>・Proプラン: 月額500円（税込）/ 年額9,800円（税込）</p>
               <p className="text-sm mt-2">
                 ※ 価格は予告なく変更される場合がございます
               </p>
@@ -74,7 +74,9 @@ export default function TokushoPage() {
 
           <section>
             <h2 className="text-xl font-bold mb-2">支払方法</h2>
-            <p className="text-gray-700">クレジットカード（決済代行：Stripe）</p>
+            <p className="text-gray-700">
+              クレジットカード（決済代行：Stripe）
+            </p>
           </section>
 
           <section>
@@ -93,9 +95,7 @@ export default function TokushoPage() {
           <section>
             <h2 className="text-xl font-bold mb-2">解約について</h2>
             <div className="text-gray-700">
-              <p>
-                アカウント設定画面からいつでも解約手続きが可能です。
-              </p>
+              <p>アカウント設定画面からいつでも解約手続きが可能です。</p>
               <p>
                 次回更新日の24時間前までに解約手続きを完了することで、次回以降の課金を停止できます。
               </p>
@@ -145,5 +145,5 @@ export default function TokushoPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

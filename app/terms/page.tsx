@@ -122,7 +122,7 @@ export default function TermsPage() {
               </p>
               <ul className="list-disc list-inside ml-8 space-y-1">
                 <li>無料プラン：0円</li>
-                <li>Proプラン（月額）：980円（税込）/ 月</li>
+                <li>Proプラン（月額）：500円（税込）/ 月</li>
                 <li>Proプラン（年額）：9,800円（税込）/ 年</li>
               </ul>
 
