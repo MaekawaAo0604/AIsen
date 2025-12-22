@@ -26,7 +26,7 @@ export default function TokushoPage() {
         <div className="space-y-6 text-[#1a1a1a]">
           <section>
             <h2 className="text-xl font-bold mb-2">販売事業者名</h2>
-            <p className="text-gray-700">伊野瀬出</p>
+            <p className="text-gray-700">Virex</p>
           </section>
 
           <section>
@@ -41,12 +41,12 @@ export default function TokushoPage() {
 
           <section>
             <h2 className="text-xl font-bold mb-2">電話番号</h2>
-            <p className="text-gray-700">［電話番号］</p>
+            <p className="text-gray-700">080-9705-0304</p>
           </section>
 
           <section>
             <h2 className="text-xl font-bold mb-2">メールアドレス</h2>
-            <p className="text-gray-700">［サポート窓口メール］</p>
+            <p className="text-gray-700">inose.virex@gmail.com</p>
           </section>
 
           <section>

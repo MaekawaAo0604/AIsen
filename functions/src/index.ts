@@ -191,10 +191,10 @@ JSON形式で回答:
       // Move tasks to board and delete from inbox
       // Group tasks by quadrant to minimize Firestore updates
       const tasksByQuadrant: Record<string, any[]> = {
-        q1: [...(boardData?.q1 || [])],
-        q2: [...(boardData?.q2 || [])],
-        q3: [...(boardData?.q3 || [])],
-        q4: [...(boardData?.q4 || [])],
+        q1: [...(boardData?.tasks?.q1 || [])],
+        q2: [...(boardData?.tasks?.q2 || [])],
+        q3: [...(boardData?.tasks?.q3 || [])],
+        q4: [...(boardData?.tasks?.q4 || [])],
       };
 
       const tasksToDelete: string[] = [];
@@ -223,11 +223,11 @@ JSON形式で回答:
 
       // Update board once with all new tasks
       batch.update(boardRef, {
-        q1: tasksByQuadrant.q1,
-        q2: tasksByQuadrant.q2,
-        q3: tasksByQuadrant.q3,
-        q4: tasksByQuadrant.q4,
-        updatedAt: new Date().toISOString(),
+        "tasks.q1": tasksByQuadrant.q1,
+        "tasks.q2": tasksByQuadrant.q2,
+        "tasks.q3": tasksByQuadrant.q3,
+        "tasks.q4": tasksByQuadrant.q4,
+        "updatedAt": new Date().toISOString(),
       });
 
       // Delete all inbox tasks
