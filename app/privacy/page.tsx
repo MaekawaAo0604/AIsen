@@ -1,19 +1,19 @@
 export const metadata = {
-  title: 'プライバシーポリシー - AIsen',
-  description: 'AIsenのプライバシーポリシーページ',
+  title: "プライバシーポリシー - AIsen",
+  description: "AIsenのプライバシーポリシーページ",
   openGraph: {
-    title: 'プライバシーポリシー - AIsen',
-    description: 'AIsenのプライバシーポリシーページ',
+    title: "プライバシーポリシー - AIsen",
+    description: "AIsenのプライバシーポリシーページ",
     images: [
       {
-        url: '/api/og?title=プライバシーポリシー',
+        url: "/api/og?title=プライバシーポリシー",
         width: 1200,
         height: 630,
-        alt: 'AIsen プライバシーポリシー',
+        alt: "AIsen プライバシーポリシー",
       },
     ],
   },
-}
+};
 
 export default function PrivacyPage() {
   return (
@@ -26,7 +26,7 @@ export default function PrivacyPage() {
         <div className="space-y-8 text-[#1a1a1a]">
           <section>
             <p className="text-gray-700">
-              伊野瀬出（以下「当社」）は、「AIsen」（以下「本サービス」）におけるユーザー情報の取扱いを以下のとおり定めます。
+              Virex（以下「当社」）は、「AIsen」（以下「本サービス」）におけるユーザー情報の取扱いを以下のとおり定めます。
             </p>
           </section>
 
@@ -34,27 +34,24 @@ export default function PrivacyPage() {
             <h2 className="text-2xl font-bold mb-4">第1条（事業者情報）</h2>
             <div className="text-gray-700 space-y-2">
               <p>
-                <strong>事業者名：</strong>伊野瀬出
+                <strong>事業者名：</strong>Virex
               </p>
               <p>
                 <strong>所在地：</strong>［住所］
               </p>
               <p>
-                <strong>連絡先：</strong>［メールアドレス / お問い合わせフォームURL］
+                <strong>連絡先：</strong>［メールアドレス /
+                お問い合わせフォームURL］
               </p>
             </div>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">
-              第2条（取得する情報）
-            </h2>
+            <h2 className="text-2xl font-bold mb-4">第2条（取得する情報）</h2>
             <div className="text-gray-700 space-y-2">
               <p>当社は、本サービスの提供にあたり、以下の情報を取得します。</p>
 
-              <h3 className="text-xl font-bold mt-4 mb-2">
-                1. アカウント情報
-              </h3>
+              <h3 className="text-xl font-bold mt-4 mb-2">1. アカウント情報</h3>
               <ul className="list-disc list-inside ml-4 space-y-1">
                 <li>メールアドレス</li>
                 <li>パスワード（暗号化して保存）</li>
@@ -124,9 +121,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">
-              第4条（第三者提供）
-            </h2>
+            <h2 className="text-2xl font-bold mb-4">第4条（第三者提供）</h2>
             <div className="text-gray-700 space-y-2">
               <p>
                 当社は、以下のいずれかに該当する場合を除き、ユーザーの同意なく個人データを第三者に提供しません。
@@ -166,9 +161,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">
-              第6条（安全管理措置）
-            </h2>
+            <h2 className="text-2xl font-bold mb-4">第6条（安全管理措置）</h2>
             <div className="text-gray-700 space-y-2">
               <p>
                 当社は、個人情報の漏えい、滅失またはき損の防止その他の個人情報の安全管理のため、以下の措置を講じます。
@@ -184,9 +177,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-4">
-              第7条（開示等の請求）
-            </h2>
+            <h2 className="text-2xl font-bold mb-4">第7条（開示等の請求）</h2>
             <div className="text-gray-700 space-y-2">
               <p>
                 ユーザーは、当社が保有する自己の個人データについて、以下の請求を行うことができます。
@@ -258,11 +249,11 @@ export default function PrivacyPage() {
           </section>
 
           <section className="border-t pt-6 mt-8">
-            <p className="text-sm text-gray-600">制定日：2025-01-01</p>
-            <p className="text-sm text-gray-600">最終更新日：2025-01-01</p>
+            <p className="text-sm text-gray-600">制定日：2025-11-30</p>
+            <p className="text-sm text-gray-600">最終更新日：2025-11-30</p>
           </section>
         </div>
       </div>
     </div>
-  )
+  );
 }
