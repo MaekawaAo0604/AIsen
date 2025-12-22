@@ -35,11 +35,6 @@ export default function TokushoPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold mb-2">所在地</h2>
-            <p className="text-gray-700">［住所］</p>
-          </section>
-
-          <section>
             <h2 className="text-xl font-bold mb-2">電話番号</h2>
             <p className="text-gray-700">080-9705-0304</p>
           </section>
