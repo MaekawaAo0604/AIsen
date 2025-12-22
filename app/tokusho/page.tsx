@@ -53,7 +53,7 @@ export default function TokushoPage() {
             <h2 className="text-xl font-bold mb-2">販売価格</h2>
             <div className="text-gray-700">
               <p>・無料プラン: 0円</p>
-              <p>・Proプラン: 月額500円（税込）/ 年額9,800円（税込）</p>
+              <p>・Proプラン: 月額500円（税込）/ 年額5,000円（税込）</p>
               <p className="text-sm mt-2">
                 ※ 価格は予告なく変更される場合がございます
               </p>
