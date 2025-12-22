@@ -37,7 +37,13 @@ export default function PrivacyPage() {
                 <strong>事業者名：</strong>伊野瀬 出 / Virex
               </p>
               <p>
-                <strong>連絡先：</strong>inose.virex@gmail.com
+                <strong>所在地：</strong>［住所］
+              </p>
+              <p>
+                <strong>電話番号：</strong>080-9705-0304
+              </p>
+              <p>
+                <strong>メールアドレス：</strong>inose.virex@gmail.com
               </p>
             </div>
           </section>
